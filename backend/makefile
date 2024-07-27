@@ -8,6 +8,6 @@ dropdb:
 	docker exec postgresDealTracker drop dealTrackerDB
 
 sqlc:
-	slqc generate
+	sqlc generate
 
 .PHONY: postgres createdb dropdb
