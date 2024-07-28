@@ -15,7 +15,7 @@ INSERT INTO users (
 )
 RETURNING *;
 
--- name: AdminGetUserForUpdate :one
+-- name: GetUserForUpdate :one
 SELECT * FROM users
 WHERE id = $1
 LIMIT 1
@@ -23,7 +23,7 @@ FOR UPDATE;
 
 -- name: AdminUpdateUser :one
 UPDATE users
-    set full_name = $2, email = $3
+    set full_name = $2, email = $3, password = $4, username = $5, updated_at = $6
 WHERE id = $1
 RETURNING *;
 
@@ -49,7 +49,7 @@ WHERE id = $1;
 DELETE FROM deals
 WHERE id = $1;
 
--- name: AdminGetUsers :many
+-- name: AdminViewUsers :many
 SELECT * FROM users
 ORDER BY id
 LIMIT $1
