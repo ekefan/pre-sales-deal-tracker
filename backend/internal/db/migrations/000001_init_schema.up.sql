@@ -33,6 +33,7 @@ CREATE TABLE "pitch_requests" (
   "customer_name" varchar NOT NULL,
   "pitch_tag" varchar NOT NULL,
   "customer_request" varchar NOT NULL DEFAULT 'proposal',
+  "request_deadline" timestamp 
   "admin_viewed" bool DEFAULT false
 );
 
