@@ -5,4 +5,5 @@
 3. Populate down migration script based on SQL queries in up migration
 
 3. Create makefile to keep reqular commands
-4.  Setup postgres database on docker
+4. Write SQL Queries
+5. Setup postgres database on docker
