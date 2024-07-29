@@ -19,7 +19,7 @@ OFFSET $3
 `
 
 type GetDealsByAwardParams struct {
-	Awarded sql.NullBool
+	Awarded bool
 	Limit   int32
 	Offset  int32
 }
@@ -182,7 +182,7 @@ OFFSET $3
 `
 
 type GetDealsByProfitParams struct {
-	Profit string
+	Profit sql.NullString
 	Limit  int32
 	Offset int32
 }
@@ -288,7 +288,7 @@ OFFSET $4
 
 type GetDealsBySalesRepAndAwardedParams struct {
 	SalesRepName string
-	Awarded      sql.NullBool
+	Awarded      bool
 	Limit        int32
 	Offset       int32
 }

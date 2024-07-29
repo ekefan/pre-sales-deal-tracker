@@ -21,11 +21,11 @@ type Deal struct {
 	StatusTag           string
 	CurrentPitchRequest string
 	NetTotalCost        sql.NullString
-	Profit              string
+	Profit              sql.NullString
 	CreatedAt           time.Time
 	UpdatedAt           sql.NullTime
 	ClosedAt            sql.NullTime
-	Awarded             sql.NullBool
+	Awarded             bool
 }
 
 type PitchRequest struct {

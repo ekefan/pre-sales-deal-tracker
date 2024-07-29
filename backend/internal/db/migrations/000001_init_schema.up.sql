@@ -19,11 +19,11 @@ CREATE TABLE "deals" (
   "status_tag" varchar NOT NULL,
   "current_pitch_request" varchar NOT NULL,
   "net_total_cost" numeric(11,2),
-  "profit" numeric(11,2) NOT NULL,
+  "profit" numeric(11,2),
   "created_at" timestamp DEFAULT (now()) NOT NULL,
   "updated_at" timestamp DEFAULT NULL,
   "closed_at" timestamp DEFAULT NULL,
-  "awarded" bool DEFAULT false
+  "awarded" bool DEFAULT false NOT NULL
 );
 
 CREATE TABLE "pitch_requests" (
