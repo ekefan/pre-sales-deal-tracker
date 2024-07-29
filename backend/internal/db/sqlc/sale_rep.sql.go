@@ -7,24 +7,25 @@ package db
 
 import (
 	"context"
-	"database/sql"
+	"time"
 )
 
 const createPitchRequest = `-- name: CreatePitchRequest :one
 INSERT INTO pitch_requests (
-    sales_rep_id, status, customer_name, pitch_tag, customer_request
+    sales_rep_id, status, customer_name, pitch_tag, customer_request, request_deadline
 ) VALUES (
-    $1, $2, $3, $4, $5
+    $1, $2, $3, $4, $5, $6
 ) 
 RETURNING id, sales_rep_id, status, customer_name, pitch_tag, customer_request, request_deadline, admin_viewed, created_at, updated_at
 `
 
 type CreatePitchRequestParams struct {
-	SalesRepID      sql.NullInt64
+	SalesRepID      int64
 	Status          string
 	CustomerName    string
 	PitchTag        string
 	CustomerRequest string
+	RequestDeadline time.Time
 }
 
 func (q *Queries) CreatePitchRequest(ctx context.Context, arg CreatePitchRequestParams) (PitchRequest, error) {
@@ -34,6 +35,7 @@ func (q *Queries) CreatePitchRequest(ctx context.Context, arg CreatePitchRequest
 		arg.CustomerName,
 		arg.PitchTag,
 		arg.CustomerRequest,
+		arg.RequestDeadline,
 	)
 	var i PitchRequest
 	err := row.Scan(
@@ -56,7 +58,7 @@ DELETE FROM pitch_requests
 WHERE sales_rep_id = $1
 `
 
-func (q *Queries) DeletePitchRequest(ctx context.Context, salesRepID sql.NullInt64) error {
+func (q *Queries) DeletePitchRequest(ctx context.Context, salesRepID int64) error {
 	_, err := q.exec(ctx, q.deletePitchRequestStmt, deletePitchRequest, salesRepID)
 	return err
 }
@@ -98,7 +100,7 @@ type UpdatePitchRequestParams struct {
 	Status          string
 	PitchTag        string
 	CustomerRequest string
-	AdminViewed     sql.NullBool
+	AdminViewed     bool
 }
 
 func (q *Queries) UpdatePitchRequest(ctx context.Context, arg UpdatePitchRequestParams) (PitchRequest, error) {

@@ -28,13 +28,13 @@ CREATE TABLE "deals" (
 
 CREATE TABLE "pitch_requests" (
   "id" bigserial PRIMARY KEY,
-  "sales_rep_id" bigint,
+  "sales_rep_id" bigint NOT NULL,
   "status" varchar NOT NULL DEFAULT 'ongoing',
   "customer_name" varchar NOT NULL,
   "pitch_tag" varchar NOT NULL,
   "customer_request" varchar NOT NULL DEFAULT 'proposal',
-  "request_deadline" timestamp,
-  "admin_viewed" bool DEFAULT false,
+  "request_deadline" timestamp NOT NULL DEFAULT(CURRENT_TIMESTAMP + INTERVAL '3 days'),
+  "admin_viewed" bool DEFAULT false NOT NULL,
   "created_at" timestamp DEFAULT (now()) NOT NULL,
   "updated_at" timestamp DEFAULT NULL
 );

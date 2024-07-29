@@ -30,13 +30,13 @@ type Deal struct {
 
 type PitchRequest struct {
 	ID              int64
-	SalesRepID      sql.NullInt64
+	SalesRepID      int64
 	Status          string
 	CustomerName    string
 	PitchTag        string
 	CustomerRequest string
-	RequestDeadline sql.NullTime
-	AdminViewed     sql.NullBool
+	RequestDeadline time.Time
+	AdminViewed     bool
 	CreatedAt       time.Time
 	UpdatedAt       sql.NullTime
 }

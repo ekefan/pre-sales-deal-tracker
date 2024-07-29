@@ -9,6 +9,8 @@ dropdb:
 
 migrateup1:
 	migrate -path internal/db/migrations -database "postgresql://root:vasDealTracker@localhost:5432/dealTrackerDB?sslmode=disable" -verbose up
+migrateforce:
+	migrate -path internal/db/migrations -database "postgresql://root:vasDealTracker@localhost:5432/dealTrackerDB?sslmode=disable" force 1
 
 sqlc:
 	sqlc generate

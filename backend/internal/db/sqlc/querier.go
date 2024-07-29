@@ -6,7 +6,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 )
 
 type Querier interface {
@@ -19,7 +18,7 @@ type Querier interface {
 	CreateDeal(ctx context.Context, arg CreateDealParams) (Deal, error)
 	CreateNewUser(ctx context.Context, arg CreateNewUserParams) (User, error)
 	CreatePitchRequest(ctx context.Context, arg CreatePitchRequestParams) (PitchRequest, error)
-	DeletePitchRequest(ctx context.Context, salesRepID sql.NullInt64) error
+	DeletePitchRequest(ctx context.Context, salesRepID int64) error
 	GetDealsByAward(ctx context.Context, arg GetDealsByAwardParams) ([]Deal, error)
 	GetDealsByCustomerAndService(ctx context.Context, arg GetDealsByCustomerAndServiceParams) ([]Deal, error)
 	GetDealsByCustomerName(ctx context.Context, arg GetDealsByCustomerNameParams) ([]Deal, error)

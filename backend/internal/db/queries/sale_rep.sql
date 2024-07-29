@@ -6,9 +6,9 @@ RETURNING *;
 
 -- name: CreatePitchRequest :one
 INSERT INTO pitch_requests (
-    sales_rep_id, status, customer_name, pitch_tag, customer_request
+    sales_rep_id, status, customer_name, pitch_tag, customer_request, request_deadline
 ) VALUES (
-    $1, $2, $3, $4, $5
+    $1, $2, $3, $4, $5, $6
 ) 
 RETURNING *;
 
