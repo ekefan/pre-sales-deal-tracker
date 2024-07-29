@@ -20,9 +20,9 @@ CREATE TABLE "deals" (
   "current_pitch_request" varchar NOT NULL,
   "net_total_cost" numeric(11,2),
   "profit" numeric(11,2) NOT NULL,
-  "created_at" timestamp DEFAULT (now()),
-  "updated_at" timestamp DEFAULT null,
-  "closed_at" timestamp DEFAULT null,
+  "created_at" timestamp DEFAULT (now()) NOT NULL,
+  "updated_at" timestamp DEFAULT NULL,
+  "closed_at" timestamp DEFAULT NULL,
   "awarded" bool DEFAULT false
 );
 
@@ -33,8 +33,10 @@ CREATE TABLE "pitch_requests" (
   "customer_name" varchar NOT NULL,
   "pitch_tag" varchar NOT NULL,
   "customer_request" varchar NOT NULL DEFAULT 'proposal',
-  "request_deadline" timestamp 
-  "admin_viewed" bool DEFAULT false
+  "request_deadline" timestamp,
+  "admin_viewed" bool DEFAULT false,
+  "created_at" timestamp DEFAULT (now()) NOT NULL,
+  "updated_at" timestamp DEFAULT NULL
 );
 
 CREATE INDEX ON "users" ("role");
