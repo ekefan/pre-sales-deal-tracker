@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-
 // createRandomUserArg generates the params need for creating a user
 func createRandomUserArg(role string) db.CreateNewUserParams {
 	return db.CreateNewUserParams{
@@ -22,8 +21,8 @@ func createRandomUserArg(role string) db.CreateNewUserParams {
 }
 
 // createNewUser loops through UsrRole and creates a user for each role
-func createNewUser(t *testing.T,  createUsers []UsrRole) []db.User {
-	 users := []db.User{}
+func createNewUser(t *testing.T, createUsers []UsrRole) []db.User {
+	users := []db.User{}
 	for _, user := range createUsers {
 		t.Run(user.role, func(t *testing.T) {
 			arg := createRandomUserArg(user.role)
@@ -45,10 +44,10 @@ func createNewUser(t *testing.T,  createUsers []UsrRole) []db.User {
 	return users
 }
 
+// UsrRole holds the role field for creating users based on role
 type UsrRole struct {
 	role string
 }
-
 
 func TestCreateNewUser(t *testing.T) {
 
@@ -57,9 +56,39 @@ func TestCreateNewUser(t *testing.T) {
 		{role: "manager"},
 		{role: "salesrep"},
 	}
-	
+
 	// Create a new User for each role
 	createNewUser(t, createUsers)
 }
 
+func TestCreateDeal(t *testing.T) {
+	//create a randomUser with role sales_rep
+	salesRep := createNewUser(t, []UsrRole{
+		{role: "salesrep"},
+	})[0]
+	require.NotEmpty(t, salesRep)
+	//create a new pitchrequest with the sales_rep id
+	pitchReq := createPitch(t, salesRep.ID)
+	require.NotEmpty(t, pitchReq)
+	//Create a deal based on the pitch request and sales_rep
+	args := db.CreateDealParams{
+		PitchID: pitchReq.ID,
+		SalesRepName: salesRep.FullName,
+		CustomerName: pitchReq.CustomerName,
+		ServiceToRender: pitchReq.CustomerRequest,
+		Status: "ongoing",
+		StatusTag: "presales",
+		CurrentPitchRequest: pitchReq.PitchTag,
+	}
 
+	deal, err := ts.CreateDeal(context.Background(), args)
+	require.NoError(t, err)
+	require.NotEmpty(t, deal)
+	require.NotEmpty(t, deal.ID)
+	require.NotEmpty(t, deal.CreatedAt)
+	require.Empty(t, deal.Profit)
+	require.Empty(t, deal.UpdatedAt)
+	require.Empty(t, deal.NetTotalCost)
+	require.Empty(t, deal.ClosedAt)
+	require.False(t, deal.Awarded)
+}
