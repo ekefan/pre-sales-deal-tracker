@@ -1,3 +1,5 @@
-module github.com/deal-tracker
+module github.com/ekefan/deal-tracker
 
 go 1.22.5
+
+require github.com/lib/pq v1.10.9 // indirect
