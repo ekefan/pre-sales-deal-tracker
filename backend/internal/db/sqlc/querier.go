@@ -31,6 +31,7 @@ type Querier interface {
 	GetUserForUpdate(ctx context.Context, id int64) (User, error)
 	UpdatePitchRequest(ctx context.Context, arg UpdatePitchRequestParams) (PitchRequest, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
+	ViewPitchRequests(ctx context.Context, arg ViewPitchRequestsParams) ([]PitchRequest, error)
 }
 
 var _ Querier = (*Queries)(nil)

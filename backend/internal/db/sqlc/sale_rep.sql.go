@@ -154,3 +154,50 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 	)
 	return i, err
 }
+
+const viewPitchRequests = `-- name: ViewPitchRequests :many
+SELECT id, sales_rep_id, status, customer_name, pitch_tag, customer_request, request_deadline, admin_viewed, created_at, updated_at FROM pitch_requests
+WHERE id = $1
+LIMIT $2
+OFFSET $3
+`
+
+type ViewPitchRequestsParams struct {
+	ID     int64
+	Limit  int32
+	Offset int32
+}
+
+func (q *Queries) ViewPitchRequests(ctx context.Context, arg ViewPitchRequestsParams) ([]PitchRequest, error) {
+	rows, err := q.query(ctx, q.viewPitchRequestsStmt, viewPitchRequests, arg.ID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []PitchRequest{}
+	for rows.Next() {
+		var i PitchRequest
+		if err := rows.Scan(
+			&i.ID,
+			&i.SalesRepID,
+			&i.Status,
+			&i.CustomerName,
+			&i.PitchTag,
+			&i.CustomerRequest,
+			&i.RequestDeadline,
+			&i.AdminViewed,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

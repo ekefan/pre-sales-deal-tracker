@@ -90,6 +90,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.updateUserStmt, err = db.PrepareContext(ctx, updateUser); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateUser: %w", err)
 	}
+	if q.viewPitchRequestsStmt, err = db.PrepareContext(ctx, viewPitchRequests); err != nil {
+		return nil, fmt.Errorf("error preparing query ViewPitchRequests: %w", err)
+	}
 	return &q, nil
 }
 
@@ -205,6 +208,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing updateUserStmt: %w", cerr)
 		}
 	}
+	if q.viewPitchRequestsStmt != nil {
+		if cerr := q.viewPitchRequestsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing viewPitchRequestsStmt: %w", cerr)
+		}
+	}
 	return err
 }
 
@@ -266,6 +274,7 @@ type Queries struct {
 	getUserForUpdateStmt             *sql.Stmt
 	updatePitchRequestStmt           *sql.Stmt
 	updateUserStmt                   *sql.Stmt
+	viewPitchRequestsStmt            *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
@@ -294,5 +303,6 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getUserForUpdateStmt:             q.getUserForUpdateStmt,
 		updatePitchRequestStmt:           q.updatePitchRequestStmt,
 		updateUserStmt:                   q.updateUserStmt,
+		viewPitchRequestsStmt:            q.viewPitchRequestsStmt,
 	}
 }
