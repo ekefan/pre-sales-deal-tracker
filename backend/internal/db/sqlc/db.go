@@ -81,6 +81,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getPitchRequestForUpdateStmt, err = db.PrepareContext(ctx, getPitchRequestForUpdate); err != nil {
 		return nil, fmt.Errorf("error preparing query GetPitchRequestForUpdate: %w", err)
 	}
+	if q.getUserStmt, err = db.PrepareContext(ctx, getUser); err != nil {
+		return nil, fmt.Errorf("error preparing query GetUser: %w", err)
+	}
 	if q.getUserForUpdateStmt, err = db.PrepareContext(ctx, getUserForUpdate); err != nil {
 		return nil, fmt.Errorf("error preparing query GetUserForUpdate: %w", err)
 	}
@@ -193,6 +196,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getPitchRequestForUpdateStmt: %w", cerr)
 		}
 	}
+	if q.getUserStmt != nil {
+		if cerr := q.getUserStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getUserStmt: %w", cerr)
+		}
+	}
 	if q.getUserForUpdateStmt != nil {
 		if cerr := q.getUserForUpdateStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getUserForUpdateStmt: %w", cerr)
@@ -271,6 +279,7 @@ type Queries struct {
 	getDealsByServicesRenderedStmt   *sql.Stmt
 	getDealsByStatusStmt             *sql.Stmt
 	getPitchRequestForUpdateStmt     *sql.Stmt
+	getUserStmt                      *sql.Stmt
 	getUserForUpdateStmt             *sql.Stmt
 	updatePitchRequestStmt           *sql.Stmt
 	updateUserStmt                   *sql.Stmt
@@ -300,6 +309,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getDealsByServicesRenderedStmt:   q.getDealsByServicesRenderedStmt,
 		getDealsByStatusStmt:             q.getDealsByStatusStmt,
 		getPitchRequestForUpdateStmt:     q.getPitchRequestForUpdateStmt,
+		getUserStmt:                      q.getUserStmt,
 		getUserForUpdateStmt:             q.getUserForUpdateStmt,
 		updatePitchRequestStmt:           q.updatePitchRequestStmt,
 		updateUserStmt:                   q.updateUserStmt,

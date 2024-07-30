@@ -54,3 +54,9 @@ SELECT * FROM users
 ORDER BY id
 LIMIT $1
 OFFSET $2;
+
+-- --name: AdminViewDeals :many
+-- SELECT * FROM deals
+-- ORDER BY id
+-- LIMIT $1
+-- OFFSET $2;
