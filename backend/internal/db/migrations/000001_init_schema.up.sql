@@ -29,6 +29,7 @@ CREATE TABLE "deals" (
 CREATE TABLE "pitch_requests" (
   "id" bigserial PRIMARY KEY,
   "sales_rep_id" bigint NOT NULL,
+  "sales_rep_name" varchar NOT NULL,
   "status" varchar NOT NULL DEFAULT 'ongoing',
   "customer_name" varchar NOT NULL,
   "pitch_tag" varchar NOT NULL,
