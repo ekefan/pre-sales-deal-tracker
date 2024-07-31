@@ -12,15 +12,16 @@ import (
 
 const createPitchRequest = `-- name: CreatePitchRequest :one
 INSERT INTO pitch_requests (
-    sales_rep_id, status, customer_name, pitch_tag, customer_request, request_deadline
+    sales_rep_id, sales_rep_name, status, customer_name, pitch_tag, customer_request, request_deadline
 ) VALUES (
-    $1, $2, $3, $4, $5, $6
+    $1, $2, $3, $4, $5, $6, $7
 ) 
-RETURNING id, sales_rep_id, status, customer_name, pitch_tag, customer_request, request_deadline, admin_viewed, created_at, updated_at
+RETURNING id, sales_rep_id, sales_rep_name, status, customer_name, pitch_tag, customer_request, request_deadline, admin_viewed, created_at, updated_at
 `
 
 type CreatePitchRequestParams struct {
 	SalesRepID      int64
+	SalesRepName    string
 	Status          string
 	CustomerName    string
 	PitchTag        string
@@ -31,6 +32,7 @@ type CreatePitchRequestParams struct {
 func (q *Queries) CreatePitchRequest(ctx context.Context, arg CreatePitchRequestParams) (PitchRequest, error) {
 	row := q.queryRow(ctx, q.createPitchRequestStmt, createPitchRequest,
 		arg.SalesRepID,
+		arg.SalesRepName,
 		arg.Status,
 		arg.CustomerName,
 		arg.PitchTag,
@@ -41,6 +43,7 @@ func (q *Queries) CreatePitchRequest(ctx context.Context, arg CreatePitchRequest
 	err := row.Scan(
 		&i.ID,
 		&i.SalesRepID,
+		&i.SalesRepName,
 		&i.Status,
 		&i.CustomerName,
 		&i.PitchTag,
@@ -64,7 +67,7 @@ func (q *Queries) DeletePitchRequest(ctx context.Context, salesRepID int64) erro
 }
 
 const getPitchRequestForUpdate = `-- name: GetPitchRequestForUpdate :one
-SELECT id, sales_rep_id, status, customer_name, pitch_tag, customer_request, request_deadline, admin_viewed, created_at, updated_at FROM pitch_requests
+SELECT id, sales_rep_id, sales_rep_name, status, customer_name, pitch_tag, customer_request, request_deadline, admin_viewed, created_at, updated_at FROM pitch_requests
 WHERE id = $1
 LIMIT 1
 FOR UPDATE
@@ -76,6 +79,7 @@ func (q *Queries) GetPitchRequestForUpdate(ctx context.Context, id int64) (Pitch
 	err := row.Scan(
 		&i.ID,
 		&i.SalesRepID,
+		&i.SalesRepName,
 		&i.Status,
 		&i.CustomerName,
 		&i.PitchTag,
@@ -92,7 +96,7 @@ const updatePitchRequest = `-- name: UpdatePitchRequest :one
 UPDATE pitch_requests
     set status = $2, pitch_tag = $3, customer_request = $4, admin_viewed = $5
 WHERE id = $1
-RETURNING id, sales_rep_id, status, customer_name, pitch_tag, customer_request, request_deadline, admin_viewed, created_at, updated_at
+RETURNING id, sales_rep_id, sales_rep_name, status, customer_name, pitch_tag, customer_request, request_deadline, admin_viewed, created_at, updated_at
 `
 
 type UpdatePitchRequestParams struct {
@@ -115,6 +119,7 @@ func (q *Queries) UpdatePitchRequest(ctx context.Context, arg UpdatePitchRequest
 	err := row.Scan(
 		&i.ID,
 		&i.SalesRepID,
+		&i.SalesRepName,
 		&i.Status,
 		&i.CustomerName,
 		&i.PitchTag,
@@ -156,7 +161,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 }
 
 const viewPitchRequests = `-- name: ViewPitchRequests :many
-SELECT id, sales_rep_id, status, customer_name, pitch_tag, customer_request, request_deadline, admin_viewed, created_at, updated_at FROM pitch_requests
+SELECT id, sales_rep_id, sales_rep_name, status, customer_name, pitch_tag, customer_request, request_deadline, admin_viewed, created_at, updated_at FROM pitch_requests
 WHERE id = $1
 LIMIT $2
 OFFSET $3
@@ -180,6 +185,7 @@ func (q *Queries) ViewPitchRequests(ctx context.Context, arg ViewPitchRequestsPa
 		if err := rows.Scan(
 			&i.ID,
 			&i.SalesRepID,
+			&i.SalesRepName,
 			&i.Status,
 			&i.CustomerName,
 			&i.PitchTag,

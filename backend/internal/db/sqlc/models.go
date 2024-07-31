@@ -31,6 +31,7 @@ type Deal struct {
 type PitchRequest struct {
 	ID              int64
 	SalesRepID      int64
+	SalesRepName    string
 	Status          string
 	CustomerName    string
 	PitchTag        string
