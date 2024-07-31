@@ -15,7 +15,7 @@ const (
 )
 
 // main entry point of the application
-func main(){
+func main() {
 	//connect to database
 	dbConn, err := sql.Open(dbDriver, dbSource)
 	if err != nil {
