@@ -21,37 +21,30 @@ func NewServer(store db.Store) *Server {
 // SetupRouter ini
 func (s *Server) SetupRouter() {
 	router := gin.Default()
-
-	router.GET("/ping", func(ctx *gin.Context) {
-		ctx.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
-
 	/*
 		ADMIN/MANAGER ROUTERS
-		router.POST("/admin/user", adminCreateUserHandler)
-		router.PUT("/admin/user/update/?id", adminUpdateUserHandler)
-		router.DELETE("/admin/user/delete/?id", adminDeleteUserHandler)
+		router.POST("/admin/users", adminCreateUserHandler)
+		router.PUT("/admin/user/update/:id", adminUpdateUserHandler)
+		router.DELETE("/admin/user/delete/:id", adminDeleteUserHandler)
 		router.POST("/admin/deals", adminCreateDealHandler)
-		router.PUT("admin/deals/update/?id", adminUpdateDealsHandler)
-		router.DELETE("/admin/deals/delete/?id", adminDeleteDealsHandler)
+		router.PUT("admin/deals/update/:id", adminUpdateDealsHandler)
+		router.DELETE("/admin/deals/delete/:id", adminDeleteDealsHandler)
+		router.GET("users", listUsersHandler)
 	*/
 
 	/*
-		router.POST("/user/login", adminLogin)
-		router.GET("/user/users", viewUsersHandler)
-		router.GET("/user/deals", getDealsHandler)
-		router.PUT("/user/pitchrequest/update?id", updatePitchReqHandler)
+		router.POST("/users/login", adminLogin)
+		router.PUT("pitchrequest/update/:id", updatePitchReqHandler)
+		router.GET("deals", getDealsHandler)
 	*/
 
 	/*
 		SALES-REP
 		router.POST("/sales/pitchReq", "salesCreatePitchReqHandler)
-		router.PUT("sales/update/?username", salesUpdateuserHandler)
+		router.PUT("sales/update/:username", salesUpdateuserHandler)
 		router.DELETE("/sales/pitchReq/delete", salesDeletePitchReqHandler)
 
-	*/ 
+	*/
 	s.Router = router
 }
 
@@ -62,4 +55,11 @@ func (s *Server) StartServer(hostAddress string) error {
 		return err
 	}
 	return nil
+}
+
+
+func errorResponse(err error) gin.H {
+	return gin.H{
+		"error": err.Error(),
+	}
 }
