@@ -21,16 +21,14 @@ func NewServer(store db.Store) *Server {
 // SetupRouter ini
 func (s *Server) SetupRouter() {
 	router := gin.Default()
-	/*
-		ADMIN/MANAGER ROUTERS
-		router.POST("/admin/users", adminCreateUserHandler)
-		router.PUT("/admin/user/update/:id", adminUpdateUserHandler)
-		router.DELETE("/admin/user/delete/:id", adminDeleteUserHandler)
-		router.POST("/admin/deals", adminCreateDealHandler)
-		router.PUT("admin/deals/update/:id", adminUpdateDealsHandler)
-		router.DELETE("/admin/deals/delete/:id", adminDeleteDealsHandler)
-		router.GET("users", listUsersHandler)
-	*/
+
+	router.POST("/admin/users", s.adminCreateUserHandler)
+	router.PUT("/admin/user/update/:id", s.adminUpdateUserHandler)
+	router.DELETE("/admin/user/delete/:id", s.adminDeleteUserHandler)
+	router.POST("/admin/deals", s.adminCreateDealHandler)
+	router.PUT("admin/deals/update/:id", s.adminUpdateDealHandler)
+	router.DELETE("/admin/deals/delete/:id", s.adminDeleteDealHandler)
+	router.GET("users", s.listUsersHandler)
 
 	/*
 		router.POST("/users/login", adminLogin)
@@ -56,7 +54,6 @@ func (s *Server) StartServer(hostAddress string) error {
 	}
 	return nil
 }
-
 
 func errorResponse(err error) gin.H {
 	return gin.H{
