@@ -16,6 +16,7 @@ func createPitch(t *testing.T, salesRepId int64) db.PitchRequest {
 	args := db.CreatePitchRequestParams{
 		SalesRepID:      salesRepId,
 		Status:          util.RandomString(4),
+		SalesRepName: util.GenFullname(),
 		CustomerName:    util.GenFullname(),
 		PitchTag:        util.RandomString(3),
 		CustomerRequest: util.RandomString(6),
@@ -29,6 +30,7 @@ func createPitch(t *testing.T, salesRepId int64) db.PitchRequest {
 	require.Empty(t, newPitch.UpdatedAt)
 	require.False(t, newPitch.AdminViewed)
 	require.Equal(t, args.SalesRepID, newPitch.SalesRepID)
+	require.Equal(t, args.SalesRepName, newPitch.SalesRepName)
 	require.WithinDuration(t, args.RequestDeadline, newPitch.RequestDeadline, time.Second)
 	return newPitch
 }
