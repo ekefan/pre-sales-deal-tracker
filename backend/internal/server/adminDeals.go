@@ -173,7 +173,7 @@ func (s *Server) adminUpdateDealHandler(ctx *gin.Context) {
 
 // AdminDeleteUserhandler holds field user id that is to be deleted
 type DeleteDealReq struct {
-	ID int64 `uri:"id" binding:"required"`
+	ID int64 `uri:"deal_id" binding:"required"`
 }
 
 // adminDeleteDealHandler http handler for the api end point for Deleting a deal
