@@ -23,12 +23,12 @@ func (s *Server) SetupRouter() {
 	router := gin.Default()
 
 	// ADMIN
-	router.POST("/admin/users", s.adminCreateUserHandler)
-	router.PUT("/admin/user/update/", s.adminUpdateUserHandler)
-	router.DELETE("/admin/user/delete/:id", s.adminDeleteUserHandler)
+	router.POST("/user", s.adminCreateUserHandler)
+	router.PUT("/user/update/", s.adminUpdateUserHandler)
+	router.DELETE("/user/delete/:id", s.adminDeleteUserHandler)
 	router.POST("/admin/deals", s.adminCreateDealHandler)
-	router.PUT("admin/deals/update/", s.adminUpdateDealHandler)
-	router.DELETE("/admin/deals/delete/:id", s.adminDeleteDealHandler)
+	router.PUT("admin/deals/update", s.adminUpdateDealHandler)
+	router.DELETE("/admin/deals/delete/:deal_id", s.adminDeleteDealHandler)
 	router.GET("/users", s.listUsersHandler)
 
 	// ADMINSALES
@@ -40,8 +40,8 @@ func (s *Server) SetupRouter() {
 	//SALES-REP
 	router.POST("/sales/pitchReq", s.salesCreatePitchReqHandler)
 	router.PUT("/sales/update/:username", s.salesUpdateuserHandler)
-	router.GET("/pitch_req:pitch_id", s.salesViewPitchRequests)
-	router.DELETE("/sales/pitchReq/delete", s.salesDeletePitchReqHandler)
+	router.GET("/pitchrequest/", s.salesViewPitchRequests)
+	router.DELETE("/sales/pitchReq/delete/:pitch_id", s.salesDeletePitchReqHandler)
 
 	s.Router = router
 }
