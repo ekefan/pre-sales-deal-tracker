@@ -66,7 +66,7 @@ type UpdatePitchReq struct {
 	Status          string `json:"status" binding:"required"`
 	PitchTag        string `json:"pitch_tag" binding:"required"`
 	CustomerRequest string `json:"customer_request" binding:"required"`
-	AdminViewed     bool   `json:"admin_viewed" binding:"required"`
+	AdminViewed     bool   `json:"admin_viewed"`
 }
 
 type PitchResp struct {
