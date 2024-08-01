@@ -26,7 +26,7 @@ func (s *Server) SetupRouter() {
 	router.PUT("/admin/user/update/", s.adminUpdateUserHandler)
 	router.DELETE("/admin/user/delete/:id", s.adminDeleteUserHandler)
 	router.POST("/admin/deals", s.adminCreateDealHandler)
-	router.PUT("admin/deals/update/:id", s.adminUpdateDealHandler)
+	router.PUT("admin/deals/update/", s.adminUpdateDealHandler)
 	router.DELETE("/admin/deals/delete/:id", s.adminDeleteDealHandler)
 	router.GET("users", s.listUsersHandler)
 
