@@ -2,6 +2,7 @@ package server
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -12,13 +13,13 @@ import (
 
 // PitchReq holds fields for creating a Pitch Request
 type PitchReq struct {
-	SalesRepID      int64     `json:"sales_rep_id" binding:"required,min=6"`
+	SalesRepID      int64     `json:"sales_rep_id" binding:"required"`
 	SalesRepName    string    `json:"sales_rep_name" binding:"required"`
 	Status          string    `json:"status" binding:"required"`
 	CustomerName    string    `json:"customer_name" binding:"required"`
 	PitchTag        string    `json:"pitch_tag" binding:"required"`
 	CustomerRequest string    `json:"customer_request" binding:"required"`
-	RequestDeadline time.Time `json:"request_deadline" binding:"required"`
+	RequestDeadline string `json:"request_deadline" binding:"required"`
 }
 
 func (s *Server) salesCreatePitchReqHandler(ctx *gin.Context) {
@@ -26,6 +27,13 @@ func (s *Server) salesCreatePitchReqHandler(ctx *gin.Context) {
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
+	}
+
+
+	/// General Problem of Parsing time between time.Time and json
+	deadline, err := time.Parse("2006-1-2", req.RequestDeadline)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(fmt.Errorf("couldn't format request deadline: %s", err)))
 	}
 
 	// instead of receiving salesRepID from json validate it through payload
@@ -36,7 +44,7 @@ func (s *Server) salesCreatePitchReqHandler(ctx *gin.Context) {
 		CustomerName:    req.CustomerName,
 		PitchTag:        req.PitchTag,
 		CustomerRequest: req.CustomerRequest,
-		RequestDeadline: req.RequestDeadline,
+		RequestDeadline: deadline,
 	}
 	pitchRequest, err := s.Store.CreatePitchRequest(ctx, args)
 	if err != nil {
@@ -118,14 +126,14 @@ func (s *Server) salesUpdateuserHandler(ctx *gin.Context) {
 }
 
 type ViewPitchReq struct {
-	ID       int64 `uri:"pitch_id" binding:"required"`
+	ID       int64 `form:"pitch_id" binding:"required"`
 	PageID   int32 `form:"page_id" binding:"required,min=1"`
 	PageSize int32 `form:"page_size" binding:"required,min=5,max=10"`
 }
 
 func (s *Server) salesViewPitchRequests(ctx *gin.Context) {
 	var req ViewPitchReq
-	if err := ctx.ShouldBind(&req); err != nil {
+	if err := ctx.ShouldBindQuery(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
@@ -145,7 +153,7 @@ func (s *Server) salesViewPitchRequests(ctx *gin.Context) {
 
 
 type DeletePitchReq struct {
-	ID int64 `uri:"id" binding:"required"`
+	ID int64 `uri:"pitch_id" binding:"required"`
 }
 func (s *Server) salesDeletePitchReqHandler(ctx *gin.Context) {
 	var req DeletePitchReq
@@ -154,6 +162,7 @@ func (s *Server) salesDeletePitchReqHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
+	fmt.Println(req.ID)
 	err := s.Store.DeletePitchRequest(ctx, req.ID)
 	if err != nil {
 		if err == sql.ErrNoRows {
