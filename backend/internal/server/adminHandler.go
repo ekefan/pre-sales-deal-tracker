@@ -142,14 +142,14 @@ func (s *Server) adminUpdateUserHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp)
 }
 
-// AdminDeleteUserhandler holds field user id that is to be deleted
-type AdminDeleteUserHandler struct {
+// AdminDeleteUserReq holds field user id that is to be deleted
+type AdminDeleteUserReq struct {
 	ID int64 `uri:"id" binding:"required"`
 }
 
 // adminDeleteUserhandler http handler for the api end point for Deleting a user
 func (s *Server) adminDeleteUserHandler(ctx *gin.Context) {
-	var req AdminDeleteUserHandler
+	var req AdminDeleteUserReq
 	if err := ctx.ShouldBindUri(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
@@ -249,16 +249,140 @@ func (s *Server) adminCreateDealHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp)
 }
 
+// UpdateDealReq holds fields used to update a deal
+type UpdateDealReq struct {
+	ID                  int64     `json:"id" binding:"required"`
+	ServiceToRender     string    `json:"service_to_render" binding:"required"`
+	Status              string    `json:"status" binding:"required"`
+	StatusTag           string    `json:"statusTag" binding:"required"`
+	CurrentPitchRequest string    `json:"current_pitch_request" binding:"required"`
+	UpdatedAt           time.Time `json:"updated_at" binding:"required"`
+	ClosedAt            time.Time `json:"closed_at" binding:"required"`
+}
+
 // adminUpdateDealsHandler http handler for the api end point for updating a deal
-func (s *Server) adminUpdateDealHandler(ctx *gin.Context) {}
+func (s *Server) adminUpdateDealHandler(ctx *gin.Context) {
+	var req UpdateDealReq
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+	}
+
+	//verify that the resouces is accessed by the admin only, check for role in
+	// authorization payload
+
+	deal, err := s.Store.AdminGetDealForUpdate(ctx, req.ID)
+	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok {
+			ctx.JSON(http.StatusForbidden, errorResponse(pqErr))
+			return
+		}
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	updatedAt := sql.NullTime{
+		Time:  req.UpdatedAt,
+		Valid: true,
+	}
+	closedAt := sql.NullTime{
+		Time:  req.UpdatedAt,
+		Valid: !req.UpdatedAt.IsZero(),
+	}
+	updatedDeal, err := s.Store.AdminUpdateDeal(ctx, db.AdminUpdateDealParams{
+		ID:                  deal.ID,
+		ServiceToRender:     req.ServiceToRender,
+		Status:              req.Status,
+		StatusTag:           req.StatusTag,
+		CurrentPitchRequest: req.CurrentPitchRequest,
+		UpdatedAt:           updatedAt,
+		ClosedAt:            closedAt,
+	})
+
+	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok {
+			//check for specific pq Errors but...
+			ctx.JSON(http.StatusForbidden, errorResponse(pqErr))
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	resp := CreateDealResp{
+		ID:                  updatedDeal.ID,
+		PitchID:             updatedDeal.PitchID,
+		SalesRepName:        updatedDeal.SalesRepName,
+		CustomerName:        updatedDeal.CustomerName,
+		ServiceToRender:     updatedDeal.ServiceToRender,
+		Status:              updatedDeal.Status,
+		StatusTag:           updatedDeal.StatusTag,
+		CurrentPitchRequest: updatedDeal.CurrentPitchRequest,
+		NetTotalCost:        updatedDeal.NetTotalCost.String,
+		Profit:              updatedDeal.Profit.String,
+		CreatedAt:           updatedDeal.CreatedAt,
+		UpdatedAt:           updatedDeal.UpdatedAt.Time,
+		ClosedAt:            updatedDeal.ClosedAt.Time,
+		Awarded:             updatedDeal.Awarded,
+	}
+
+	ctx.JSON(http.StatusOK, resp)
+}
+
+// AdminDeleteUserhandler holds field user id that is to be deleted
+type DeleteDealReq struct {
+	ID int64 `uri:"id" binding:"required"`
+}
 
 // adminDeleteDealHandler http handler for the api end point for Deleting a deal
-func (s *Server) adminDeleteDealHandler(ctx *gin.Context) {}
+func (s *Server) adminDeleteDealHandler(ctx *gin.Context) {
+	var req DeleteDealReq
+	if err := ctx.ShouldBindUri(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	err := s.Store.AdminDeleteDeal(ctx, req.ID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "successful",
+	})
+}
+
+type ListUsersReq struct {
+	PageID   int32 `json:"page_id" binding:"required"`
+	PageSize int32 `json:"page_size" binding:"required"`
+}
 
 // listUsershandler http handler for the api end point for getting list of users currently
-func (s *Server) listUsersHandler(ctx *gin.Context) {}
+func (s *Server) listUsersHandler(ctx *gin.Context) {
+	var req ListUsersReq
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+	args := db.AdminViewUsersParams{
+		Limit:  req.PageSize,
+		Offset: (req.PageID - 1) * req.PageSize,
+	}
+	users, err := s.Store.AdminViewUsers(ctx, args)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, users)
+}
 
 // ================TODO=============================
 //1. Create Custom validation for role: oneof - admin, sales, manager
 //2. Create hash password functionality
 //3. send user email to update password, login
+//4. Must write test to validate that update deal works well
