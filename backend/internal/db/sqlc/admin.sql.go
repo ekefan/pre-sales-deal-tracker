@@ -147,6 +147,56 @@ func (q *Queries) AdminUpdateUser(ctx context.Context, arg AdminUpdateUserParams
 	return i, err
 }
 
+const adminViewDeals = `-- name: AdminViewDeals :many
+SELECT id, pitch_id, sales_rep_name, customer_name, service_to_render, status, status_tag, current_pitch_request, net_total_cost, profit, created_at, updated_at, closed_at, awarded FROM deals
+ORDER BY id
+LIMIT $1
+OFFSET $2
+`
+
+type AdminViewDealsParams struct {
+	Limit  int32
+	Offset int32
+}
+
+func (q *Queries) AdminViewDeals(ctx context.Context, arg AdminViewDealsParams) ([]Deal, error) {
+	rows, err := q.query(ctx, q.adminViewDealsStmt, adminViewDeals, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Deal{}
+	for rows.Next() {
+		var i Deal
+		if err := rows.Scan(
+			&i.ID,
+			&i.PitchID,
+			&i.SalesRepName,
+			&i.CustomerName,
+			&i.ServiceToRender,
+			&i.Status,
+			&i.StatusTag,
+			&i.CurrentPitchRequest,
+			&i.NetTotalCost,
+			&i.Profit,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.ClosedAt,
+			&i.Awarded,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const adminViewUsers = `-- name: AdminViewUsers :many
 SELECT id, username, role, full_name, email, password, updated_at, created_at FROM users
 ORDER BY id

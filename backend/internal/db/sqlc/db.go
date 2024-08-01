@@ -39,6 +39,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.adminUpdateUserStmt, err = db.PrepareContext(ctx, adminUpdateUser); err != nil {
 		return nil, fmt.Errorf("error preparing query AdminUpdateUser: %w", err)
 	}
+	if q.adminViewDealsStmt, err = db.PrepareContext(ctx, adminViewDeals); err != nil {
+		return nil, fmt.Errorf("error preparing query AdminViewDeals: %w", err)
+	}
 	if q.adminViewUsersStmt, err = db.PrepareContext(ctx, adminViewUsers); err != nil {
 		return nil, fmt.Errorf("error preparing query AdminViewUsers: %w", err)
 	}
@@ -124,6 +127,11 @@ func (q *Queries) Close() error {
 	if q.adminUpdateUserStmt != nil {
 		if cerr := q.adminUpdateUserStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing adminUpdateUserStmt: %w", cerr)
+		}
+	}
+	if q.adminViewDealsStmt != nil {
+		if cerr := q.adminViewDealsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing adminViewDealsStmt: %w", cerr)
 		}
 	}
 	if q.adminViewUsersStmt != nil {
@@ -265,6 +273,7 @@ type Queries struct {
 	adminGetDealForUpdateStmt        *sql.Stmt
 	adminUpdateDealStmt              *sql.Stmt
 	adminUpdateUserStmt              *sql.Stmt
+	adminViewDealsStmt               *sql.Stmt
 	adminViewUsersStmt               *sql.Stmt
 	createDealStmt                   *sql.Stmt
 	createNewUserStmt                *sql.Stmt
@@ -295,6 +304,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		adminGetDealForUpdateStmt:        q.adminGetDealForUpdateStmt,
 		adminUpdateDealStmt:              q.adminUpdateDealStmt,
 		adminUpdateUserStmt:              q.adminUpdateUserStmt,
+		adminViewDealsStmt:               q.adminViewDealsStmt,
 		adminViewUsersStmt:               q.adminViewUsersStmt,
 		createDealStmt:                   q.createDealStmt,
 		createNewUserStmt:                q.createNewUserStmt,

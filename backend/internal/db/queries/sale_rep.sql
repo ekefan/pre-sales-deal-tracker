@@ -14,7 +14,7 @@ OFFSET $3;
 
 -- name: UpdatePitchRequest :one
 UPDATE pitch_requests
-    set status = $2, pitch_tag = $3, customer_request = $4, admin_viewed = $5
+    set status = $2, pitch_tag = $3, customer_request = $4, admin_viewed = $5, updated_at = $6
 WHERE id = $1
 RETURNING *;
 

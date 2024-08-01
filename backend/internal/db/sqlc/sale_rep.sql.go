@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"time"
 )
 
@@ -94,7 +95,7 @@ func (q *Queries) GetPitchRequestForUpdate(ctx context.Context, id int64) (Pitch
 
 const updatePitchRequest = `-- name: UpdatePitchRequest :one
 UPDATE pitch_requests
-    set status = $2, pitch_tag = $3, customer_request = $4, admin_viewed = $5
+    set status = $2, pitch_tag = $3, customer_request = $4, admin_viewed = $5, updated_at = $6
 WHERE id = $1
 RETURNING id, sales_rep_id, sales_rep_name, status, customer_name, pitch_tag, customer_request, request_deadline, admin_viewed, created_at, updated_at
 `
@@ -105,6 +106,7 @@ type UpdatePitchRequestParams struct {
 	PitchTag        string
 	CustomerRequest string
 	AdminViewed     bool
+	UpdatedAt       sql.NullTime
 }
 
 func (q *Queries) UpdatePitchRequest(ctx context.Context, arg UpdatePitchRequestParams) (PitchRequest, error) {
@@ -114,6 +116,7 @@ func (q *Queries) UpdatePitchRequest(ctx context.Context, arg UpdatePitchRequest
 		arg.PitchTag,
 		arg.CustomerRequest,
 		arg.AdminViewed,
+		arg.UpdatedAt,
 	)
 	var i PitchRequest
 	err := row.Scan(

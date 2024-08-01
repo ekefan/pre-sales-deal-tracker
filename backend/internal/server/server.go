@@ -28,16 +28,17 @@ func (s *Server) SetupRouter() {
 	router.POST("/admin/deals", s.adminCreateDealHandler)
 	router.PUT("admin/deals/update/", s.adminUpdateDealHandler)
 	router.DELETE("/admin/deals/delete/:id", s.adminDeleteDealHandler)
-	router.GET("users", s.listUsersHandler)
+	router.GET("/users", s.listUsersHandler)
 
-	router.POST("/users/login", s.adminLogin)
-	router.PUT("pitchrequest/update/:id", s.updatePitchReqHandler)
-	router.GET("deals", s.getDealsHandler)
+	router.POST("/users/login", s.userLogin)
+	router.PUT("pitchrequest/update", s.updatePitchReqHandler)
+	router.GET("/deals", s.getDealsHandler)
 
 	/*
 		SALES-REP
 		router.POST("/sales/pitchReq", "salesCreatePitchReqHandler)
-		router.PUT("sales/update/:username", salesUpdateuserHandler)
+		router.PUT("/sales/update/:username", salesUpdateuserHandler)
+		routner.GET("/pitch_req", salesViewPitchRequests)
 		router.DELETE("/sales/pitchReq/delete", salesDeletePitchReqHandler)
 
 	*/

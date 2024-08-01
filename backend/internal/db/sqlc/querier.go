@@ -14,6 +14,7 @@ type Querier interface {
 	AdminGetDealForUpdate(ctx context.Context, id int64) (Deal, error)
 	AdminUpdateDeal(ctx context.Context, arg AdminUpdateDealParams) (Deal, error)
 	AdminUpdateUser(ctx context.Context, arg AdminUpdateUserParams) (User, error)
+	AdminViewDeals(ctx context.Context, arg AdminViewDealsParams) ([]Deal, error)
 	AdminViewUsers(ctx context.Context, arg AdminViewUsersParams) ([]User, error)
 	CreateDeal(ctx context.Context, arg CreateDealParams) (Deal, error)
 	CreateNewUser(ctx context.Context, arg CreateNewUserParams) (User, error)
