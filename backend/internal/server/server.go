@@ -22,6 +22,7 @@ func NewServer(store db.Store) *Server {
 func (s *Server) SetupRouter() {
 	router := gin.Default()
 
+	// ADMIN
 	router.POST("/admin/users", s.adminCreateUserHandler)
 	router.PUT("/admin/user/update/", s.adminUpdateUserHandler)
 	router.DELETE("/admin/user/delete/:id", s.adminDeleteUserHandler)
@@ -30,18 +31,18 @@ func (s *Server) SetupRouter() {
 	router.DELETE("/admin/deals/delete/:id", s.adminDeleteDealHandler)
 	router.GET("/users", s.listUsersHandler)
 
+	// ADMINSALES
 	router.POST("/users/login", s.userLogin)
 	router.PUT("pitchrequest/update", s.updatePitchReqHandler)
 	router.GET("/deals", s.getDealsHandler)
 
-	/*
-		SALES-REP
-		router.POST("/sales/pitchReq", "salesCreatePitchReqHandler)
-		router.PUT("/sales/update/:username", salesUpdateuserHandler)
-		routner.GET("/pitch_req", salesViewPitchRequests)
-		router.DELETE("/sales/pitchReq/delete", salesDeletePitchReqHandler)
 
-	*/
+	//SALES-REP
+	router.POST("/sales/pitchReq", s.salesCreatePitchReqHandler)
+	router.PUT("/sales/update/:username", s.salesUpdateuserHandler)
+	router.GET("/pitch_req:pitch_id", s.salesViewPitchRequests)
+	router.DELETE("/sales/pitchReq/delete", s.salesDeletePitchReqHandler)
+
 	s.Router = router
 }
 
