@@ -62,8 +62,8 @@ func (q *Queries) AdminGetDealForUpdate(ctx context.Context, id int64) (Deal, er
 const adminUpdateDeal = `-- name: AdminUpdateDeal :one
 UPDATE deals
     set service_to_render = $2, status = $3,
-    status_tag = $4, current_pitch_request = $5, updated_at = $6,
-    closed_at = $7
+    status_tag = $4, current_pitch_request = $5, updated_at = $7,
+    closed_at = $6
 WHERE id = $1
 RETURNING id, pitch_id, sales_rep_name, customer_name, service_to_render, status, status_tag, current_pitch_request, net_total_cost, profit, created_at, updated_at, closed_at, awarded
 `
@@ -74,8 +74,8 @@ type AdminUpdateDealParams struct {
 	Status              string
 	StatusTag           string
 	CurrentPitchRequest string
-	UpdatedAt           sql.NullTime
 	ClosedAt            sql.NullTime
+	UpdatedAt           sql.NullTime
 }
 
 func (q *Queries) AdminUpdateDeal(ctx context.Context, arg AdminUpdateDealParams) (Deal, error) {
@@ -85,8 +85,8 @@ func (q *Queries) AdminUpdateDeal(ctx context.Context, arg AdminUpdateDealParams
 		arg.Status,
 		arg.StatusTag,
 		arg.CurrentPitchRequest,
-		arg.UpdatedAt,
 		arg.ClosedAt,
+		arg.UpdatedAt,
 	)
 	var i Deal
 	err := row.Scan(
