@@ -30,11 +30,9 @@ func (s *Server) SetupRouter() {
 	router.DELETE("/admin/deals/delete/:id", s.adminDeleteDealHandler)
 	router.GET("users", s.listUsersHandler)
 
-	/*
-		router.POST("/users/login", adminLogin)
-		router.PUT("pitchrequest/update/:id", updatePitchReqHandler)
-		router.GET("deals", getDealsHandler)
-	*/
+	router.POST("/users/login", s.adminLogin)
+	router.PUT("pitchrequest/update/:id", s.updatePitchReqHandler)
+	router.GET("deals", s.getDealsHandler)
 
 	/*
 		SALES-REP
