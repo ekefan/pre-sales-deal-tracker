@@ -23,7 +23,7 @@ func (s *Server) SetupRouter() {
 	router := gin.Default()
 
 	router.POST("/admin/users", s.adminCreateUserHandler)
-	router.PUT("/admin/user/update/:id", s.adminUpdateUserHandler)
+	router.PUT("/admin/user/update/", s.adminUpdateUserHandler)
 	router.DELETE("/admin/user/delete/:id", s.adminDeleteUserHandler)
 	router.POST("/admin/deals", s.adminCreateDealHandler)
 	router.PUT("admin/deals/update/:id", s.adminUpdateDealHandler)
