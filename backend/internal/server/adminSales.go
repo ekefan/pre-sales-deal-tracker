@@ -61,12 +61,14 @@ func (s *Server) userLogin(ctx *gin.Context) {
 
 }
 
+
 type UpdatePitchReq struct {
-	ID              int64  `json:"pitch_request_id" binding:"required"`
-	Status          string `json:"status" binding:"required"`
-	PitchTag        string `json:"pitch_tag" binding:"required"`
-	CustomerRequest string `json:"customer_request" binding:"required"`
-	AdminViewed     bool   `json:"admin_viewed"`
+	ID              int64     `json:"pitch_request_id" binding:"required"`
+	Status          string    `json:"status" binding:"required"`
+	PitchTag        string    `json:"pitch_tag" binding:"required"`
+	CustomerRequest string    `json:"customer_request" binding:"required"`
+	AdminViewed     bool      `json:"admin_viewed"`
+	RequestDealine  UnixTime `json:"request_deadline"`
 }
 
 type PitchResp struct {
@@ -104,6 +106,12 @@ func (s *Server) updatePitchReqHandler(ctx *gin.Context) {
 		Time:  time.Now(),
 		Valid: true,
 	}
+	var deadline time.Time
+	if req.RequestDealine.Valid {
+		deadline = req.RequestDealine.Time
+	} else {
+		deadline = pitchReq.RequestDeadline
+	}
 	args := db.UpdatePitchRequestParams{
 		ID:              pitchReq.ID,
 		Status:          req.Status,
@@ -111,6 +119,7 @@ func (s *Server) updatePitchReqHandler(ctx *gin.Context) {
 		CustomerRequest: req.CustomerRequest,
 		AdminViewed:     req.AdminViewed,
 		UpdatedAt:       updateTime,
+		RequestDeadline: deadline,
 	}
 	updatedPitchReq, err := s.Store.UpdatePitchRequest(ctx, args)
 	if err != nil {
