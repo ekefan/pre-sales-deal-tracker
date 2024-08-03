@@ -41,9 +41,24 @@ UPDATE deals
 WHERE id = $1
 RETURNING *;
 
+-- name: AdminUserExists :one
+SELECT EXISTS (
+    SELECT 1 
+    FROM users
+    WHERE id = $1
+);
+
 -- name: AdminDeleteUser :exec
 DELETE FROM users
 WHERE id = $1;
+
+
+-- name: AdminDealExists :one
+SELECT EXISTS (
+    SELECT 1
+    FROM deals
+    WHERE id = $1
+);
 
 -- name: AdminDeleteDeal :exec
 DELETE FROM deals

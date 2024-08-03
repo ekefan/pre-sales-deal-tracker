@@ -8,7 +8,7 @@ RETURNING *;
 
 -- name: ViewPitchRequests :many
 SELECT * FROM pitch_requests
-WHERE id = $1
+WHERE sales_rep_id = $1
 LIMIT $2
 OFFSET $3;
 
@@ -31,6 +31,14 @@ WHERE id = $1
 LIMIT 1
 FOR UPDATE;
 
+
+-- name: PitchRequestExist :one
+SELECT EXISTS(
+    SELECT 1
+    FROM pitch_requests
+    WHERE sales_rep_id = $1 AND id = $2
+);
+
 -- name: DeletePitchRequest :exec
 DELETE FROM pitch_requests
-WHERE sales_rep_id = $1;
+WHERE id = $1;
