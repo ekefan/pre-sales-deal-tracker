@@ -2,6 +2,7 @@ package server
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -50,7 +51,7 @@ func (s *Server) adminCreateUserHandler(ctx *gin.Context) {
 		if pqErr, ok := err.(*pq.Error); ok {
 			switch pqErr.Code.Name() {
 			case "unique_violation":
-				ctx.JSON(http.StatusForbidden, errorResponse(err))
+				ctx.JSON(http.StatusForbidden, errorResponse(fmt.Errorf("user with details: email or username exist")))
 				return
 			}
 		}
@@ -155,7 +156,13 @@ func (s *Server) adminDeleteUserHandler(ctx *gin.Context) {
 		return
 	}
 
-	err := s.Store.AdminDeleteUser(ctx, req.ID)
+	exists, err := s.Store.AdminUserExists(ctx, req.ID)
+	if err != nil || !exists{
+		ctx.JSON(http.StatusNotFound, errorResponse(fmt.Errorf("user doesn't exist")))
+		return
+	}
+
+	err = s.Store.AdminDeleteUser(ctx, req.ID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
