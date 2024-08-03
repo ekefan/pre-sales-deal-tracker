@@ -41,7 +41,7 @@ func (s *Server) SetupRouter() {
 	router.POST("/sales/pitchReq", s.salesCreatePitchReqHandler)
 	router.PUT("/sales/update/:username", s.salesUpdateuserHandler)
 	router.GET("/pitchrequest/", s.salesViewPitchRequests)
-	router.DELETE("/sales/pitchReq/delete/:pitch_id", s.salesDeletePitchReqHandler)
+	router.DELETE("/sales/pitchReq/delete/:sales_rep_id/:pitch_id", s.salesDeletePitchReqHandler)
 
 	s.Router = router
 }
