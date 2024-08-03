@@ -13,13 +13,13 @@ import (
 
 // PitchReq holds fields for creating a Pitch Request
 type PitchReq struct {
-	SalesRepID      int64     `json:"sales_rep_id" binding:"required"`
-	SalesRepName    string    `json:"sales_rep_name" binding:"required"`
-	Status          string    `json:"status" binding:"required"`
-	CustomerName    string    `json:"customer_name" binding:"required"`
-	PitchTag        string    `json:"pitch_tag" binding:"required"`
-	CustomerRequest string    `json:"customer_request" binding:"required"`
-	RequestDeadline string `json:"request_deadline" binding:"required"`
+	SalesRepID      int64    `json:"sales_rep_id" binding:"required"`
+	SalesRepName    string   `json:"sales_rep_name" binding:"required"`
+	Status          string   `json:"status" binding:"required"`
+	CustomerName    string   `json:"customer_name" binding:"required"`
+	PitchTag        string   `json:"pitch_tag" binding:"required"`
+	CustomerRequest string   `json:"customer_request" binding:"required"`
+	RequestDeadline UnixTime `json:"request_deadline" binding:"required"`
 }
 
 func (s *Server) salesCreatePitchReqHandler(ctx *gin.Context) {
@@ -29,12 +29,7 @@ func (s *Server) salesCreatePitchReqHandler(ctx *gin.Context) {
 		return
 	}
 
-
 	/// General Problem of Parsing time between time.Time and json
-	deadline, err := time.Parse("2006-1-2", req.RequestDeadline)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(fmt.Errorf("couldn't format request deadline: %s", err)))
-	}
 
 	// instead of receiving salesRepID from json validate it through payload
 	args := db.CreatePitchRequestParams{
@@ -44,7 +39,7 @@ func (s *Server) salesCreatePitchReqHandler(ctx *gin.Context) {
 		CustomerName:    req.CustomerName,
 		PitchTag:        req.PitchTag,
 		CustomerRequest: req.CustomerRequest,
-		RequestDeadline: deadline,
+		RequestDeadline: req.RequestDeadline.Time,
 	}
 	pitchRequest, err := s.Store.CreatePitchRequest(ctx, args)
 	if err != nil {
@@ -87,6 +82,7 @@ func (s *Server) salesUpdateuserHandler(ctx *gin.Context) {
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 		}
+		//check pq validation error
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 	}
 	// Set update time to time now....
@@ -126,9 +122,9 @@ func (s *Server) salesUpdateuserHandler(ctx *gin.Context) {
 }
 
 type ViewPitchReq struct {
-	ID       int64 `form:"pitch_id" binding:"required"`
-	PageID   int32 `form:"page_id" binding:"required,min=1"`
-	PageSize int32 `form:"page_size" binding:"required,min=5,max=10"`
+	SalesRepID int64 `form:"sales_rep_id" binding:"required"`
+	PageID     int32 `form:"page_id" binding:"required,min=1"`
+	PageSize   int32 `form:"page_size" binding:"required,min=5,max=10"`
 }
 
 func (s *Server) salesViewPitchRequests(ctx *gin.Context) {
@@ -138,9 +134,9 @@ func (s *Server) salesViewPitchRequests(ctx *gin.Context) {
 		return
 	}
 	args := db.ViewPitchRequestsParams{
-		ID:     req.ID,
-		Limit:  req.PageSize,
-		Offset: (req.PageID - 1) * req.PageSize,
+		SalesRepID: req.SalesRepID,
+		Limit:      req.PageSize,
+		Offset:     (req.PageID - 1) * req.PageSize,
 	}
 
 	requests, err := s.Store.ViewPitchRequests(ctx, args)
@@ -151,10 +147,11 @@ func (s *Server) salesViewPitchRequests(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, requests)
 }
 
-
 type DeletePitchReq struct {
-	ID int64 `uri:"pitch_id" binding:"required"`
+	ID         int64 `uri:"pitch_id" binding:"required"`
+	SalesRepID int64 `uri:"sales_rep_id" binding:"required"`
 }
+
 func (s *Server) salesDeletePitchReqHandler(ctx *gin.Context) {
 	var req DeletePitchReq
 
@@ -162,16 +159,35 @@ func (s *Server) salesDeletePitchReqHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	fmt.Println(req.ID)
-	err := s.Store.DeletePitchRequest(ctx, req.ID)
+
+	// Check if the pitch request exists
+	args := db.PitchRequestExistParams{
+		ID:         req.ID,
+		SalesRepID: req.SalesRepID,
+	}
+	exists, err := s.Store.PitchRequestExist(ctx, args)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, errorResponse(err))
-			return
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	if !exists {
+		ctx.JSON(http.StatusNotFound, errorResponse(fmt.Errorf("pitch request doesn't exist")))
+		return
+	}
+	fmt.Println(exists, req)
+	// Attempt to delete the pitch request
+	err = s.Store.DeletePitchRequest(ctx, req.ID)
+	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok {
+			if pqErr.Code == "23503" { // Foreign key violation error code
+				ctx.JSON(http.StatusConflict, errorResponse(fmt.Errorf("cannot delete pitch request: foreign key constraint violation")))
+				return
+			}
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
+
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "successful",
 	})
