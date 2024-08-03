@@ -2,6 +2,7 @@ package server
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -9,7 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
 )
-
 
 // CreateDealReq holds fields needed to create a new deal
 type CreateDealReq struct {
@@ -93,13 +93,13 @@ func (s *Server) adminCreateDealHandler(ctx *gin.Context) {
 
 // UpdateDealReq holds fields used to update a deal
 type UpdateDealReq struct {
-	ID                  int64     `json:"id" binding:"required"`
-	ServiceToRender     string    `json:"service_to_render" binding:"required"`
-	Status              string    `json:"status" binding:"required"`
-	StatusTag           string    `json:"statusTag" binding:"required"`
-	CurrentPitchRequest string    `json:"current_pitch_request" binding:"required"`
-	UpdatedAt           time.Time `json:"updated_at" binding:"required"`
-	ClosedAt            time.Time `json:"closed_at" binding:"required"`
+	ID                  int64    `json:"id" binding:"required"`
+	ServiceToRender     string   `json:"service_to_render" binding:"required"`
+	Status              string   `json:"status" binding:"required"`
+	StatusTag           string   `json:"status_tag" binding:"required"`
+	CurrentPitchRequest string   `json:"current_pitch_request" binding:"required"`
+	UpdatedAt           UnixTime `json:"updated_at" binding:"required"`
+	ClosedAt            UnixTime `json:"closed_at"`
 }
 
 // adminUpdateDealsHandler http handler for the api end point for updating a deal
@@ -107,6 +107,7 @@ func (s *Server) adminUpdateDealHandler(ctx *gin.Context) {
 	var req UpdateDealReq
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
 	}
 
 	//verify that the resouces is accessed by the admin only, check for role in
@@ -126,12 +127,12 @@ func (s *Server) adminUpdateDealHandler(ctx *gin.Context) {
 		return
 	}
 	updatedAt := sql.NullTime{
-		Time:  req.UpdatedAt,
-		Valid: true,
+		Time:  req.UpdatedAt.Time,
+		Valid: req.UpdatedAt.Valid,
 	}
 	closedAt := sql.NullTime{
-		Time:  req.UpdatedAt,
-		Valid: !req.UpdatedAt.IsZero(),
+		Time:  req.UpdatedAt.Time,
+		Valid: req.ClosedAt.Valid,
 	}
 	updatedDeal, err := s.Store.AdminUpdateDeal(ctx, db.AdminUpdateDealParams{
 		ID:                  deal.ID,
@@ -147,6 +148,7 @@ func (s *Server) adminUpdateDealHandler(ctx *gin.Context) {
 		if pqErr, ok := err.(*pq.Error); ok {
 			//check for specific pq Errors but...
 			ctx.JSON(http.StatusForbidden, errorResponse(pqErr))
+			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
@@ -185,14 +187,15 @@ func (s *Server) adminDeleteDealHandler(ctx *gin.Context) {
 	}
 
 	//get payload and check the for user.role
-	
-	err := s.Store.AdminDeleteDeal(ctx, req.ID)
+
+	exists, err := s.Store.AdminDealExists(ctx, req.ID)
+	if err != nil || !exists {
+		ctx.JSON(http.StatusNotFound, errorResponse(fmt.Errorf("deal doesn't exist")))
+		return
+	}
+	err = s.Store.AdminDeleteDeal(ctx, req.ID)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, errorResponse(err))
-			return
-		}
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		ctx.JSON(http.StatusInternalServerError, errorResponse(fmt.Errorf("couldn't delete deal: %v", err)))
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{
