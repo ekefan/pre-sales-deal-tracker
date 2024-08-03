@@ -17,11 +17,10 @@ type SqlStore struct {
 	db *sql.DB
 }
 
-
 func NewStore(db *sql.DB) Store {
 	return &SqlStore{
 		Queries: New(db),
-		db: db,
+		db:      db,
 	}
 }
 
@@ -40,3 +39,17 @@ func NewStore(db *sql.DB) Store {
 // 	}
 // 	return tx.Commit()
 // }
+
+// SetNullPitchID converts user pitch_id into sql format
+func SetNullPitchID(pitchID int64) sql.NullInt64 {
+	if pitchID > 0 {
+		return sql.NullInt64{
+			Int64: pitchID,
+			Valid: true,
+		}
+	}
+	return sql.NullInt64{
+		Int64: 0,
+		Valid: false,
+	}
+}
