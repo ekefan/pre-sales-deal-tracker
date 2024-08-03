@@ -52,7 +52,7 @@ func (s *Server) adminCreateDealHandler(ctx *gin.Context) {
 
 	//make call to database
 	deal, err := s.Store.CreateDeal(ctx, db.CreateDealParams{
-		PitchID:             req.PitchID,
+		PitchID:             db.SetNullPitchID(req.PitchID),
 		SalesRepName:        req.SalesRepName,
 		CustomerName:        req.CustomerName,
 		ServiceToRender:     req.ServiceToRender,
@@ -71,9 +71,10 @@ func (s *Server) adminCreateDealHandler(ctx *gin.Context) {
 		return
 	}
 
+	
 	resp := CreateDealResp{
 		ID:                  deal.ID,
-		PitchID:             deal.PitchID,
+		PitchID:             deal.PitchID.Int64, // .Int64 returns the value from the sql.NullInt64
 		SalesRepName:        deal.SalesRepName,
 		CustomerName:        deal.CustomerName,
 		ServiceToRender:     deal.ServiceToRender,
@@ -155,7 +156,7 @@ func (s *Server) adminUpdateDealHandler(ctx *gin.Context) {
 	}
 	resp := CreateDealResp{
 		ID:                  updatedDeal.ID,
-		PitchID:             updatedDeal.PitchID,
+		PitchID:             updatedDeal.PitchID.Int64,
 		SalesRepName:        updatedDeal.SalesRepName,
 		CustomerName:        updatedDeal.CustomerName,
 		ServiceToRender:     updatedDeal.ServiceToRender,
