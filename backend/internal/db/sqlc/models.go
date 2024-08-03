@@ -11,7 +11,7 @@ import (
 
 type Deal struct {
 	ID              int64
-	PitchID         int64
+	PitchID         sql.NullInt64
 	SalesRepName    string
 	CustomerName    string
 	ServiceToRender string

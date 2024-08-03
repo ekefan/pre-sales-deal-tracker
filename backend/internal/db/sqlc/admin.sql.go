@@ -281,7 +281,7 @@ RETURNING id, pitch_id, sales_rep_name, customer_name, service_to_render, status
 `
 
 type CreateDealParams struct {
-	PitchID             int64
+	PitchID             sql.NullInt64
 	SalesRepName        string
 	CustomerName        string
 	ServiceToRender     string
