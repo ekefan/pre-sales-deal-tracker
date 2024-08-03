@@ -72,7 +72,7 @@ func TestCreateDeal(t *testing.T) {
 	require.NotEmpty(t, pitchReq)
 	//Create a deal based on the pitch request and sales_rep
 	args := db.CreateDealParams{
-		PitchID:             pitchReq.ID,
+		PitchID:             db.SetNullPitchID(pitchReq.ID),
 		SalesRepName:        salesRep.FullName,
 		CustomerName:        pitchReq.CustomerName,
 		ServiceToRender:     pitchReq.CustomerRequest,
