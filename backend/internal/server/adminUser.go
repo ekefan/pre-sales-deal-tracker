@@ -102,8 +102,10 @@ func (s *Server) adminUpdateUserHandler(ctx *gin.Context) {
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
 	}
 	// Set update time to time now....
 	updateTime := sql.NullTime{
@@ -130,6 +132,7 @@ func (s *Server) adminUpdateUserHandler(ctx *gin.Context) {
 			}
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
 	}
 	resp := AdminUpdateUsrResp{
 		UserID:    newUsr.ID,
