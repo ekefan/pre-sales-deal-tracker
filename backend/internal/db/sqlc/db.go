@@ -24,6 +24,9 @@ func New(db DBTX) *Queries {
 func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	q := Queries{db: db}
 	var err error
+	if q.adminDealExistsStmt, err = db.PrepareContext(ctx, adminDealExists); err != nil {
+		return nil, fmt.Errorf("error preparing query AdminDealExists: %w", err)
+	}
 	if q.adminDeleteDealStmt, err = db.PrepareContext(ctx, adminDeleteDeal); err != nil {
 		return nil, fmt.Errorf("error preparing query AdminDeleteDeal: %w", err)
 	}
@@ -38,6 +41,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.adminUpdateUserStmt, err = db.PrepareContext(ctx, adminUpdateUser); err != nil {
 		return nil, fmt.Errorf("error preparing query AdminUpdateUser: %w", err)
+	}
+	if q.adminUserExistsStmt, err = db.PrepareContext(ctx, adminUserExists); err != nil {
+		return nil, fmt.Errorf("error preparing query AdminUserExists: %w", err)
 	}
 	if q.adminViewDealsStmt, err = db.PrepareContext(ctx, adminViewDeals); err != nil {
 		return nil, fmt.Errorf("error preparing query AdminViewDeals: %w", err)
@@ -90,6 +96,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getUserForUpdateStmt, err = db.PrepareContext(ctx, getUserForUpdate); err != nil {
 		return nil, fmt.Errorf("error preparing query GetUserForUpdate: %w", err)
 	}
+	if q.pitchRequestExistStmt, err = db.PrepareContext(ctx, pitchRequestExist); err != nil {
+		return nil, fmt.Errorf("error preparing query PitchRequestExist: %w", err)
+	}
 	if q.updatePitchRequestStmt, err = db.PrepareContext(ctx, updatePitchRequest); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdatePitchRequest: %w", err)
 	}
@@ -104,6 +113,11 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 
 func (q *Queries) Close() error {
 	var err error
+	if q.adminDealExistsStmt != nil {
+		if cerr := q.adminDealExistsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing adminDealExistsStmt: %w", cerr)
+		}
+	}
 	if q.adminDeleteDealStmt != nil {
 		if cerr := q.adminDeleteDealStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing adminDeleteDealStmt: %w", cerr)
@@ -127,6 +141,11 @@ func (q *Queries) Close() error {
 	if q.adminUpdateUserStmt != nil {
 		if cerr := q.adminUpdateUserStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing adminUpdateUserStmt: %w", cerr)
+		}
+	}
+	if q.adminUserExistsStmt != nil {
+		if cerr := q.adminUserExistsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing adminUserExistsStmt: %w", cerr)
 		}
 	}
 	if q.adminViewDealsStmt != nil {
@@ -214,6 +233,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getUserForUpdateStmt: %w", cerr)
 		}
 	}
+	if q.pitchRequestExistStmt != nil {
+		if cerr := q.pitchRequestExistStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing pitchRequestExistStmt: %w", cerr)
+		}
+	}
 	if q.updatePitchRequestStmt != nil {
 		if cerr := q.updatePitchRequestStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing updatePitchRequestStmt: %w", cerr)
@@ -268,11 +292,13 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 type Queries struct {
 	db                               DBTX
 	tx                               *sql.Tx
+	adminDealExistsStmt              *sql.Stmt
 	adminDeleteDealStmt              *sql.Stmt
 	adminDeleteUserStmt              *sql.Stmt
 	adminGetDealForUpdateStmt        *sql.Stmt
 	adminUpdateDealStmt              *sql.Stmt
 	adminUpdateUserStmt              *sql.Stmt
+	adminUserExistsStmt              *sql.Stmt
 	adminViewDealsStmt               *sql.Stmt
 	adminViewUsersStmt               *sql.Stmt
 	createDealStmt                   *sql.Stmt
@@ -290,6 +316,7 @@ type Queries struct {
 	getPitchRequestForUpdateStmt     *sql.Stmt
 	getUserStmt                      *sql.Stmt
 	getUserForUpdateStmt             *sql.Stmt
+	pitchRequestExistStmt            *sql.Stmt
 	updatePitchRequestStmt           *sql.Stmt
 	updateUserStmt                   *sql.Stmt
 	viewPitchRequestsStmt            *sql.Stmt
@@ -299,11 +326,13 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
 		db:                               tx,
 		tx:                               tx,
+		adminDealExistsStmt:              q.adminDealExistsStmt,
 		adminDeleteDealStmt:              q.adminDeleteDealStmt,
 		adminDeleteUserStmt:              q.adminDeleteUserStmt,
 		adminGetDealForUpdateStmt:        q.adminGetDealForUpdateStmt,
 		adminUpdateDealStmt:              q.adminUpdateDealStmt,
 		adminUpdateUserStmt:              q.adminUpdateUserStmt,
+		adminUserExistsStmt:              q.adminUserExistsStmt,
 		adminViewDealsStmt:               q.adminViewDealsStmt,
 		adminViewUsersStmt:               q.adminViewUsersStmt,
 		createDealStmt:                   q.createDealStmt,
@@ -321,6 +350,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getPitchRequestForUpdateStmt:     q.getPitchRequestForUpdateStmt,
 		getUserStmt:                      q.getUserStmt,
 		getUserForUpdateStmt:             q.getUserForUpdateStmt,
+		pitchRequestExistStmt:            q.pitchRequestExistStmt,
 		updatePitchRequestStmt:           q.updatePitchRequestStmt,
 		updateUserStmt:                   q.updateUserStmt,
 		viewPitchRequestsStmt:            q.viewPitchRequestsStmt,

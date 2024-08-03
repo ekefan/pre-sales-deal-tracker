@@ -9,17 +9,19 @@ import (
 )
 
 type Querier interface {
+	AdminDealExists(ctx context.Context, id int64) (bool, error)
 	AdminDeleteDeal(ctx context.Context, id int64) error
 	AdminDeleteUser(ctx context.Context, id int64) error
 	AdminGetDealForUpdate(ctx context.Context, id int64) (Deal, error)
 	AdminUpdateDeal(ctx context.Context, arg AdminUpdateDealParams) (Deal, error)
 	AdminUpdateUser(ctx context.Context, arg AdminUpdateUserParams) (User, error)
+	AdminUserExists(ctx context.Context, id int64) (bool, error)
 	AdminViewDeals(ctx context.Context, arg AdminViewDealsParams) ([]Deal, error)
 	AdminViewUsers(ctx context.Context, arg AdminViewUsersParams) ([]User, error)
 	CreateDeal(ctx context.Context, arg CreateDealParams) (Deal, error)
 	CreateNewUser(ctx context.Context, arg CreateNewUserParams) (User, error)
 	CreatePitchRequest(ctx context.Context, arg CreatePitchRequestParams) (PitchRequest, error)
-	DeletePitchRequest(ctx context.Context, salesRepID int64) error
+	DeletePitchRequest(ctx context.Context, id int64) error
 	GetDealsByAward(ctx context.Context, arg GetDealsByAwardParams) ([]Deal, error)
 	GetDealsByCustomerAndService(ctx context.Context, arg GetDealsByCustomerAndServiceParams) ([]Deal, error)
 	GetDealsByCustomerName(ctx context.Context, arg GetDealsByCustomerNameParams) ([]Deal, error)
@@ -31,6 +33,7 @@ type Querier interface {
 	GetPitchRequestForUpdate(ctx context.Context, id int64) (PitchRequest, error)
 	GetUser(ctx context.Context, username string) (User, error)
 	GetUserForUpdate(ctx context.Context, id int64) (User, error)
+	PitchRequestExist(ctx context.Context, arg PitchRequestExistParams) (bool, error)
 	UpdatePitchRequest(ctx context.Context, arg UpdatePitchRequestParams) (PitchRequest, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
 	ViewPitchRequests(ctx context.Context, arg ViewPitchRequestsParams) ([]PitchRequest, error)

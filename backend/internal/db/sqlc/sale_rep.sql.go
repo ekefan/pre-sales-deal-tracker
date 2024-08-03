@@ -59,11 +59,11 @@ func (q *Queries) CreatePitchRequest(ctx context.Context, arg CreatePitchRequest
 
 const deletePitchRequest = `-- name: DeletePitchRequest :exec
 DELETE FROM pitch_requests
-WHERE sales_rep_id = $1
+WHERE id = $1
 `
 
-func (q *Queries) DeletePitchRequest(ctx context.Context, salesRepID int64) error {
-	_, err := q.exec(ctx, q.deletePitchRequestStmt, deletePitchRequest, salesRepID)
+func (q *Queries) DeletePitchRequest(ctx context.Context, id int64) error {
+	_, err := q.exec(ctx, q.deletePitchRequestStmt, deletePitchRequest, id)
 	return err
 }
 
@@ -91,6 +91,26 @@ func (q *Queries) GetPitchRequestForUpdate(ctx context.Context, id int64) (Pitch
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const pitchRequestExist = `-- name: PitchRequestExist :one
+SELECT EXISTS(
+    SELECT 1
+    FROM pitch_requests
+    WHERE sales_rep_id = $1 AND id = $2
+)
+`
+
+type PitchRequestExistParams struct {
+	SalesRepID int64
+	ID         int64
+}
+
+func (q *Queries) PitchRequestExist(ctx context.Context, arg PitchRequestExistParams) (bool, error) {
+	row := q.queryRow(ctx, q.pitchRequestExistStmt, pitchRequestExist, arg.SalesRepID, arg.ID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
 }
 
 const updatePitchRequest = `-- name: UpdatePitchRequest :one
@@ -174,19 +194,19 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 
 const viewPitchRequests = `-- name: ViewPitchRequests :many
 SELECT id, sales_rep_id, sales_rep_name, status, customer_name, pitch_tag, customer_request, request_deadline, admin_viewed, created_at, updated_at FROM pitch_requests
-WHERE id = $1
+WHERE sales_rep_id = $1
 LIMIT $2
 OFFSET $3
 `
 
 type ViewPitchRequestsParams struct {
-	ID     int64
-	Limit  int32
-	Offset int32
+	SalesRepID int64
+	Limit      int32
+	Offset     int32
 }
 
 func (q *Queries) ViewPitchRequests(ctx context.Context, arg ViewPitchRequestsParams) ([]PitchRequest, error) {
-	rows, err := q.query(ctx, q.viewPitchRequestsStmt, viewPitchRequests, arg.ID, arg.Limit, arg.Offset)
+	rows, err := q.query(ctx, q.viewPitchRequestsStmt, viewPitchRequests, arg.SalesRepID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}

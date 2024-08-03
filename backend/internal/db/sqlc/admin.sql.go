@@ -10,6 +10,21 @@ import (
 	"database/sql"
 )
 
+const adminDealExists = `-- name: AdminDealExists :one
+SELECT EXISTS (
+    SELECT 1
+    FROM deals
+    WHERE id = $1
+)
+`
+
+func (q *Queries) AdminDealExists(ctx context.Context, id int64) (bool, error) {
+	row := q.queryRow(ctx, q.adminDealExistsStmt, adminDealExists, id)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const adminDeleteDeal = `-- name: AdminDeleteDeal :exec
 DELETE FROM deals
 WHERE id = $1
@@ -145,6 +160,21 @@ func (q *Queries) AdminUpdateUser(ctx context.Context, arg AdminUpdateUserParams
 		&i.CreatedAt,
 	)
 	return i, err
+}
+
+const adminUserExists = `-- name: AdminUserExists :one
+SELECT EXISTS (
+    SELECT 1 
+    FROM users
+    WHERE id = $1
+)
+`
+
+func (q *Queries) AdminUserExists(ctx context.Context, id int64) (bool, error) {
+	row := q.queryRow(ctx, q.adminUserExistsStmt, adminUserExists, id)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
 }
 
 const adminViewDeals = `-- name: AdminViewDeals :many
