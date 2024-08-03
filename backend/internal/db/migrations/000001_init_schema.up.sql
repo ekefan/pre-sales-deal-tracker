@@ -11,7 +11,7 @@ CREATE TABLE "users" (
 
 CREATE TABLE "deals" (
   "id" bigserial PRIMARY KEY,
-  "pitch_id" bigint UNIQUE NOT NULL,
+  "pitch_id" bigint UNIQUE,
   "sales_rep_name" varchar NOT NULL,
   "customer_name" varchar NOT NULL,
   "service_to_render" varchar NOT NULL DEFAULT 'none',
