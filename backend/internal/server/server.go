@@ -2,7 +2,10 @@ package server
 
 import (
 	db "github.com/ekefan/deal-tracker/internal/db/sqlc"
+	"github.com/ekefan/deal-tracker/internal/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 )
 
 // Server contains fields required by the server instance
@@ -21,6 +24,11 @@ func NewServer(store db.Store) *Server {
 // SetupRouter ini
 func (s *Server) SetupRouter() {
 	router := gin.Default()
+
+	// register validation to gin context
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterValidation("valid-role", utils.RoleValidator)
+	}
 
 	// ADMIN
 	router.POST("/user", s.adminCreateUserHandler)
