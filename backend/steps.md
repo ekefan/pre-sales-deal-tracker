@@ -13,4 +13,5 @@
 9. Setup gin server, with db engine for router, the db interface to make queries and other needed fields within a server instance or context
 10. Write handler functions for each endpoint
 11. Test handler functions work as intended
-12. Optimise handler functions add password hashing, and authorization middleware
+12. Optimise handler functions
+13. Add viper to marshall envfiles to app server

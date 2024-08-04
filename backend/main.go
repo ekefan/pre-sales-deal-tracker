@@ -9,15 +9,14 @@ import (
 	_ "github.com/lib/pq"
 )
 
-const (
-	dbDriver string = "postgres"
-	dbSource string = "postgresql://root:vasDealTracker@localhost:5432/dealTrackerDB?sslmode=disable"
-)
-
 // main entry point of the application
 func main() {
 	//connect to database
-	dbConn, err := sql.Open(dbDriver, dbSource)
+	config, err := server.LoadConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+	dbConn, err := sql.Open(config.DBDriver, config.DBSource)
 	if err != nil {
 		log.Fatal("couldn't connect to database", err)
 	}
