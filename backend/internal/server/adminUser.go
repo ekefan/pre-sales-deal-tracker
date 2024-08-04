@@ -8,7 +8,6 @@ import (
 
 	db "github.com/ekefan/deal-tracker/internal/db/sqlc"
 	"github.com/gin-gonic/gin"
-	"github.com/lib/pq"
 )
 
 // CreateUsrReq holds fields that must be provided by client to create user
@@ -48,12 +47,8 @@ func (s *Server) adminCreateUserHandler(ctx *gin.Context) {
 
 	user, err := s.Store.CreateNewUser(ctx, args)
 	if err != nil {
-		if pqErr, ok := err.(*pq.Error); ok {
-			switch pqErr.Code.Name() {
-			case "unique_violation":
-				ctx.JSON(http.StatusForbidden, errorResponse(fmt.Errorf("user with details: email or username exist")))
-				return
-			}
+		if pqErrHandler(ctx, "user", err) {
+			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
@@ -100,8 +95,7 @@ func (s *Server) adminUpdateUserHandler(ctx *gin.Context) {
 	//get user for update in the kitch
 	usr, err := s.Store.GetUserForUpdate(ctx, req.ID)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, errorResponse(err))
+		if sqlNoRowsHandler(ctx, err){
 			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
@@ -124,12 +118,8 @@ func (s *Server) adminUpdateUserHandler(ctx *gin.Context) {
 	// get
 	newUsr, err := s.Store.AdminUpdateUser(ctx, args)
 	if err != nil {
-		if pqErr, ok := err.(*pq.Error); ok {
-			switch pqErr.Code.Name() {
-			case "unique_violation":
-				ctx.JSON(http.StatusForbidden, errorResponse(err))
-				return
-			}
+		if pqErrHandler(ctx, "user", err) {
+			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
@@ -167,8 +157,7 @@ func (s *Server) adminDeleteUserHandler(ctx *gin.Context) {
 
 	err = s.Store.AdminDeleteUser(ctx, req.ID)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, errorResponse(err))
+		if sqlNoRowsHandler(ctx, err){
 			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
