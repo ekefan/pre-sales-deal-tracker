@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
+	"github.com/spf13/viper"
 )
 
 // Custom type for Unix timestamp
@@ -37,7 +38,7 @@ func (ut *UnixTime) UnmarshalJSON(data []byte) error {
 // pqErrHandler checks if pq error exist in err,
 // sends a http response depending on the useCase: user, pitchrequest or deal
 // with http status forbidden
-func pqErrHandler(ctx *gin.Context, use string, err error) (pqErrExist bool){
+func pqErrHandler(ctx *gin.Context, use string, err error) (pqErrExist bool) {
 	pqErr, ok := err.(*pq.Error)
 	if !ok {
 		return false
@@ -58,12 +59,37 @@ func pqErrHandler(ctx *gin.Context, use string, err error) (pqErrExist bool){
 	return true
 }
 
-
-// sqlNoRowsHandler return true if no rows exist in database 
+// sqlNoRowsHandler return true if no rows exist in database
 func sqlNoRowsHandler(ctx *gin.Context, err error) (sqlErrrNoRowsExist bool) {
 	if err == sql.ErrNoRows {
 		ctx.JSON(http.StatusNotFound, errorResponse(err))
 		return true
 	}
 	return false
+}
+
+// Set config for getting env variables
+type Config struct {
+	DBSource string `mapstructure:"DB_SOURCE"`
+	DBDriver string `mapstructure:"DB_DRIVER"`
+}
+
+func LoadConfig() (*Config, error) {
+	var config Config
+	viper.SetConfigFile(".env")
+	viper.AddConfigPath(".")
+
+	viper.AutomaticEnv()
+	err := viper.ReadInConfig()
+	if err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			return nil, fmt.Errorf("config file not found: %s", err)
+		}
+		return nil, fmt.Errorf("fatal error reading envs: %w", err)
+	}
+	err = viper.Unmarshal(&config)
+	if err != nil {
+		return nil, fmt.Errorf("unable to decode into struct, %v", err)
+	}
+	return &config, nil
 }
