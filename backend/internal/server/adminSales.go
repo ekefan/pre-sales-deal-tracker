@@ -2,7 +2,6 @@ package server
 
 import (
 	"database/sql"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -37,8 +36,7 @@ func (s *Server) userLogin(ctx *gin.Context) {
 
 	user, err := s.Store.GetUser(ctx, req.Username)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, errorResponse(err))
+		if sqlNoRowsHandler(ctx, err) {
 			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
@@ -95,11 +93,11 @@ func (s *Server) updatePitchReqHandler(ctx *gin.Context) {
 	// getAuthPayload and require role == admin or sales
 	pitchReq, err := s.Store.GetPitchRequestForUpdate(ctx, req.ID)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, errorResponse(fmt.Errorf("pitch request not found:%v", err)))
+		if sqlNoRowsHandler(ctx, err) {
 			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
 	}
 
 	updateTime := sql.NullTime{
@@ -123,7 +121,9 @@ func (s *Server) updatePitchReqHandler(ctx *gin.Context) {
 	}
 	updatedPitchReq, err := s.Store.UpdatePitchRequest(ctx, args)
 	if err != nil {
-		//check possible pq err
+		if pqErrHandler(ctx, "pitch_requests", err) {
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
