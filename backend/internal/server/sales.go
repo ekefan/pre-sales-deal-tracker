@@ -8,7 +8,6 @@ import (
 
 	db "github.com/ekefan/deal-tracker/internal/db/sqlc"
 	"github.com/gin-gonic/gin"
-	"github.com/lib/pq"
 )
 
 // PitchReq holds fields for creating a Pitch Request
@@ -79,11 +78,11 @@ func (s *Server) salesUpdateuserHandler(ctx *gin.Context) {
 	//get user for update,  get ID from authorization payload
 	usr, err := s.Store.GetUserForUpdate(ctx, req.ID)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, errorResponse(err))
+		if sqlNoRowsHandler(ctx, err) {
+			return
 		}
-		//check pq validation error
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
 	}
 	// Set update time to time now....
 	updateTime := sql.NullTime{
@@ -100,14 +99,11 @@ func (s *Server) salesUpdateuserHandler(ctx *gin.Context) {
 	// get
 	newUsr, err := s.Store.UpdateUser(ctx, args)
 	if err != nil {
-		if pqErr, ok := err.(*pq.Error); ok {
-			switch pqErr.Code.Name() {
-			case "unique_violation":
-				ctx.JSON(http.StatusForbidden, errorResponse(err))
-				return
-			}
+		if pqErrHandler(ctx, "sales-rep", err) {
+			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
 	}
 	resp := AdminUpdateUsrResp{
 		UserID:    newUsr.ID,
@@ -176,13 +172,15 @@ func (s *Server) salesDeletePitchReqHandler(ctx *gin.Context) {
 	}
 	fmt.Println(exists, req)
 	// Attempt to delete the pitch request
+
+	///////////////////////////////////////////////////
+	//////////////////////////////////////////////////
+	//////////////////////////////////////////////////
+	////////////////////////////////////////////////
 	err = s.Store.DeletePitchRequest(ctx, req.ID)
 	if err != nil {
-		if pqErr, ok := err.(*pq.Error); ok {
-			if pqErr.Code == "23503" { // Foreign key violation error code
-				ctx.JSON(http.StatusConflict, errorResponse(fmt.Errorf("cannot delete pitch request: foreign key constraint violation")))
-				return
-			}
+		if pqErrHandler(ctx, "pitch request", err) {
+			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
