@@ -1,6 +1,7 @@
 package server
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -53,6 +54,16 @@ func pqErrHandler(ctx *gin.Context, use string, err error) (pqErrExist bool){
 	default:
 		errMsg = fmt.Sprintf("database error: %s", pqErr.Code.Name())
 	}
-	ctx.JSON(http.StatusForbidden, errorResponse(fmt.Errorf(errMsg)))
+	ctx.JSON(http.StatusConflict, errorResponse(fmt.Errorf(errMsg)))
 	return true
+}
+
+
+// sqlNoRowsHandler return true if no rows exist in database 
+func sqlNoRowsHandler(ctx *gin.Context, err error) (sqlErrrNoRowsExist bool) {
+	if err == sql.ErrNoRows {
+		ctx.JSON(http.StatusNotFound, errorResponse(err))
+		return true
+	}
+	return false
 }
