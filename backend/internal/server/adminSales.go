@@ -2,11 +2,13 @@ package server
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 	"time"
 
 	// db "github.com/ekefan/deal-tracker/internal/db/sqlc"
 	db "github.com/ekefan/deal-tracker/internal/db/sqlc"
+	"github.com/ekefan/deal-tracker/internal/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -43,7 +45,11 @@ func (s *Server) userLogin(ctx *gin.Context) {
 		return
 	}
 
-	//TODO: check passwords match
+	if !utils.CheckPasswordHash(req.Password, user.Password) {
+		ctx.JSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("password invalid: %v", err)))
+		return
+	}
+	
 	//Create token or cookies and add to resp
 	resp := LoginResp{
 		//accessToken:
