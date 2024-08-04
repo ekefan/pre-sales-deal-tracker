@@ -8,7 +8,6 @@ import (
 
 	db "github.com/ekefan/deal-tracker/internal/db/sqlc"
 	"github.com/gin-gonic/gin"
-	"github.com/lib/pq"
 )
 
 // CreateDealReq holds fields needed to create a new deal
@@ -62,16 +61,13 @@ func (s *Server) adminCreateDealHandler(ctx *gin.Context) {
 	})
 
 	if err != nil {
-		if _, ok := err.(*pq.Error); ok {
-			ctx.JSON(http.StatusForbidden, errorResponse(err))
+		if pqErrHandler(ctx, "deal", err) {
 			return
-
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
-	
 	resp := CreateDealResp{
 		ID:                  deal.ID,
 		PitchID:             deal.PitchID.Int64, // .Int64 returns the value from the sql.NullInt64
@@ -116,12 +112,7 @@ func (s *Server) adminUpdateDealHandler(ctx *gin.Context) {
 
 	deal, err := s.Store.AdminGetDealForUpdate(ctx, req.ID)
 	if err != nil {
-		if pqErr, ok := err.(*pq.Error); ok {
-			ctx.JSON(http.StatusForbidden, errorResponse(pqErr))
-			return
-		}
-		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, errorResponse(err))
+		if sqlNoRowsHandler(ctx, err) || pqErrHandler(ctx, "deals", err) {
 			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
@@ -146,9 +137,7 @@ func (s *Server) adminUpdateDealHandler(ctx *gin.Context) {
 	})
 
 	if err != nil {
-		if pqErr, ok := err.(*pq.Error); ok {
-			//check for specific pq Errors but...
-			ctx.JSON(http.StatusForbidden, errorResponse(pqErr))
+		if pqErrHandler(ctx, "deals", err) {
 			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
