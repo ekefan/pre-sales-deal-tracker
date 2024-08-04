@@ -7,6 +7,7 @@ import (
 	"time"
 
 	db "github.com/ekefan/deal-tracker/internal/db/sqlc"
+	"github.com/ekefan/deal-tracker/internal/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -35,14 +36,18 @@ func (s *Server) adminCreateUserHandler(ctx *gin.Context) {
 		return
 	}
 
-	//hashpassword
+	// Hash Password to prevent saving user password in database
+	passwordHash, err := utils.HashPassword(req.Password)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+	}
 
 	args := db.CreateNewUserParams{
 		Username: req.Username,
 		Role:     req.Role,
 		FullName: req.FullName,
 		Email:    req.Email,
-		Password: req.Password,
+		Password: passwordHash,
 	}
 
 	user, err := s.Store.CreateNewUser(ctx, args)
