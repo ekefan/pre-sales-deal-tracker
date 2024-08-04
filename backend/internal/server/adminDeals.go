@@ -218,7 +218,5 @@ func (s *Server) listUsersHandler(ctx *gin.Context) {
 }
 
 // ================TODO=============================
-//1. Create Custom validation for role: oneof - admin, sales, manager
-//2. Create hash password functionality
 //3. send user email to update password, login
 //4. Must write test to validate that update deal works well
