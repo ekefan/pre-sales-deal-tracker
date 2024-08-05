@@ -42,12 +42,17 @@ func (s *Server) adminCreateUserHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 	}
 
+	updated := true
+	if req.Role != utils.Admin {
+		updated = false
+	}
 	args := db.CreateNewUserParams{
-		Username: req.Username,
-		Role:     req.Role,
-		FullName: req.FullName,
-		Email:    req.Email,
-		Password: passwordHash,
+		Username:        req.Username,
+		Role:            req.Role,
+		FullName:        req.FullName,
+		Email:           req.Email,
+		Password:        passwordHash,
+		PasswordChanged: updated,
 	}
 
 	user, err := s.Store.CreateNewUser(ctx, args)
@@ -81,13 +86,14 @@ type AdminUpdateUsrReq struct {
 
 // AdminUpdateUsrResp holds the fields for responding accurately to updating user end-point
 type AdminUpdateUsrResp struct {
-	UserID    int64     `json:"user_id"`
-	Username  string    `json:"username"`
-	Role      string    `json:"role"`
-	Fullname  string    `json:"fullname"`
-	Email     string    `json:"email"`
-	UpdatedAt time.Time `json:"updated_at"`
-	CreatedAt time.Time `json:"created_at"`
+	UserID          int64     `json:"user_id"`
+	Username        string    `json:"username"`
+	Role            string    `json:"role"`
+	Fullname        string    `json:"fullname"`
+	Email           string    `json:"email"`
+	PasswordChanged bool      `json:"password_changed"`
+	UpdatedAt       time.Time `json:"updated_at"`
+	CreatedAt       time.Time `json:"created_at"`
 }
 
 // adminUpdateUserHandler http handler for the api end point for updating a user
@@ -100,7 +106,7 @@ func (s *Server) adminUpdateUserHandler(ctx *gin.Context) {
 	//get user for update in the kitch
 	usr, err := s.Store.GetUserForUpdate(ctx, req.ID)
 	if err != nil {
-		if sqlNoRowsHandler(ctx, err){
+		if sqlNoRowsHandler(ctx, err) {
 			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
@@ -130,13 +136,14 @@ func (s *Server) adminUpdateUserHandler(ctx *gin.Context) {
 		return
 	}
 	resp := AdminUpdateUsrResp{
-		UserID:    newUsr.ID,
-		Username:  newUsr.Username,
-		Role:      newUsr.Role,
-		Fullname:  newUsr.FullName,
-		Email:     newUsr.Email,
-		UpdatedAt: newUsr.UpdatedAt.Time,
-		CreatedAt: newUsr.CreatedAt,
+		UserID:          newUsr.ID,
+		Username:        newUsr.Username,
+		Role:            newUsr.Role,
+		Fullname:        newUsr.FullName,
+		Email:           newUsr.Email,
+		UpdatedAt:       newUsr.UpdatedAt.Time,
+		PasswordChanged: newUsr.PasswordChanged,
+		CreatedAt:       newUsr.CreatedAt,
 	}
 	ctx.JSON(http.StatusOK, resp)
 }
@@ -155,14 +162,14 @@ func (s *Server) adminDeleteUserHandler(ctx *gin.Context) {
 	}
 
 	exists, err := s.Store.AdminUserExists(ctx, req.ID)
-	if err != nil || !exists{
+	if err != nil || !exists {
 		ctx.JSON(http.StatusNotFound, errorResponse(fmt.Errorf("user doesn't exist")))
 		return
 	}
 
 	err = s.Store.AdminDeleteUser(ctx, req.ID)
 	if err != nil {
-		if sqlNoRowsHandler(ctx, err){
+		if sqlNoRowsHandler(ctx, err) {
 			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))

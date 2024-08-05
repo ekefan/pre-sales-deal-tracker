@@ -44,7 +44,7 @@ func (s *Server) userLogin(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-
+	
 	if !utils.CheckPasswordHash(req.Password, user.Password) {
 		ctx.JSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("password invalid: %v", err)))
 		return
