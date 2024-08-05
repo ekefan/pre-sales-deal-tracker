@@ -159,16 +159,17 @@ func (q *Queries) UpdatePitchRequest(ctx context.Context, arg UpdatePitchRequest
 
 const updateUser = `-- name: UpdateUser :one
 UPDATE users
-    set username = $2, password = $3, updated_at = $4
+    set username = $2, password = $3, updated_at = $4, password_changed = $5
 WHERE id = $1
-RETURNING id, username, role, full_name, email, password, updated_at, created_at
+RETURNING id, username, role, full_name, email, password, password_changed, updated_at, created_at
 `
 
 type UpdateUserParams struct {
-	ID        int64
-	Username  string
-	Password  string
-	UpdatedAt sql.NullTime
+	ID              int64
+	Username        string
+	Password        string
+	UpdatedAt       sql.NullTime
+	PasswordChanged bool
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
@@ -177,6 +178,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		arg.Username,
 		arg.Password,
 		arg.UpdatedAt,
+		arg.PasswordChanged,
 	)
 	var i User
 	err := row.Scan(
@@ -186,6 +188,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		&i.FullName,
 		&i.Email,
 		&i.Password,
+		&i.PasswordChanged,
 		&i.UpdatedAt,
 		&i.CreatedAt,
 	)

@@ -9,9 +9,9 @@ RETURNING *;
 
 -- name: CreateNewUser :one
 INSERT INTO users (
-    username, role, full_name, email, password
+    username, role, full_name, email, password, password_changed
 ) VALUES (
-    $1, $2, $3, $4, $5
+    $1, $2, $3, $4, $5, $6
 )
 RETURNING *;
 

@@ -433,7 +433,7 @@ func (q *Queries) GetDealsByStatus(ctx context.Context, status string) ([]Deal, 
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, username, role, full_name, email, password, updated_at, created_at FROM users
+SELECT id, username, role, full_name, email, password, password_changed, updated_at, created_at FROM users
 WHERE username = $1
 LIMIT 1
 `
@@ -448,6 +448,7 @@ func (q *Queries) GetUser(ctx context.Context, username string) (User, error) {
 		&i.FullName,
 		&i.Email,
 		&i.Password,
+		&i.PasswordChanged,
 		&i.UpdatedAt,
 		&i.CreatedAt,
 	)

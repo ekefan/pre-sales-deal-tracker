@@ -46,10 +46,11 @@ type User struct {
 	ID       int64
 	Username string
 	// Role of the user, e.g., sales rep, admin, manager
-	Role      string
-	FullName  string
-	Email     string
-	Password  string
-	UpdatedAt sql.NullTime
-	CreatedAt time.Time
+	Role            string
+	FullName        string
+	Email           string
+	Password        string
+	PasswordChanged bool
+	UpdatedAt       sql.NullTime
+	CreatedAt       time.Time
 }

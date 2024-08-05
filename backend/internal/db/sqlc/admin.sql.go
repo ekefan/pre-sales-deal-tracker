@@ -127,7 +127,7 @@ const adminUpdateUser = `-- name: AdminUpdateUser :one
 UPDATE users
     set full_name = $2, email = $3, password = $4, username = $5, updated_at = $6
 WHERE id = $1
-RETURNING id, username, role, full_name, email, password, updated_at, created_at
+RETURNING id, username, role, full_name, email, password, password_changed, updated_at, created_at
 `
 
 type AdminUpdateUserParams struct {
@@ -156,6 +156,7 @@ func (q *Queries) AdminUpdateUser(ctx context.Context, arg AdminUpdateUserParams
 		&i.FullName,
 		&i.Email,
 		&i.Password,
+		&i.PasswordChanged,
 		&i.UpdatedAt,
 		&i.CreatedAt,
 	)
@@ -228,7 +229,7 @@ func (q *Queries) AdminViewDeals(ctx context.Context, arg AdminViewDealsParams) 
 }
 
 const adminViewUsers = `-- name: AdminViewUsers :many
-SELECT id, username, role, full_name, email, password, updated_at, created_at FROM users
+SELECT id, username, role, full_name, email, password, password_changed, updated_at, created_at FROM users
 ORDER BY id
 LIMIT $1
 OFFSET $2
@@ -255,6 +256,7 @@ func (q *Queries) AdminViewUsers(ctx context.Context, arg AdminViewUsersParams) 
 			&i.FullName,
 			&i.Email,
 			&i.Password,
+			&i.PasswordChanged,
 			&i.UpdatedAt,
 			&i.CreatedAt,
 		); err != nil {
@@ -322,19 +324,20 @@ func (q *Queries) CreateDeal(ctx context.Context, arg CreateDealParams) (Deal, e
 
 const createNewUser = `-- name: CreateNewUser :one
 INSERT INTO users (
-    username, role, full_name, email, password
+    username, role, full_name, email, password, password_changed
 ) VALUES (
-    $1, $2, $3, $4, $5
+    $1, $2, $3, $4, $5, $6
 )
-RETURNING id, username, role, full_name, email, password, updated_at, created_at
+RETURNING id, username, role, full_name, email, password, password_changed, updated_at, created_at
 `
 
 type CreateNewUserParams struct {
-	Username string
-	Role     string
-	FullName string
-	Email    string
-	Password string
+	Username        string
+	Role            string
+	FullName        string
+	Email           string
+	Password        string
+	PasswordChanged bool
 }
 
 func (q *Queries) CreateNewUser(ctx context.Context, arg CreateNewUserParams) (User, error) {
@@ -344,6 +347,7 @@ func (q *Queries) CreateNewUser(ctx context.Context, arg CreateNewUserParams) (U
 		arg.FullName,
 		arg.Email,
 		arg.Password,
+		arg.PasswordChanged,
 	)
 	var i User
 	err := row.Scan(
@@ -353,6 +357,7 @@ func (q *Queries) CreateNewUser(ctx context.Context, arg CreateNewUserParams) (U
 		&i.FullName,
 		&i.Email,
 		&i.Password,
+		&i.PasswordChanged,
 		&i.UpdatedAt,
 		&i.CreatedAt,
 	)
@@ -360,7 +365,7 @@ func (q *Queries) CreateNewUser(ctx context.Context, arg CreateNewUserParams) (U
 }
 
 const getUserForUpdate = `-- name: GetUserForUpdate :one
-SELECT id, username, role, full_name, email, password, updated_at, created_at FROM users
+SELECT id, username, role, full_name, email, password, password_changed, updated_at, created_at FROM users
 WHERE id = $1
 LIMIT 1
 FOR UPDATE
@@ -376,6 +381,7 @@ func (q *Queries) GetUserForUpdate(ctx context.Context, id int64) (User, error) 
 		&i.FullName,
 		&i.Email,
 		&i.Password,
+		&i.PasswordChanged,
 		&i.UpdatedAt,
 		&i.CreatedAt,
 	)
