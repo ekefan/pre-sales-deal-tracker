@@ -14,11 +14,11 @@ import (
 	"github.com/spf13/viper"
 )
 
-
 const (
 	MinNumPass = 123456
 	MaxNumPass = 999999
 )
+
 // Custom type for Unix timestamp
 type UnixTime struct {
 	Time  time.Time
@@ -77,8 +77,11 @@ func sqlNoRowsHandler(ctx *gin.Context, err error) (sqlErrrNoRowsExist bool) {
 
 // Set config for getting env variables
 type Config struct {
-	DBSource string `mapstructure:"DB_SOURCE"`
-	DBDriver string `mapstructure:"DB_DRIVER"`
+	DBSource            string `mapstructure:"DB_SOURCE"`
+	DBDriver            string `mapstructure:"DB_DRIVER"`
+	EmailSenderName     string `mapstructure:"EMAIL_SENDER_NAME"`
+	EmaleSenderAddress  string `mapstructure:"EMAIL_SENDER_ADDRESS"`
+	EmailSenderPassword string `mapstructure:"EMAIL_SENDER_PASSWORD"`
 }
 
 func LoadConfig() (*Config, error) {
@@ -102,6 +105,6 @@ func LoadConfig() (*Config, error) {
 }
 
 func randomPasswordCode() string {
-	code := MinNumPass + rand.Intn(MaxNumPass - MinNumPass) 
+	code := MinNumPass + rand.Intn(MaxNumPass-MinNumPass)
 	return strconv.Itoa(code)
 }
