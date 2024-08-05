@@ -159,27 +159,19 @@ func (q *Queries) UpdatePitchRequest(ctx context.Context, arg UpdatePitchRequest
 
 const updateUser = `-- name: UpdateUser :one
 UPDATE users
-    set username = $2, password = $3, updated_at = $4, password_changed = $5
+    set username = $2, updated_at = $3
 WHERE id = $1
 RETURNING id, username, role, full_name, email, password, password_changed, updated_at, created_at
 `
 
 type UpdateUserParams struct {
-	ID              int64
-	Username        string
-	Password        string
-	UpdatedAt       sql.NullTime
-	PasswordChanged bool
+	ID        int64
+	Username  string
+	UpdatedAt sql.NullTime
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
-	row := q.queryRow(ctx, q.updateUserStmt, updateUser,
-		arg.ID,
-		arg.Username,
-		arg.Password,
-		arg.UpdatedAt,
-		arg.PasswordChanged,
-	)
+	row := q.queryRow(ctx, q.updateUserStmt, updateUser, arg.ID, arg.Username, arg.UpdatedAt)
 	var i User
 	err := row.Scan(
 		&i.ID,

@@ -22,6 +22,7 @@ type Querier interface {
 	CreateNewUser(ctx context.Context, arg CreateNewUserParams) (User, error)
 	CreatePitchRequest(ctx context.Context, arg CreatePitchRequestParams) (PitchRequest, error)
 	DeletePitchRequest(ctx context.Context, id int64) error
+	ForgotPassword(ctx context.Context, email string) (User, error)
 	GetDealsByAward(ctx context.Context, arg GetDealsByAwardParams) ([]Deal, error)
 	GetDealsByCustomerAndService(ctx context.Context, arg GetDealsByCustomerAndServiceParams) ([]Deal, error)
 	GetDealsByCustomerName(ctx context.Context, arg GetDealsByCustomerNameParams) ([]Deal, error)
@@ -34,6 +35,7 @@ type Querier interface {
 	GetUser(ctx context.Context, username string) (User, error)
 	GetUserForUpdate(ctx context.Context, id int64) (User, error)
 	PitchRequestExist(ctx context.Context, arg PitchRequestExistParams) (bool, error)
+	UpdatePassWord(ctx context.Context, arg UpdatePassWordParams) error
 	UpdatePitchRequest(ctx context.Context, arg UpdatePitchRequestParams) (PitchRequest, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
 	ViewPitchRequests(ctx context.Context, arg ViewPitchRequestsParams) ([]PitchRequest, error)

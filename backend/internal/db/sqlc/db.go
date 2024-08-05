@@ -63,6 +63,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.deletePitchRequestStmt, err = db.PrepareContext(ctx, deletePitchRequest); err != nil {
 		return nil, fmt.Errorf("error preparing query DeletePitchRequest: %w", err)
 	}
+	if q.forgotPasswordStmt, err = db.PrepareContext(ctx, forgotPassword); err != nil {
+		return nil, fmt.Errorf("error preparing query ForgotPassword: %w", err)
+	}
 	if q.getDealsByAwardStmt, err = db.PrepareContext(ctx, getDealsByAward); err != nil {
 		return nil, fmt.Errorf("error preparing query GetDealsByAward: %w", err)
 	}
@@ -98,6 +101,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.pitchRequestExistStmt, err = db.PrepareContext(ctx, pitchRequestExist); err != nil {
 		return nil, fmt.Errorf("error preparing query PitchRequestExist: %w", err)
+	}
+	if q.updatePassWordStmt, err = db.PrepareContext(ctx, updatePassWord); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdatePassWord: %w", err)
 	}
 	if q.updatePitchRequestStmt, err = db.PrepareContext(ctx, updatePitchRequest); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdatePitchRequest: %w", err)
@@ -178,6 +184,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing deletePitchRequestStmt: %w", cerr)
 		}
 	}
+	if q.forgotPasswordStmt != nil {
+		if cerr := q.forgotPasswordStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing forgotPasswordStmt: %w", cerr)
+		}
+	}
 	if q.getDealsByAwardStmt != nil {
 		if cerr := q.getDealsByAwardStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getDealsByAwardStmt: %w", cerr)
@@ -236,6 +247,11 @@ func (q *Queries) Close() error {
 	if q.pitchRequestExistStmt != nil {
 		if cerr := q.pitchRequestExistStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing pitchRequestExistStmt: %w", cerr)
+		}
+	}
+	if q.updatePassWordStmt != nil {
+		if cerr := q.updatePassWordStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updatePassWordStmt: %w", cerr)
 		}
 	}
 	if q.updatePitchRequestStmt != nil {
@@ -305,6 +321,7 @@ type Queries struct {
 	createNewUserStmt                *sql.Stmt
 	createPitchRequestStmt           *sql.Stmt
 	deletePitchRequestStmt           *sql.Stmt
+	forgotPasswordStmt               *sql.Stmt
 	getDealsByAwardStmt              *sql.Stmt
 	getDealsByCustomerAndServiceStmt *sql.Stmt
 	getDealsByCustomerNameStmt       *sql.Stmt
@@ -317,6 +334,7 @@ type Queries struct {
 	getUserStmt                      *sql.Stmt
 	getUserForUpdateStmt             *sql.Stmt
 	pitchRequestExistStmt            *sql.Stmt
+	updatePassWordStmt               *sql.Stmt
 	updatePitchRequestStmt           *sql.Stmt
 	updateUserStmt                   *sql.Stmt
 	viewPitchRequestsStmt            *sql.Stmt
@@ -339,6 +357,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		createNewUserStmt:                q.createNewUserStmt,
 		createPitchRequestStmt:           q.createPitchRequestStmt,
 		deletePitchRequestStmt:           q.deletePitchRequestStmt,
+		forgotPasswordStmt:               q.forgotPasswordStmt,
 		getDealsByAwardStmt:              q.getDealsByAwardStmt,
 		getDealsByCustomerAndServiceStmt: q.getDealsByCustomerAndServiceStmt,
 		getDealsByCustomerNameStmt:       q.getDealsByCustomerNameStmt,
@@ -351,6 +370,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getUserStmt:                      q.getUserStmt,
 		getUserForUpdateStmt:             q.getUserForUpdateStmt,
 		pitchRequestExistStmt:            q.pitchRequestExistStmt,
+		updatePassWordStmt:               q.updatePassWordStmt,
 		updatePitchRequestStmt:           q.updatePitchRequestStmt,
 		updateUserStmt:                   q.updateUserStmt,
 		viewPitchRequestsStmt:            q.viewPitchRequestsStmt,

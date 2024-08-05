@@ -125,7 +125,7 @@ func (q *Queries) AdminUpdateDeal(ctx context.Context, arg AdminUpdateDealParams
 
 const adminUpdateUser = `-- name: AdminUpdateUser :one
 UPDATE users
-    set full_name = $2, email = $3, password = $4, username = $5, updated_at = $6
+    set full_name = $2, email = $3, username = $4, updated_at = $5
 WHERE id = $1
 RETURNING id, username, role, full_name, email, password, password_changed, updated_at, created_at
 `
@@ -134,7 +134,6 @@ type AdminUpdateUserParams struct {
 	ID        int64
 	FullName  string
 	Email     string
-	Password  string
 	Username  string
 	UpdatedAt sql.NullTime
 }
@@ -144,7 +143,6 @@ func (q *Queries) AdminUpdateUser(ctx context.Context, arg AdminUpdateUserParams
 		arg.ID,
 		arg.FullName,
 		arg.Email,
-		arg.Password,
 		arg.Username,
 		arg.UpdatedAt,
 	)
@@ -364,6 +362,30 @@ func (q *Queries) CreateNewUser(ctx context.Context, arg CreateNewUserParams) (U
 	return i, err
 }
 
+const forgotPassword = `-- name: ForgotPassword :one
+SELECT id, username, role, full_name, email, password, password_changed, updated_at, created_at FROM users
+WHERE email = $1
+LIMIT 1
+FOR UPDATE
+`
+
+func (q *Queries) ForgotPassword(ctx context.Context, email string) (User, error) {
+	row := q.queryRow(ctx, q.forgotPasswordStmt, forgotPassword, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Role,
+		&i.FullName,
+		&i.Email,
+		&i.Password,
+		&i.PasswordChanged,
+		&i.UpdatedAt,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const getUserForUpdate = `-- name: GetUserForUpdate :one
 SELECT id, username, role, full_name, email, password, password_changed, updated_at, created_at FROM users
 WHERE id = $1
@@ -386,4 +408,27 @@ func (q *Queries) GetUserForUpdate(ctx context.Context, id int64) (User, error) 
 		&i.CreatedAt,
 	)
 	return i, err
+}
+
+const updatePassWord = `-- name: UpdatePassWord :exec
+UPDATE users
+    set password = $2, password_changed = $3, updated_at = $4
+WHERE id = $1
+`
+
+type UpdatePassWordParams struct {
+	ID              int64
+	Password        string
+	PasswordChanged bool
+	UpdatedAt       sql.NullTime
+}
+
+func (q *Queries) UpdatePassWord(ctx context.Context, arg UpdatePassWordParams) error {
+	_, err := q.exec(ctx, q.updatePassWordStmt, updatePassWord,
+		arg.ID,
+		arg.Password,
+		arg.PasswordChanged,
+		arg.UpdatedAt,
+	)
+	return err
 }
