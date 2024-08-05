@@ -23,7 +23,7 @@ FOR UPDATE;
 
 -- name: AdminUpdateUser :one
 UPDATE users
-    set full_name = $2, email = $3, password = $4, username = $5, updated_at = $6
+    set full_name = $2, email = $3, username = $4, updated_at = $5
 WHERE id = $1
 RETURNING *;
 
@@ -75,3 +75,17 @@ SELECT * FROM deals
 ORDER BY id
 LIMIT $1
 OFFSET $2;
+
+
+
+-- name: UpdatePassWord :exec
+UPDATE users
+    set password = $2, password_changed = $3, updated_at = $4
+WHERE id = $1;
+
+
+-- name: ForgotPassword :one
+SELECT * FROM users
+WHERE email = $1
+LIMIT 1
+FOR UPDATE;

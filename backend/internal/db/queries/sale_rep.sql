@@ -21,7 +21,7 @@ RETURNING *;
 
 -- name: UpdateUser :one
 UPDATE users
-    set username = $2, password = $3, updated_at = $4, password_changed = $5
+    set username = $2, updated_at = $3
 WHERE id = $1
 RETURNING *;
 
