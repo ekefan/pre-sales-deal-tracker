@@ -11,12 +11,17 @@ import (
 
 // createRandomUserArg generates the params need for creating a user
 func createRandomUserArg(role string) db.CreateNewUserParams {
+	updated := true
+	if role != "admin" {
+		updated = false
+	}
 	return db.CreateNewUserParams{
 		Username: util.RandomString(5),
 		Role:     role,
 		FullName: util.GenFullname(),
 		Email:    util.GenEmail(),
 		Password: util.GenPassWord(),
+		PasswordChanged: updated,
 	}
 }
 
