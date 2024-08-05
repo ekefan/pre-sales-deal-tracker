@@ -220,3 +220,4 @@ func (s *Server) listUsersHandler(ctx *gin.Context) {
 // ================TODO=============================
 //3. send user email to update password, login
 //4. Must write test to validate that update deal works well
+//5. 
