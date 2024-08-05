@@ -64,9 +64,7 @@ func (s *Server) salesCreatePitchReqHandler(ctx *gin.Context) {
 
 type SalesUpdateUserReq struct {
 	ID       int64  `json:"user_id" binding:"required"`
-	Password string `json:"password" binding:"required,min=6"`
 	Username string `json:"username" binding:"required,alphanum"`
-	PasswordChanged bool `json:"password_changed" binding:"required"`
 }
 
 // LoginReq holds fields required to access user details
@@ -93,10 +91,8 @@ func (s *Server) salesUpdateuserHandler(ctx *gin.Context) {
 	// Hash password
 	args := db.UpdateUserParams{
 		ID:        usr.ID,
-		Password:  req.Password,
 		Username:  req.Username,
 		UpdatedAt: updateTime,
-		PasswordChanged: req.PasswordChanged,
 	}
 	// get
 	newUsr, err := s.Store.UpdateUser(ctx, args)
@@ -108,14 +104,14 @@ func (s *Server) salesUpdateuserHandler(ctx *gin.Context) {
 		return
 	}
 	resp := AdminUpdateUsrResp{
-		UserID:    newUsr.ID,
-		Username:  newUsr.Username,
-		Role:      newUsr.Role,
-		Fullname:  newUsr.FullName,
-		Email:     newUsr.Email,
+		UserID:          newUsr.ID,
+		Username:        newUsr.Username,
+		Role:            newUsr.Role,
+		Fullname:        newUsr.FullName,
+		Email:           newUsr.Email,
 		PasswordChanged: newUsr.PasswordChanged,
-		UpdatedAt: newUsr.UpdatedAt.Time,
-		CreatedAt: newUsr.CreatedAt,
+		UpdatedAt:       newUsr.UpdatedAt.Time,
+		CreatedAt:       newUsr.CreatedAt,
 	}
 	ctx.JSON(http.StatusOK, resp)
 }
