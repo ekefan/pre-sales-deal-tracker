@@ -4,7 +4,9 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -12,6 +14,11 @@ import (
 	"github.com/spf13/viper"
 )
 
+
+const (
+	MinNumPass = 123456
+	MaxNumPass = 999999
+)
 // Custom type for Unix timestamp
 type UnixTime struct {
 	Time  time.Time
@@ -92,4 +99,9 @@ func LoadConfig() (*Config, error) {
 		return nil, fmt.Errorf("unable to decode into struct, %v", err)
 	}
 	return &config, nil
+}
+
+func randomPasswordCode() string {
+	code := MinNumPass + rand.Intn(MaxNumPass - MinNumPass) 
+	return strconv.Itoa(code)
 }
