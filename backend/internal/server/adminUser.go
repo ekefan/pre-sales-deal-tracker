@@ -42,9 +42,9 @@ func (s *Server) adminCreateUserHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 	}
 
-	updated := true
+	passwordChanged := true
 	if req.Role != utils.Admin {
-		updated = false
+		passwordChanged = false
 	}
 	args := db.CreateNewUserParams{
 		Username:        req.Username,
@@ -52,7 +52,7 @@ func (s *Server) adminCreateUserHandler(ctx *gin.Context) {
 		FullName:        req.FullName,
 		Email:           req.Email,
 		Password:        passwordHash,
-		PasswordChanged: updated,
+		PasswordChanged: passwordChanged,
 	}
 
 	user, err := s.Store.CreateNewUser(ctx, args)
@@ -80,7 +80,6 @@ type AdminUpdateUsrReq struct {
 	ID       int64  `json:"user_id" binding:"required"`
 	Fullname string `json:"fullname" binding:"required"`
 	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required,min=6"`
 	Username string `json:"username" binding:"required,alphanum"`
 }
 
@@ -122,7 +121,6 @@ func (s *Server) adminUpdateUserHandler(ctx *gin.Context) {
 		ID:        usr.ID,
 		FullName:  req.Fullname,
 		Email:     req.Email,
-		Password:  req.Password,
 		Username:  req.Username,
 		UpdatedAt: updateTime,
 	}
