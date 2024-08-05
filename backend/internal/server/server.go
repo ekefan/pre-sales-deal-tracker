@@ -31,9 +31,9 @@ func (s *Server) SetupRouter() {
 	}
 
 	// ADMIN
-	router.POST("/user", s.adminCreateUserHandler)
-	router.PUT("/user/update/", s.adminUpdateUserHandler)
-	router.DELETE("/user/delete/:id", s.adminDeleteUserHandler)
+	router.POST("/users", s.adminCreateUserHandler)
+	router.PUT("/users/update/", s.adminUpdateUserHandler)
+	router.DELETE("/users/delete/:id", s.adminDeleteUserHandler)
 	router.POST("/admin/deals", s.adminCreateDealHandler)
 	router.PUT("admin/deals/update", s.adminUpdateDealHandler)
 	router.DELETE("/admin/deals/delete/:deal_id", s.adminDeleteDealHandler)
@@ -50,6 +50,10 @@ func (s *Server) SetupRouter() {
 	router.PUT("/sales/update/:username", s.salesUpdateuserHandler)
 	router.GET("/pitchrequest/", s.salesViewPitchRequests)
 	router.DELETE("/sales/pitchReq/delete/:sales_rep_id/:pitch_id", s.salesDeletePitchReqHandler)
+
+	//General
+	router.PUT("/users/password", s.updatePassWordLoggedIn)
+	router.PUT("/users/forgotpassword", s.forgotPassword)
 
 	s.Router = router
 }
