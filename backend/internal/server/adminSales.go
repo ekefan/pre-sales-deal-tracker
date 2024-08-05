@@ -36,6 +36,7 @@ func (s *Server) userLogin(ctx *gin.Context) {
 		return
 	}
 
+	// check if the user has been created
 	user, err := s.Store.GetUser(ctx, req.Username)
 	if err != nil {
 		if sqlNoRowsHandler(ctx, err) {
@@ -45,6 +46,11 @@ func (s *Server) userLogin(ctx *gin.Context) {
 		return
 	}
 	
+	// if user has not updated password...
+	// redirect user to update password...
+			//set password,
+			//update newPassword
+	//
 	if !utils.CheckPasswordHash(req.Password, user.Password) {
 		ctx.JSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("password invalid: %v", err)))
 		return
