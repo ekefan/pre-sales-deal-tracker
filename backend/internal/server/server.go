@@ -39,17 +39,20 @@ func (s *Server) SetupRouter() {
 	router.DELETE("/admin/deals/delete/:deal_id", s.adminDeleteDealHandler)
 	router.GET("/users", s.listUsersHandler)
 
+
 	// ADMINSALES
 	router.POST("/users/login", s.userLogin)
 	router.PUT("pitchrequest/update", s.updatePitchReqHandler)
-	router.GET("/deals", s.getDealsHandler)
-
+	// router.GET("/deals", s.getDealsHandler)
+	router.GET("/deals", s.getOngoingDeals)
+	router.GET("/deals/filtered", s.getFilteredDeals)
 
 	//SALES-REP
 	router.POST("/sales/pitchReq", s.salesCreatePitchReqHandler)
 	router.PUT("/sales/update/:username", s.salesUpdateuserHandler)
 	router.GET("/pitchrequest/", s.salesViewPitchRequests)
 	router.DELETE("/sales/pitchReq/delete/:sales_rep_id/:pitch_id", s.salesDeletePitchReqHandler)
+	router.GET("sales/deals", s.getSalesDeals)
 
 	//General
 	router.PUT("/users/password", s.updatePassWordLoggedIn)
