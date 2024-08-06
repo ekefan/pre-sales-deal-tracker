@@ -80,14 +80,14 @@ type Config struct {
 	DBSource            string `mapstructure:"DB_SOURCE"`
 	DBDriver            string `mapstructure:"DB_DRIVER"`
 	EmailSenderName     string `mapstructure:"EMAIL_SENDER_NAME"`
-	EmaleSenderAddress  string `mapstructure:"EMAIL_SENDER_ADDRESS"`
+	EmailSenderAddress  string `mapstructure:"EMAIL_SENDER_ADDRESS"`
 	EmailSenderPassword string `mapstructure:"EMAIL_SENDER_PASSWORD"`
 }
 
 func LoadConfig() (*Config, error) {
 	var config Config
 	viper.SetConfigFile(".env")
-	viper.AddConfigPath(".")
+	// viper.AddConfigPath(".")
 
 	viper.AutomaticEnv()
 	err := viper.ReadInConfig()
