@@ -45,17 +45,17 @@ func (s *Server) userLogin(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-	
+
 	// if user has not updated password...
 	// redirect user to update password...
-			//set password,
-			//update newPassword
+	//set password,
+	//update newPassword
 	//
 	if !utils.CheckPasswordHash(req.Password, user.Password) {
 		ctx.JSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("password invalid: %v", err)))
 		return
 	}
-	
+
 	//Create token or cookies and add to resp
 	resp := LoginResp{
 		//accessToken:
@@ -71,13 +71,12 @@ func (s *Server) userLogin(ctx *gin.Context) {
 
 }
 
-
 type UpdatePitchReq struct {
-	ID              int64     `json:"pitch_request_id" binding:"required"`
-	Status          string    `json:"status" binding:"required"`
-	PitchTag        string    `json:"pitch_tag" binding:"required"`
-	CustomerRequest string    `json:"customer_request" binding:"required"`
-	AdminViewed     bool      `json:"admin_viewed"`
+	ID              int64    `json:"pitch_request_id" binding:"required"`
+	Status          string   `json:"status" binding:"required"`
+	PitchTag        string   `json:"pitch_tag" binding:"required"`
+	CustomerRequest string   `json:"customer_request" binding:"required"`
+	AdminViewed     bool     `json:"admin_viewed"`
 	RequestDealine  UnixTime `json:"request_deadline"`
 }
 
@@ -155,26 +154,91 @@ func (s *Server) updatePitchReqHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp)
 }
 
-type ListDealsReq struct {
-	PageID   int32 `form:"page_id" binding:"required,min=1"`
-	PageSize int32 `form:"page_size" binding:"required,min=5,max=10"`
+// type ListDealsReq struct {
+// 	PageID   int32 `form:"page_id" binding:"required,min=1"`
+// 	PageSize int32 `form:"page_size" binding:"required,min=5,max=10"`
+// }
+
+// // getDealsHandler http handler for the api end point for getting list of all deals currently
+// func (s *Server) getDealsHandler(ctx *gin.Context) {
+// 	var req ListDealsReq
+// 	if err := ctx.ShouldBindQuery(&req); err != nil {
+// 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+// 		return
+// 	}
+// 	args := db.AdminViewDealsParams{
+// 		Limit:  req.PageSize,
+// 		Offset: (req.PageID - 1) * req.PageSize,
+// 	}
+// 	deals, err := s.Store.AdminViewDeals(ctx, args)
+// 	if err != nil {
+// 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+// 		return
+// 	}
+// 	ctx.JSON(http.StatusOK, deals)
+// }
+
+type OngoingDealsReq struct {
+	Status string `json:"status" binding:"required"`
 }
 
-// getDealsHandler http handler for the api end point for getting list of all deals currently
-func (s *Server) getDealsHandler(ctx *gin.Context) {
-	var req ListDealsReq
-	if err := ctx.ShouldBindQuery(&req); err != nil {
+func (s *Server) getOngoingDeals(ctx *gin.Context) {
+	var req OngoingDealsReq
+	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	args := db.AdminViewDealsParams{
-		Limit:  req.PageSize,
-		Offset: (req.PageID - 1) * req.PageSize,
-	}
-	users, err := s.Store.AdminViewDeals(ctx, args)
+
+	deals, err := s.Store.GetDealsByStatus(ctx, req.Status)
 	if err != nil {
+		if sqlNoRowsHandler(ctx, err) {
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-	ctx.JSON(http.StatusOK, users)
+	ctx.JSON(http.StatusOK, deals)
+
+}
+
+type FilterDealReq struct {
+	CustomerName    string         `json:"customer_name"`
+	ServiceToRender string         `json:"service_to_render"`
+	Status          string         `json:"status"`
+	MaxProfit       sql.NullString `json:"max_profit"`
+	MinProfit       sql.NullString `json:"min_profit"`
+	Awarded         bool           `json:"awarded"`
+	SalesRepName    string         `json:"sales_rep_name"`
+	PageSize        int32          `json:"page_size"`
+	PageID          int32          `json:"page_id"`
+}
+
+func (s *Server) getFilteredDeals(ctx *gin.Context) {
+	var req FilterDealReq
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	args := db.FilterDealsParams{
+		CustomerName: req.CustomerName,
+		ServiceToRender: req.ServiceToRender,
+		Status: req.Status,
+		Profit: req.MaxProfit,
+		Profit_2: req.MinProfit,
+		Awarded: req.Awarded,
+		SalesRepName: req.SalesRepName,
+		Limit: req.PageSize,
+		Offset: (req.PageID - 1) * req.PageSize,
+	}
+	deals, err := s.Store.FilterDeals(ctx, args)
+	if err != nil {
+		if sqlNoRowsHandler(ctx, err) {
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	ctx.JSON(http.StatusOK, deals)
+
 }
