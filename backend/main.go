@@ -12,7 +12,7 @@ import (
 // main entry point of the application
 func main() {
 	//connect to database
-	config, err := server.LoadConfig()
+	config, err := server.LoadConfig(".env")
 	if err != nil {
 		log.Fatal(err)
 	}

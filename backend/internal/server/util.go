@@ -84,9 +84,9 @@ type Config struct {
 	EmailSenderPassword string `mapstructure:"EMAIL_SENDER_PASSWORD"`
 }
 
-func LoadConfig() (*Config, error) {
+func LoadConfig(envPath string) (*Config, error) {
 	var config Config
-	viper.SetConfigFile(".env")
+	viper.SetConfigFile(envPath)
 	// viper.AddConfigPath(".")
 
 	viper.AutomaticEnv()

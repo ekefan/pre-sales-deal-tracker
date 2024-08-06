@@ -8,7 +8,7 @@ import (
 )
 
 type EmailSender interface {
-	sendEmail(
+	SendEmail(
 		subject string,
 		content string,
 		to []string,
@@ -24,20 +24,20 @@ const (
 )
 
 type GmailSender struct {
-	name              string
-	fromEmailAddress  string
-	fromEmailPassword string
+	Name              string
+	FromEmailAddress  string
+	FromEmailPassword string
 }
 
 func NewGmailSender(name, fromEmailAddress, fromEmailPassword string) EmailSender {
 	return &GmailSender{
-		name:              name,
-		fromEmailAddress:  fromEmailAddress,
-		fromEmailPassword: fromEmailPassword,
+		Name:              name,
+		FromEmailAddress:  fromEmailAddress,
+		FromEmailPassword: fromEmailPassword,
 	}
 }
 
-func (sender *GmailSender) sendEmail(
+func (sender *GmailSender) SendEmail(
 	subject string,
 	content string,
 	to []string,
@@ -46,7 +46,7 @@ func (sender *GmailSender) sendEmail(
 	// attachedFiles []string,
 ) error {
 	e := email.NewEmail()
-	e.From = fmt.Sprintf("%s <%s>", sender.name, sender.fromEmailAddress)
+	e.From = fmt.Sprintf("%s <%s>", sender.Name, sender.FromEmailAddress)
 	e.Subject = subject
 	e.HTML = []byte(content)
 	e.To = to
@@ -59,6 +59,6 @@ func (sender *GmailSender) sendEmail(
 	// 		return fmt.Errorf("failed to attach file %s: %w", f, err)
 	// 	}
 	// }
-	smtpAuth := smtp.PlainAuth("", sender.fromEmailAddress, sender.fromEmailPassword, smtpAuthAddress)
+	smtpAuth := smtp.PlainAuth("", sender.FromEmailAddress, sender.FromEmailPassword, smtpAuthAddress)
 	return e.Send(smtpServerAdress, smtpAuth)
 }
