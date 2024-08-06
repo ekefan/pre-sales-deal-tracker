@@ -189,3 +189,32 @@ func (s *Server) salesDeletePitchReqHandler(ctx *gin.Context) {
 		"message": "successful",
 	})
 }
+
+
+type SalesDealssReq struct {
+	SalesRepName string `json:"status" binding:"required"`
+	PageSize int32 `json:"page_size" binding:"required"`
+	PageID int32 `json:"page_id" binding:"required"`
+}
+func (s *Server) getSalesDeals(ctx *gin.Context) {
+	var req SalesDealssReq
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	args := db.GetDealsBySalesRepParams{
+		SalesRepName: req.SalesRepName,
+		Limit: req.PageSize,
+		Offset: req.PageID,
+	}
+	deals, err := s.Store.GetDealsBySalesRep(ctx, args)
+	if err != nil {
+		if sqlNoRowsHandler(ctx, err) {
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	ctx.JSON(http.StatusOK, deals)
+}
