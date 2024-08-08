@@ -192,7 +192,7 @@ func (s *Server) salesDeletePitchReqHandler(ctx *gin.Context) {
 
 
 type SalesDealssReq struct {
-	SalesRepName string `json:"status" binding:"required"`
+	SalesRepName string `json:"sales_rep" binding:"required"`
 	PageSize int32 `json:"page_size" binding:"required"`
 	PageID int32 `json:"page_id" binding:"required"`
 }
@@ -206,7 +206,7 @@ func (s *Server) getSalesDeals(ctx *gin.Context) {
 	args := db.GetDealsBySalesRepParams{
 		SalesRepName: req.SalesRepName,
 		Limit: req.PageSize,
-		Offset: req.PageID,
+		Offset: (req.PageID - 1) * req.PageSize,
 	}
 	deals, err := s.Store.GetDealsBySalesRep(ctx, args)
 	if err != nil {
