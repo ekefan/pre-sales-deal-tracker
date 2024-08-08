@@ -7,41 +7,50 @@ package db
 
 import (
 	"context"
-	"database/sql"
+	"fmt"
 )
 
 const countFilteredDeals = `-- name: CountFilteredDeals :one
-SELECT COUNT(*)
-FROM deals
+WITH params AS (
+    SELECT
+        $1::TEXT AS customer_name,
+        $2::TEXT AS service_to_render,
+        $3::TEXT AS status,
+        $4::NUMERIC AS min_profit,
+        $5::NUMERIC AS max_profit,
+        $6::BOOLEAN AS awarded,
+        $7::TEXT AS sales_rep_name
+)
+SELECT COUNT(*) FROM deals
 WHERE 
-    (customer_name ILIKE $1 OR $1 IS NULL) AND
-    (service_to_render ILIKE $2 OR $2 IS NULL) AND
-    (status = $3 OR $3 IS NULL) AND
-    (profit >= $4 OR $4 IS NULL) AND
-    (profit <= $5 OR $5 IS NULL) AND
-    (awarded = $6 OR $6 IS NULL) AND
-    (sales_rep_name ILIKE $7 OR $7 IS NULL)
+    (customer_name = (SELECT customer_name FROM params) OR (SELECT customer_name FROM params) IS NULL) AND
+    (service_to_render = (SELECT service_to_render FROM params) OR (SELECT service_to_render FROM params) IS NULL) AND
+    (status = (SELECT status FROM params) OR (SELECT status FROM params) IS NULL) AND
+    (profit >= (SELECT min_profit FROM params) OR (SELECT min_profit FROM params) IS NULL) AND
+    (profit <= (SELECT max_profit FROM params) OR (SELECT max_profit FROM params) IS NULL) AND
+    (awarded = (SELECT awarded FROM params) OR (SELECT awarded FROM params) IS NULL) AND
+    (sales_rep_name = (SELECT sales_rep_name FROM params) OR (SELECT sales_rep_name FROM params) IS NULL)
 `
 
 type CountFilteredDealsParams struct {
-	CustomerName    string
-	ServiceToRender string
-	Status          string
-	Profit          sql.NullString
-	Profit_2        sql.NullString
-	Awarded         bool
-	SalesRepName    string
+	Column1 *string
+	Column2 *string
+	Column3 *string
+	Column4 *string
+	Column5 *string
+	Column6 *bool
+	Column7 *string
 }
 
 func (q *Queries) CountFilteredDeals(ctx context.Context, arg CountFilteredDealsParams) (int64, error) {
 	row := q.queryRow(ctx, q.countFilteredDealsStmt, countFilteredDeals,
-		arg.CustomerName,
-		arg.ServiceToRender,
-		arg.Status,
-		arg.Profit,
-		arg.Profit_2,
-		arg.Awarded,
-		arg.SalesRepName,
+		arg.Column1,
+		arg.Column2,
+		arg.Column3,
+		arg.Column4,
+		arg.Column5,
+		arg.Column6,
+		arg.Column7,
 	)
 	var count int64
 	err := row.Scan(&count)
@@ -49,41 +58,52 @@ func (q *Queries) CountFilteredDeals(ctx context.Context, arg CountFilteredDeals
 }
 
 const filterDeals = `-- name: FilterDeals :many
+WITH params AS (
+    SELECT
+        $1::TEXT AS customer_name,
+        $2::TEXT AS service_to_render,
+        $3::TEXT AS status,
+        $4::NUMERIC AS min_profit,
+        $5::NUMERIC AS max_profit,
+        $6::BOOLEAN AS awarded,
+        $7::TEXT AS sales_rep_name
+)
 SELECT id, pitch_id, sales_rep_name, customer_name, service_to_render, status, status_tag, current_pitch_request, net_total_cost, profit, created_at, updated_at, closed_at, awarded FROM deals
 WHERE 
-    (customer_name ILIKE $1 OR $1 IS NULL) AND
-    (service_to_render ILIKE $2 OR $2 IS NULL) AND
-    (status = $3 OR $3 IS NULL) AND
-    (profit >= $4 OR $4 IS NULL) AND
-    (profit <= $5 OR $5 IS NULL) AND
-    (awarded = $6 OR $6 IS NULL) AND
-    (sales_rep_name ILIKE $7 OR $7 IS NULL)
-ORDER BY id 
+    (customer_name = (SELECT customer_name FROM params) OR (SELECT customer_name FROM params) IS NULL) AND
+    (service_to_render = (SELECT service_to_render FROM params) OR (SELECT service_to_render FROM params) IS NULL) AND
+    (status = (SELECT status FROM params) OR (SELECT status FROM params) IS NULL) AND
+    (profit >= (SELECT min_profit FROM params) OR (SELECT min_profit FROM params) IS NULL) AND
+    (profit <= (SELECT max_profit FROM params) OR (SELECT max_profit FROM params) IS NULL) AND
+    (awarded = (SELECT awarded FROM params) OR (SELECT awarded FROM params) IS NULL) AND
+    (sales_rep_name = (SELECT sales_rep_name FROM params) OR (SELECT sales_rep_name FROM params) IS NULL)
+ORDER BY id
 LIMIT $8
 OFFSET $9
 `
 
 type FilterDealsParams struct {
-	CustomerName    string
-	ServiceToRender string
-	Status          string
-	Profit          sql.NullString
-	Profit_2        sql.NullString
-	Awarded         bool
-	SalesRepName    string
-	Limit           int32
-	Offset          int32
+	Column1 *string
+	Column2 *string
+	Column3 *string
+	Column4 *string
+	Column5 *string
+	Column6 *bool
+	Column7 *string
+	Limit   int32
+	Offset  int32
 }
 
 func (q *Queries) FilterDeals(ctx context.Context, arg FilterDealsParams) ([]Deal, error) {
+	fmt.Println(arg, "line 98 userAndDeals.sql.go")
 	rows, err := q.query(ctx, q.filterDealsStmt, filterDeals,
-		arg.CustomerName,
-		arg.ServiceToRender,
-		arg.Status,
-		arg.Profit,
-		arg.Profit_2,
-		arg.Awarded,
-		arg.SalesRepName,
+		arg.Column1,
+		arg.Column2,
+		arg.Column3,
+		arg.Column4,
+		arg.Column5,
+		arg.Column6,
+		arg.Column7,
 		arg.Limit,
 		arg.Offset,
 	)
