@@ -217,7 +217,6 @@ func (s *Server) listUsersHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, users)
 }
 
-// ================TODO=============================
-//3. send user email to update password, login
-//4. Must write test to validate that update deal works well
-//5. 
+// ===== TODO =====
+// implement authorization and role based access
+// write tests for backend service....
