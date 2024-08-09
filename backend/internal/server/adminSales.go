@@ -232,7 +232,6 @@ func (s *Server) getFilteredDeals(ctx *gin.Context) {
 		Offset:  (req.PageID - 1) * req.PageSize,
 	}
 
-	fmt.Println(req, "line 235 adminSales.go")
 	deals, err := s.Store.FilterDeals(ctx, args)
 	if err != nil {
 		if sqlNoRowsHandler(ctx, err) {
