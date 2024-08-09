@@ -169,13 +169,6 @@ func (s *Server) salesDeletePitchReqHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusNotFound, errorResponse(fmt.Errorf("pitch request doesn't exist")))
 		return
 	}
-	fmt.Println(exists, req)
-	// Attempt to delete the pitch request
-
-	///////////////////////////////////////////////////
-	//////////////////////////////////////////////////
-	//////////////////////////////////////////////////
-	////////////////////////////////////////////////
 	err = s.Store.DeletePitchRequest(ctx, req.ID)
 	if err != nil {
 		if pqErrHandler(ctx, "pitch request", err) {
