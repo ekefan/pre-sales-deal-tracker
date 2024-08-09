@@ -1,5 +1,11 @@
 package server
 
+
+// handlers
+// adminCreateDealHandler
+// adminUpdateDealHandler
+// adminDeleteDealHandler
+// listUsersHandler
 import (
 	"database/sql"
 	"fmt"

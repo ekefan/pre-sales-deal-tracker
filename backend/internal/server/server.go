@@ -46,6 +46,7 @@ func (s *Server) SetupRouter() {
 	router.GET("/deals", s.getDealsHandler)
 	router.GET("/deals/vas", s.getOngoingDeals)
 	router.GET("/deals/filtered", s.getFilteredDeals)
+	router.GET("deals/filtered/count", s.getCountFilteredDeals)
 
 	//SALES-REP
 	router.POST("/sales/pitchReq", s.salesCreatePitchReqHandler)
