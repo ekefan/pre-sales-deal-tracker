@@ -7,7 +7,6 @@ package db
 
 import (
 	"context"
-	"fmt"
 )
 
 const countFilteredDeals = `-- name: CountFilteredDeals :one
@@ -95,7 +94,6 @@ type FilterDealsParams struct {
 }
 
 func (q *Queries) FilterDeals(ctx context.Context, arg FilterDealsParams) ([]Deal, error) {
-	fmt.Println(arg, "line 98 userAndDeals.sql.go")
 	rows, err := q.query(ctx, q.filterDealsStmt, filterDeals,
 		arg.Column1,
 		arg.Column2,
