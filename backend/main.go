@@ -23,7 +23,10 @@ func main() {
 	//Create new store instance
 	store := db.NewStore(dbConn)
 	//Create new server instance
-	server := server.NewServer(store)
+	server, err := server.NewServer(store, config)
+	if err != nil {
+		log.Fatal("could't spin up server: %w", err)
+	}
 	//Setup router
 	server.SetupRouter()
 	//Start Server

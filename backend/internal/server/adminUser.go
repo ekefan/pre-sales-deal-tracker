@@ -23,7 +23,7 @@ type CreateUsrReq struct {
 // CreateUsrRep holds fields that must be provided to client after creating a user
 type CreateUsrResp struct {
 	Role      string    `json:"Role"`
-	ID        int64     `json:"user_id"`
+	Username  string    `json:"username"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
@@ -66,7 +66,7 @@ func (s *Server) adminCreateUserHandler(ctx *gin.Context) {
 
 	resp := CreateUsrResp{
 		Role:      user.Role,
-		ID:        user.ID,
+		Username:  user.Username,
 		CreatedAt: user.CreatedAt,
 	}
 	ctx.JSON(http.StatusOK, resp)

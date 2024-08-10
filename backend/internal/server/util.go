@@ -77,31 +77,26 @@ func sqlNoRowsHandler(ctx *gin.Context, err error) (sqlErrrNoRowsExist bool) {
 
 // Set config for getting env variables
 type Config struct {
-	DBSource            string `mapstructure:"DB_SOURCE"`
-	DBDriver            string `mapstructure:"DB_DRIVER"`
-	EmailSenderName     string `mapstructure:"EMAIL_SENDER_NAME"`
-	EmailSenderAddress  string `mapstructure:"EMAIL_SENDER_ADDRESS"`
-	EmailSenderPassword string `mapstructure:"EMAIL_SENDER_PASSWORD"`
+	DBSource     string `mapstructure:"DB_SOURCE"`
+	DBDriver     string `mapstructure:"DB_DRIVER"`
+	SymmetricKey string `mapstructure:"SYMMETRIC_KEY"`
 }
 
-func LoadConfig(envPath string) (*Config, error) {
-	var config Config
+func LoadConfig(envPath string) (config Config, err error) {
 	viper.SetConfigFile(envPath)
 	// viper.AddConfigPath(".")
 
 	viper.AutomaticEnv()
-	err := viper.ReadInConfig()
+	err = viper.ReadInConfig()
 	if err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			return nil, fmt.Errorf("config file not found: %s", err)
-		}
-		return nil, fmt.Errorf("fatal error reading envs: %w", err)
+		return 
 	}
+
 	err = viper.Unmarshal(&config)
 	if err != nil {
-		return nil, fmt.Errorf("unable to decode into struct, %v", err)
+		return 
 	}
-	return &config, nil
+	return
 }
 
 func randomPasswordCode() string {

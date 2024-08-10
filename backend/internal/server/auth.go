@@ -12,6 +12,7 @@ import (
 const (
 	authHeaderKey = "Authorization"
 	authHeaderType = "bearer"
+	authPayloadKey = "authorization_payload"
 )
 
 func authMiddleware(maker token.TokenMaker) gin.HandlerFunc {
@@ -38,12 +39,13 @@ func authMiddleware(maker token.TokenMaker) gin.HandlerFunc {
 		}
 		
 		//token verification
-		_, err := maker.VerifyToken(fields[1])
+		payload, err := maker.VerifyToken(fields[1])
 		if err != nil {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("invalid access token: %v", err)))
 			return
 		}
 		//if verification is successful pass to the next handler func
+		ctx.Set(authPayloadKey, payload)
 		ctx.Next()
 	}
 }

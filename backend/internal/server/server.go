@@ -1,7 +1,10 @@
 package server
 
 import (
+	"fmt"
+
 	db "github.com/ekefan/deal-tracker/internal/db/sqlc"
+	"github.com/ekefan/deal-tracker/internal/token"
 	"github.com/ekefan/deal-tracker/internal/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -12,13 +15,21 @@ import (
 type Server struct {
 	Router *gin.Engine
 	Store  db.Store
+	EnvVar Config
+	TokenMaker token.TokenMaker
 }
 
 // NewServer create a server instance, having a router that connect api endpoints
-func NewServer(store db.Store) *Server {
+func NewServer(store db.Store, config Config) (*Server, error) {
+	tokenMaker, err := token.NewPaseto(config.SymmetricKey)
+	if err != nil {
+		return nil, fmt.Errorf("couln't create token: %w", err)
+	}
 	return &Server{
 		Store: store,
-	}
+		EnvVar: config,
+		TokenMaker: tokenMaker,
+	}, nil
 }
 
 // SetupRouter ini
@@ -32,6 +43,9 @@ func (s *Server) SetupRouter() {
 
 	// ADMIN
 	router.POST("/users", s.adminCreateUserHandler)
+	router.POST("/users/login", s.userLogin)
+
+	
 	router.PUT("/users/update/", s.adminUpdateUserHandler)
 	router.DELETE("/users/delete/:id", s.adminDeleteUserHandler)
 	router.POST("/admin/deals", s.adminCreateDealHandler)
@@ -41,7 +55,6 @@ func (s *Server) SetupRouter() {
 
 
 	// ADMINSALES
-	router.POST("/users/login", s.userLogin)
 	router.PUT("pitchrequest/update", s.updatePitchReqHandler)
 	router.GET("/deals", s.getDealsHandler)
 	router.GET("/deals/vas", s.getOngoingDeals)
