@@ -1,6 +1,5 @@
 package server
 
-
 // handlers
 // adminCreateDealHandler
 // adminUpdateDealHandler
@@ -225,4 +224,5 @@ func (s *Server) listUsersHandler(ctx *gin.Context) {
 
 // ===== TODO =====
 // implement authorization and role based access
+// implement authorized access for every endpoint
 // write tests for backend service....

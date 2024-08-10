@@ -1,6 +1,5 @@
 package server
 
-
 ////////// handlers /////////
 
 // userLogin
@@ -33,6 +32,11 @@ type LoginResp struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+type UserResp struct {
+	AccessToken string    `json:"access_token"`
+	LoginResp   LoginResp `json:"user"`
+}
+
 // userLogin handler for loging users to application
 func (s *Server) userLogin(ctx *gin.Context) {
 	var req LoginReq
@@ -55,14 +59,21 @@ func (s *Server) userLogin(ctx *gin.Context) {
 	// redirect user to update password...
 	//set password,
 	//update newPassword
-	//
+	//this is frontend logic
 	if !utils.CheckPasswordHash(req.Password, user.Password) {
 		ctx.JSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("password invalid: %v", err)))
 		return
 	}
 
+	// create accessToken
+	accessToken, err := s.TokenMaker.CreateToken(user.Username, user.Role, s.EnvVar.TokenDuration)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
 	//Create token or cookies and add to resp
-	resp := LoginResp{
+	usr := LoginResp{
 		//accessToken:
 		ID:        user.ID,
 		Username:  user.Username,
@@ -71,6 +82,10 @@ func (s *Server) userLogin(ctx *gin.Context) {
 		Email:     user.Email,
 		UpdatedAt: user.UpdatedAt.Time,
 		CreatedAt: user.CreatedAt,
+	}
+	resp := UserResp{
+		AccessToken: accessToken,
+		LoginResp:   usr,
 	}
 	ctx.JSON(http.StatusOK, resp)
 
@@ -158,4 +173,3 @@ func (s *Server) updatePitchReqHandler(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, resp)
 }
-

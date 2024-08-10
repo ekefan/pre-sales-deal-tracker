@@ -77,10 +77,11 @@ func (s *Server) adminCreateUserHandler(ctx *gin.Context) {
 // They are all required, however if no new values are passed... the current
 // the current user fields will be used
 type AdminUpdateUsrReq struct {
-	ID       int64  `json:"user_id" binding:"required"`
-	Fullname string `json:"fullname" binding:"required"`
-	Email    string `json:"email" binding:"required,email"`
-	Username string `json:"username" binding:"required,alphanum"`
+	ID        int64  `json:"user_id" binding:"required"`
+	Fullname  string `json:"fullname" binding:"required"`
+	Email     string `json:"email" binding:"required,email"`
+	Username  string `json:"username" binding:"required,alphanum"`
+	AdminRole string `json:"admin_role" binding:"required"`
 }
 
 // AdminUpdateUsrResp holds the fields for responding accurately to updating user end-point
@@ -102,7 +103,10 @@ func (s *Server) adminUpdateUserHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	//get user for update in the kitch
+	//get access token
+	if !authAccess(ctx, req.AdminRole) {
+		return
+	}
 	usr, err := s.Store.GetUserForUpdate(ctx, req.ID)
 	if err != nil {
 		if sqlNoRowsHandler(ctx, err) {
@@ -148,7 +152,8 @@ func (s *Server) adminUpdateUserHandler(ctx *gin.Context) {
 
 // AdminDeleteUserReq holds field user id that is to be deleted
 type AdminDeleteUserReq struct {
-	ID int64 `uri:"id" binding:"required"`
+	ID        int64  `uri:"id" binding:"required"`
+	AdminRole string `uri:"admin_role" binding:"required"`
 }
 
 // adminDeleteUserhandler http handler for the api end point for Deleting a user
@@ -158,7 +163,10 @@ func (s *Server) adminDeleteUserHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-
+	
+	if !authAccess(ctx, req.AdminRole) {
+		return
+	}
 	exists, err := s.Store.AdminUserExists(ctx, req.ID)
 	if err != nil || !exists {
 		ctx.JSON(http.StatusNotFound, errorResponse(fmt.Errorf("user doesn't exist")))

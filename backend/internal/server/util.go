@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/ekefan/deal-tracker/internal/token"
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
 	"github.com/spf13/viper"
@@ -80,8 +81,11 @@ type Config struct {
 	DBSource     string `mapstructure:"DB_SOURCE"`
 	DBDriver     string `mapstructure:"DB_DRIVER"`
 	SymmetricKey string `mapstructure:"SYMMETRIC_KEY"`
+	TokenDuration time.Duration `mapstructure:"TOKEN_DURATION"`
 }
 
+
+// LoadConfig loads environment variables into Config
 func LoadConfig(envPath string) (config Config, err error) {
 	viper.SetConfigFile(envPath)
 	// viper.AddConfigPath(".")
@@ -99,7 +103,20 @@ func LoadConfig(envPath string) (config Config, err error) {
 	return
 }
 
+// randomPasswordCode generates a random password between MaxNumPass and MinNumPass
 func randomPasswordCode() string {
 	code := MinNumPass + rand.Intn(MaxNumPass-MinNumPass)
 	return strconv.Itoa(code)
+}
+
+// authAccess ...authenticates the request accessing the endpoint
+// it checks if the accessCondition matches the accessToken Payload
+// returns true if request is granted access
+func authAccess(ctx *gin.Context, accessCondition string) bool {
+	payload := ctx.MustGet(authPayloadKey).(*token.Payload)
+	if payload.Role != accessCondition {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("not admin")))
+		return false
+	}
+	return true
 }

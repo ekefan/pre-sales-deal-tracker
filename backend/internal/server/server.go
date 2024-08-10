@@ -43,14 +43,14 @@ func (s *Server) SetupRouter() {
 
 	// ADMIN
 	router.POST("/users", s.adminCreateUserHandler)
-	router.POST("/users/login", s.userLogin)
+	router.POST("/users/login", s.userLogin) //added token
 
-	
-	router.PUT("/users/update/", s.adminUpdateUserHandler)
-	router.DELETE("/users/delete/:id", s.adminDeleteUserHandler)
-	router.POST("/admin/deals", s.adminCreateDealHandler)
+	authRoute := router.Group("/auth").Use(authMiddleware(s.TokenMaker))
+	authRoute.PUT("/users/update/", s.adminUpdateUserHandler) //added token authorization
+	router.DELETE("/users/delete/:id/admin_role", s.adminDeleteUserHandler) //added token authorization
+	router.POST("/admin/deals", s.adminCreateDealHandler) 
 	router.PUT("admin/deals/update", s.adminUpdateDealHandler)
-	router.DELETE("/admin/deals/delete/:deal_id", s.adminDeleteDealHandler)
+	router.DELETE("/admin/deals/delete/:deal_id/:admin_role", s.adminDeleteDealHandler)
 	router.GET("/users", s.listUsersHandler)
 
 
