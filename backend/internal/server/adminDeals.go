@@ -12,6 +12,7 @@ import (
 	"time"
 
 	db "github.com/ekefan/deal-tracker/internal/db/sqlc"
+	"github.com/ekefan/deal-tracker/internal/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -52,7 +53,9 @@ func (s *Server) adminCreateDealHandler(ctx *gin.Context) {
 		return
 	}
 	//find a way to perform authorization
-	// -- maybe receive user id from token/cookies and verify it's an admin
+	if !authAccess(ctx, utils.AdminRole) {
+		return
+	}
 
 	//make call to database
 	deal, err := s.Store.CreateDeal(ctx, db.CreateDealParams{
@@ -114,6 +117,9 @@ func (s *Server) adminUpdateDealHandler(ctx *gin.Context) {
 
 	//verify that the resouces is accessed by the admin only, check for role in
 	// authorization payload
+	if !authAccess(ctx, utils.AdminRole) {
+		return
+	}
 
 	deal, err := s.Store.AdminGetDealForUpdate(ctx, req.ID)
 	if err != nil {
@@ -182,6 +188,9 @@ func (s *Server) adminDeleteDealHandler(ctx *gin.Context) {
 	}
 
 	//get payload and check the for user.role
+	if !authAccess(ctx, utils.AdminRole) {
+		return
+	}
 
 	exists, err := s.Store.AdminDealExists(ctx, req.ID)
 	if err != nil || !exists {
@@ -210,6 +219,10 @@ func (s *Server) listUsersHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
+
+	if !authAccess(ctx, utils.AdminRole) || !authAccess(ctx, utils.ManagerRole) {
+		return
+	}
 	args := db.AdminViewUsersParams{
 		Limit:  req.PageSize,
 		Offset: (req.PageID - 1) * req.PageSize,
@@ -223,6 +236,11 @@ func (s *Server) listUsersHandler(ctx *gin.Context) {
 }
 
 // ===== TODO =====
-// implement authorization and role based access
 // implement authorized access for every endpoint
+// run migrations ...
+// Update: adminUpdate query to allow password update... more like. set new password
+// adminUpdate password... sets the userpassword to generic and can set random password...
+// change passwordChanged to false
 // write tests for backend service....
+
+///Test working of authorization

@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	db "github.com/ekefan/deal-tracker/internal/db/sqlc"
+	"github.com/ekefan/deal-tracker/internal/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -17,6 +18,9 @@ func (s *Server) getDealsHandler(ctx *gin.Context) {
 	var req ListDealsReq
 	if err := ctx.ShouldBindQuery(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+	if !authAccess(ctx, utils.AdminRole) || !authAccess(ctx, utils.ManagerRole) || !authAccess(ctx, utils.SalesRole) {
 		return
 	}
 	args := db.AdminViewDealsParams{
@@ -42,6 +46,9 @@ func (s *Server) getOngoingDeals(ctx *gin.Context) {
 		return
 	}
 
+	if !authAccess(ctx, utils.AdminRole) || !authAccess(ctx, utils.ManagerRole) || !authAccess(ctx, utils.SalesRole) {
+		return
+	}
 	deals, err := s.Store.GetDealsByStatus(ctx, req.Status)
 	if err != nil {
 		if sqlNoRowsHandler(ctx, err) {
@@ -73,6 +80,9 @@ func (s *Server) getFilteredDeals(ctx *gin.Context) {
 		return
 	}
 
+	if !authAccess(ctx, utils.AdminRole) || !authAccess(ctx, utils.ManagerRole) {
+		return
+	}
 	args := db.FilterDealsParams{
 		Column1: req.CustomerName,    // column1 == customer_name
 		Column2: req.ServiceToRender, // column2 == service_to_render
@@ -116,6 +126,10 @@ func (s *Server) getCountFilteredDeals(ctx *gin.Context) {
 		return
 	}
 
+	if !authAccess(ctx, utils.AdminRole) || !authAccess(ctx, utils.ManagerRole) {
+		return
+	}
+	
 	args := db.CountFilteredDealsParams{
 		Column1: req.CustomerName,    // column1 == customer_name
 		Column2: req.ServiceToRender, // column2 == service_to_render

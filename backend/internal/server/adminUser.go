@@ -42,17 +42,13 @@ func (s *Server) adminCreateUserHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 	}
 
-	passwordChanged := true
-	if req.Role != utils.Admin {
-		passwordChanged = false
-	}
 	args := db.CreateNewUserParams{
 		Username:        req.Username,
 		Role:            req.Role,
 		FullName:        req.FullName,
 		Email:           req.Email,
 		Password:        passwordHash,
-		PasswordChanged: passwordChanged,
+		PasswordChanged: false,
 	}
 
 	user, err := s.Store.CreateNewUser(ctx, args)
@@ -81,7 +77,6 @@ type AdminUpdateUsrReq struct {
 	Fullname  string `json:"fullname" binding:"required"`
 	Email     string `json:"email" binding:"required,email"`
 	Username  string `json:"username" binding:"required,alphanum"`
-	AdminRole string `json:"admin_role" binding:"required"`
 }
 
 // AdminUpdateUsrResp holds the fields for responding accurately to updating user end-point
@@ -104,7 +99,7 @@ func (s *Server) adminUpdateUserHandler(ctx *gin.Context) {
 		return
 	}
 	//get access token
-	if !authAccess(ctx, req.AdminRole) {
+	if !authAccess(ctx, utils.AdminRole) {
 		return
 	}
 	usr, err := s.Store.GetUserForUpdate(ctx, req.ID)
@@ -153,7 +148,7 @@ func (s *Server) adminUpdateUserHandler(ctx *gin.Context) {
 // AdminDeleteUserReq holds field user id that is to be deleted
 type AdminDeleteUserReq struct {
 	ID        int64  `uri:"id" binding:"required"`
-	AdminRole string `uri:"admin_role" binding:"required"`
+	// AdminRole string `uri:"admin_role" binding:"required"`
 }
 
 // adminDeleteUserhandler http handler for the api end point for Deleting a user
@@ -164,7 +159,8 @@ func (s *Server) adminDeleteUserHandler(ctx *gin.Context) {
 		return
 	}
 	
-	if !authAccess(ctx, req.AdminRole) {
+	// authenticated access
+	if !authAccess(ctx, utils.AdminRole) {
 		return
 	}
 	exists, err := s.Store.AdminUserExists(ctx, req.ID)

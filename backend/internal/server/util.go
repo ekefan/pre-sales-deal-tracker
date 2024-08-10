@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/ekefan/deal-tracker/internal/token"
+	"github.com/ekefan/deal-tracker/internal/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
 	"github.com/spf13/viper"
@@ -78,12 +79,11 @@ func sqlNoRowsHandler(ctx *gin.Context, err error) (sqlErrrNoRowsExist bool) {
 
 // Set config for getting env variables
 type Config struct {
-	DBSource     string `mapstructure:"DB_SOURCE"`
-	DBDriver     string `mapstructure:"DB_DRIVER"`
-	SymmetricKey string `mapstructure:"SYMMETRIC_KEY"`
+	DBSource      string        `mapstructure:"DB_SOURCE"`
+	DBDriver      string        `mapstructure:"DB_DRIVER"`
+	SymmetricKey  string        `mapstructure:"SYMMETRIC_KEY"`
 	TokenDuration time.Duration `mapstructure:"TOKEN_DURATION"`
 }
-
 
 // LoadConfig loads environment variables into Config
 func LoadConfig(envPath string) (config Config, err error) {
@@ -93,12 +93,12 @@ func LoadConfig(envPath string) (config Config, err error) {
 	viper.AutomaticEnv()
 	err = viper.ReadInConfig()
 	if err != nil {
-		return 
+		return
 	}
 
 	err = viper.Unmarshal(&config)
 	if err != nil {
-		return 
+		return
 	}
 	return
 }
@@ -115,7 +115,15 @@ func randomPasswordCode() string {
 func authAccess(ctx *gin.Context, accessCondition string) bool {
 	payload := ctx.MustGet(authPayloadKey).(*token.Payload)
 	if payload.Role != accessCondition {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("not admin")))
+		switch accessCondition {
+		case utils.AdminRole:
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("not admin")))
+		case utils.SalesRole:
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("not sales")))
+		case utils.ManagerRole:
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("not manager")))
+		}
+
 		return false
 	}
 	return true

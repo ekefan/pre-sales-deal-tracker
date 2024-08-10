@@ -7,6 +7,7 @@ import (
 	"time"
 
 	db "github.com/ekefan/deal-tracker/internal/db/sqlc"
+	"github.com/ekefan/deal-tracker/internal/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -31,6 +32,9 @@ func (s *Server) salesCreatePitchReqHandler(ctx *gin.Context) {
 	/// General Problem of Parsing time between time.Time and json
 
 	// instead of receiving salesRepID from json validate it through payload
+	if !authAccess(ctx, utils.SalesRole) {
+		return
+	}
 	args := db.CreatePitchRequestParams{
 		SalesRepID:      req.SalesRepID,
 		SalesRepName:    req.SalesRepName,
@@ -74,7 +78,10 @@ func (s *Server) salesUpdateuserHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	//get user for update,  get ID from authorization payload
+	if !authAccess(ctx, utils.SalesRole) {
+		return
+	}
+	//get user for update
 	usr, err := s.Store.GetUserForUpdate(ctx, req.ID)
 	if err != nil {
 		if sqlNoRowsHandler(ctx, err) {
@@ -128,6 +135,9 @@ func (s *Server) salesViewPitchRequests(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
+	if !authAccess(ctx, utils.SalesRole) {
+		return
+	}
 	args := db.ViewPitchRequestsParams{
 		SalesRepID: req.SalesRepID,
 		Limit:      req.PageSize,
@@ -155,6 +165,9 @@ func (s *Server) salesDeletePitchReqHandler(ctx *gin.Context) {
 		return
 	}
 
+	if !authAccess(ctx, utils.SalesRole) {
+		return
+	}
 	// Check if the pitch request exists
 	args := db.PitchRequestExistParams{
 		ID:         req.ID,
@@ -184,18 +197,23 @@ func (s *Server) salesDeletePitchReqHandler(ctx *gin.Context) {
 }
 
 
-type SalesDealssReq struct {
+type SalesDealsReq struct {
 	SalesRepName string `json:"sales_rep" binding:"required"`
 	PageSize int32 `json:"page_size" binding:"required"`
 	PageID int32 `json:"page_id" binding:"required"`
 }
+
+// getSalesDeals returns deals associated with a sales rep pitch request
 func (s *Server) getSalesDeals(ctx *gin.Context) {
-	var req SalesDealssReq
+	var req SalesDealsReq
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
+	if !authAccess(ctx, utils.SalesRole) {
+		return
+	}
 	args := db.GetDealsBySalesRepParams{
 		SalesRepName: req.SalesRepName,
 		Limit: req.PageSize,
