@@ -13,9 +13,9 @@ import (
 
 // Server contains fields required by the server instance
 type Server struct {
-	Router *gin.Engine
-	Store  db.Store
-	EnvVar Config
+	Router     *gin.Engine
+	Store      db.Store
+	EnvVar     Config
 	TokenMaker token.TokenMaker
 }
 
@@ -26,8 +26,8 @@ func NewServer(store db.Store, config Config) (*Server, error) {
 		return nil, fmt.Errorf("couln't create token: %w", err)
 	}
 	return &Server{
-		Store: store,
-		EnvVar: config,
+		Store:      store,
+		EnvVar:     config,
 		TokenMaker: tokenMaker,
 	}, nil
 }
@@ -45,33 +45,35 @@ func (s *Server) SetupRouter() {
 	router.POST("/users", s.adminCreateUserHandler)
 	router.POST("/users/login", s.userLogin) //added token
 
-	authRoute := router.Group("/auth").Use(authMiddleware(s.TokenMaker))
-	authRoute.PUT("/users/update/", s.adminUpdateUserHandler) //added token authorization
-	router.DELETE("/users/delete/:id/admin_role", s.adminDeleteUserHandler) //added token authorization
-	router.POST("/admin/deals", s.adminCreateDealHandler) 
-	router.PUT("admin/deals/update", s.adminUpdateDealHandler)
-	router.DELETE("/admin/deals/delete/:deal_id/:admin_role", s.adminDeleteDealHandler)
-	router.GET("/users", s.listUsersHandler)
-
+	authRoute := router.Group("/a").Use(authMiddleware(s.TokenMaker))
+	authRoute.PUT("/users/update/", s.adminUpdateUserHandler)                //added token authorization
+	authRoute.DELETE("/users/delete/:id/", s.adminDeleteUserHandler)            //added token authorization
+	authRoute.POST("/admin/deals", s.adminCreateDealHandler)                    // added token authorization
+	authRoute.PUT("admin/deals/update", s.adminUpdateDealHandler)               //added token authorization
+	authRoute.DELETE("/admin/deals/delete/:deal_id/", s.adminDeleteDealHandler) //added token authorization
+	authRoute.GET("/users", s.listUsersHandler)                                 //added  token authorization
 
 	// ADMINSALES
-	router.PUT("pitchrequest/update", s.updatePitchReqHandler)
-	router.GET("/deals", s.getDealsHandler)
-	router.GET("/deals/vas", s.getOngoingDeals)
-	router.GET("/deals/filtered", s.getFilteredDeals)
-	router.GET("deals/filtered/count", s.getCountFilteredDeals)
+	authRoute.PUT("pitchrequest/update", s.updatePitchReqHandler) // added token authorization
+	// this route can be replaced with filtered... or user makes call here first then filters
+	authRoute.GET("/deals", s.getDealsHandler)                     // added token authorization
+	authRoute.GET("/deals/vas", s.getOngoingDeals)                 //added token authorization
+	authRoute.GET("/deals/filtered", s.getFilteredDeals)           // added token authorization
+	authRoute.GET("deals/filtered/count", s.getCountFilteredDeals) //added token authorization
 
 	//SALES-REP
-	router.POST("/sales/pitchReq", s.salesCreatePitchReqHandler)
-	router.PUT("/sales/update/:username", s.salesUpdateuserHandler)
-	router.GET("/pitchrequest/", s.salesViewPitchRequests)
-	router.DELETE("/sales/pitchReq/delete/:sales_rep_id/:pitch_id", s.salesDeletePitchReqHandler)
-	router.GET("sales/deals", s.getSalesDeals)
-	// router.GET("sales/count/deals", s.getSalesDealsCount)
+	authRoute.POST("/sales/pitchReq", s.salesCreatePitchReqHandler) //added token authorization
+
+	//this should be the general update user without even for password
+	authRoute.PUT("/sales/update/user", s.salesUpdateuserHandler)                                    //added token authorization (for sales only)
+	authRoute.GET("/pitchrequest/", s.salesViewPitchRequests)                                        // added token authorization
+	authRoute.DELETE("/sales/pitchReq/delete/:sales_rep_id/:pitch_id", s.salesDeletePitchReqHandler) //
+	authRoute.GET("sales/deals", s.getSalesDeals)                                                    //added token authorization
+	// authRoute.GET("sales/count/deals", s.getSalesDealsCount)
 
 	//General
-	router.PUT("/users/password", s.updatePassWordLoggedIn)
-	router.PUT("/users/forgotpassword", s.forgotPassword)
+	authRoute.PUT("/users/password", s.updatePassWordLoggedIn) //added token authorization
+	// router.PUT("/users/forgotpassword", s.forgotPassword)
 
 	s.Router = router
 }
