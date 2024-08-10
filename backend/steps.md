@@ -17,3 +17,6 @@
 14. Add viper to marshall envfiles to app server
 15. Use bcrypt to hash and compare password hash
 16. Create custom validator for role in http requests for user
+17. Adjust query to filterdeals
+18. Creating Payload file for JWT authentication
+19. Define the payload data using a struct
