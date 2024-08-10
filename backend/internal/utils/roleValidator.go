@@ -3,9 +3,9 @@ package utils
 import "github.com/go-playground/validator/v10"
 
 const (
-	Admin   = "admin"
-	Sales   = "sales"
-	Manager = "manager"
+	AdminRole   = "admin"
+	SalesRole   = "sales"
+	ManagerRole = "manager"
 )
 
 func RoleValidator(fl validator.FieldLevel) bool {
@@ -17,7 +17,7 @@ func RoleValidator(fl validator.FieldLevel) bool {
 
 func isSupportedRole(role string) bool {
 	switch role {
-	case Admin, Sales, Manager:
+	case AdminRole, SalesRole, ManagerRole:
 		return true
 	}
 	return false
