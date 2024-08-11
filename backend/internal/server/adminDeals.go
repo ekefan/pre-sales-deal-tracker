@@ -240,4 +240,8 @@ func (s *Server) listUsersHandler(ctx *gin.Context) {
 // change passwordChanged to false
 // write tests for backend service....
 
+
+// check updating user for sales and for admins
+
+/// for deleting pitch request... instead use username in the uri
 ///Test working of authorization
