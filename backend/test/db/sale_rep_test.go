@@ -36,7 +36,7 @@ func createPitch(t *testing.T, salesRepId int64) db.PitchRequest {
 }
 
 func TestCreatePitchRequest(t *testing.T) {
-	userRole := []UsrRole{{role: "salesRep"}}
+	userRole := []UsrRole{{role: "sales"}}
 	salesRep := createNewUser(t, userRole)[0]
 	require.NotEmpty(t, salesRep)
 	createPitch(t, salesRep.ID)

@@ -11,17 +11,12 @@ import (
 
 // createRandomUserArg generates the params need for creating a user
 func createRandomUserArg(role string) db.CreateNewUserParams {
-	updated := true
-	if role != "admin" {
-		updated = false
-	}
 	return db.CreateNewUserParams{
 		Username: util.RandomString(5),
 		Role:     role,
 		FullName: util.GenFullname(),
 		Email:    util.GenEmail(),
 		Password: util.GenPassWord(),
-		PasswordChanged: updated,
 	}
 }
 
@@ -59,7 +54,7 @@ func TestCreateNewUser(t *testing.T) {
 	createUsers := []UsrRole{
 		{role: "admin"},
 		{role: "manager"},
-		{role: "salesrep"},
+		{role: "sales"},
 	}
 
 	// Create a new User for each role
@@ -69,7 +64,7 @@ func TestCreateNewUser(t *testing.T) {
 func TestCreateDeal(t *testing.T) {
 	//create a randomUser with role sales_rep
 	salesRep := createNewUser(t, []UsrRole{
-		{role: "salesrep"},
+		{role: "sales"},
 	})[0]
 	require.NotEmpty(t, salesRep)
 	//create a new pitchrequest with the sales_rep id
