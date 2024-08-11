@@ -110,12 +110,12 @@ func randomPasswordCode() string {
 }
 
 // authAccess ...authenticates the request accessing the endpoint
-// it checks if the accessCondition matches the accessToken Payload
+// it checks if the role matches the accessToken Payload role
 // returns true if request is granted access
-func authAccess(ctx *gin.Context, accessCondition string) bool {
+func authAccess(ctx *gin.Context, role string) bool {
 	payload := ctx.MustGet(authPayloadKey).(*token.Payload)
-	if payload.Role != accessCondition {
-		switch accessCondition {
+	if payload.Role != role {
+		switch role {
 		case utils.AdminRole:
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("not admin")))
 		case utils.SalesRole:
@@ -127,4 +127,19 @@ func authAccess(ctx *gin.Context, accessCondition string) bool {
 		return false
 	}
 	return true
+}
+
+// multipleAuthAccess checks if any conditions match the payload in ctx
+// returns true if match else false
+func multipleAuthAccess(ctx *gin.Context, roles []string) (rolesHaveAccess bool) {
+	payload := ctx.MustGet(authPayloadKey).(*token.Payload)
+	for _, role := range roles {
+		if role == payload.Role {
+			rolesHaveAccess = true
+		}
+	}
+	if !rolesHaveAccess {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("unauthorized access")))
+	}
+	return rolesHaveAccess
 }

@@ -220,7 +220,7 @@ func (s *Server) listUsersHandler(ctx *gin.Context) {
 		return
 	}
 
-	if !authAccess(ctx, utils.AdminRole) || !authAccess(ctx, utils.ManagerRole) {
+	if !multipleAuthAccess(ctx, []string{utils.AdminRole, utils.ManagerRole}) {
 		return
 	}
 	args := db.AdminViewUsersParams{
@@ -229,17 +229,14 @@ func (s *Server) listUsersHandler(ctx *gin.Context) {
 	}
 	users, err := s.Store.AdminViewUsers(ctx, args)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		ctx.JSON(http.StatusInternalServerError, errorResponse(fmt.Errorf("i don't know")))
 		return
 	}
+	fmt.Println(len(users))
 	ctx.JSON(http.StatusOK, users)
 }
 
 // ===== TODO =====
-// implement authorized access for every endpoint
-// run migrations ...
-// Update: adminUpdate query to allow password update... more like. set new password
-// adminUpdate password... sets the userpassword to generic and can set random password...
 // change passwordChanged to false
 // write tests for backend service....
 

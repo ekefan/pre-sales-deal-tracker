@@ -20,7 +20,7 @@ func (s *Server) getDealsHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	if !authAccess(ctx, utils.AdminRole) || !authAccess(ctx, utils.ManagerRole) || !authAccess(ctx, utils.SalesRole) {
+	if !multipleAuthAccess(ctx, []string{utils.AdminRole, utils.ManagerRole, utils.SalesRole}) {
 		return
 	}
 	args := db.AdminViewDealsParams{
@@ -46,7 +46,7 @@ func (s *Server) getOngoingDeals(ctx *gin.Context) {
 		return
 	}
 
-	if !authAccess(ctx, utils.AdminRole) || !authAccess(ctx, utils.ManagerRole) || !authAccess(ctx, utils.SalesRole) {
+	if !multipleAuthAccess(ctx, []string{utils.AdminRole, utils.ManagerRole, utils.SalesRole}) {
 		return
 	}
 	deals, err := s.Store.GetDealsByStatus(ctx, req.Status)
@@ -80,7 +80,7 @@ func (s *Server) getFilteredDeals(ctx *gin.Context) {
 		return
 	}
 
-	if !authAccess(ctx, utils.AdminRole) || !authAccess(ctx, utils.ManagerRole) {
+	if !multipleAuthAccess(ctx, []string{utils.AdminRole, utils.ManagerRole}) {
 		return
 	}
 	args := db.FilterDealsParams{
@@ -119,17 +119,18 @@ type CountFilterDealReq struct {
 	Awarded         *bool   `json:"awarded"`
 	SalesRepName    *string `json:"sales_rep_name"`
 }
+
 func (s *Server) getCountFilteredDeals(ctx *gin.Context) {
-	var req CountFilterDealReq 
-	if err  := ctx.ShouldBindJSON(&req); err != nil {
+	var req CountFilterDealReq
+	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
-	if !authAccess(ctx, utils.AdminRole) || !authAccess(ctx, utils.ManagerRole) {
+	if !multipleAuthAccess(ctx, []string{utils.AdminRole, utils.ManagerRole}) {
 		return
 	}
-	
+
 	args := db.CountFilteredDealsParams{
 		Column1: req.CustomerName,    // column1 == customer_name
 		Column2: req.ServiceToRender, // column2 == service_to_render
@@ -152,6 +153,8 @@ func (s *Server) getCountFilteredDeals(ctx *gin.Context) {
 		return
 	}
 
-	resp := struct{ Count int64 `json:"num_of_pages"`}{Count: count}
+	resp := struct {
+		Count int64 `json:"num_of_pages"`
+	}{Count: count}
 	ctx.JSON(http.StatusOK, resp)
 }

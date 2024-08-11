@@ -27,7 +27,7 @@ func (s *Server) updatePassWordLoggedIn(ctx *gin.Context) {
 	}
 
 	//maybe using session management.. check if user is loggedin
-	if !authAccess(ctx, utils.AdminRole) || !authAccess(ctx, utils.ManagerRole) || !authAccess(ctx, utils.SalesRole) {
+	if !multipleAuthAccess(ctx, []string{utils.AdminRole, utils.ManagerRole, utils.SalesRole}) {
 		return
 	}
 	usr, err := s.Store.GetUserForUpdate(ctx, req.UserID)

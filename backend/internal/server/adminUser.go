@@ -48,7 +48,6 @@ func (s *Server) adminCreateUserHandler(ctx *gin.Context) {
 		FullName:        req.FullName,
 		Email:           req.Email,
 		Password:        passwordHash,
-		PasswordChanged: false,
 	}
 
 	user, err := s.Store.CreateNewUser(ctx, args)

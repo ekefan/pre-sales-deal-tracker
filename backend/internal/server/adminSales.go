@@ -122,10 +122,10 @@ func (s *Server) updatePitchReqHandler(ctx *gin.Context) {
 	}
 
 	// getAuthPayload and require role == admin or sales
-	if !authAccess(ctx, utils.AdminRole) || !authAccess(ctx, utils.SalesRole) {
+	if !multipleAuthAccess(ctx, []string{utils.AdminRole, utils.SalesRole}) {
 		return
 	}
-	
+
 	pitchReq, err := s.Store.GetPitchRequestForUpdate(ctx, req.ID)
 	if err != nil {
 		if sqlNoRowsHandler(ctx, err) {
