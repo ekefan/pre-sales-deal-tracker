@@ -3,9 +3,9 @@ package utils
 import "github.com/go-playground/validator/v10"
 
 const (
-	AdminRole   = "admin"
-	SalesRole   = "sales"
-	ManagerRole = "manager"
+	AdminRole   string = "admin"
+	SalesRole   string = "sales"
+	ManagerRole string = "manager"
 )
 
 func RoleValidator(fl validator.FieldLevel) bool {
