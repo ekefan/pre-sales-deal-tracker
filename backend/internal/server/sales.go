@@ -7,6 +7,7 @@ import (
 	"time"
 
 	db "github.com/ekefan/deal-tracker/internal/db/sqlc"
+	"github.com/ekefan/deal-tracker/internal/token"
 	"github.com/ekefan/deal-tracker/internal/utils"
 	"github.com/gin-gonic/gin"
 )
@@ -155,6 +156,7 @@ func (s *Server) salesViewPitchRequests(ctx *gin.Context) {
 type DeletePitchReq struct {
 	ID         int64 `uri:"pitch_id" binding:"required"`
 	SalesRepID int64 `uri:"sales_rep_id" binding:"required"`
+	Username string `uri:"sales_username" binding:"required"`
 }
 
 func (s *Server) salesDeletePitchReqHandler(ctx *gin.Context) {
@@ -165,7 +167,9 @@ func (s *Server) salesDeletePitchReqHandler(ctx *gin.Context) {
 		return
 	}
 
-	if !authAccess(ctx, utils.SalesRole) {
+	payload := ctx.MustGet(authPayloadKey).(*token.Payload)
+	if payload.Role != utils.SalesRole || payload.Username != req.Username {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("unauthorized access")))
 		return
 	}
 	// Check if the pitch request exists

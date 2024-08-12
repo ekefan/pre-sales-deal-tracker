@@ -46,6 +46,7 @@ func (s *Server) SetupRouter() {
 	router.POST("/users/login", s.userLogin) //added token
 
 	authRoute := router.Group("/a").Use(authMiddleware(s.TokenMaker))
+	//this update user... updates the users full name, email, or username...
 	authRoute.PUT("/users/update/", s.adminUpdateUserHandler)                //added token authorization
 	authRoute.DELETE("/users/delete/:id/", s.adminDeleteUserHandler)            //added token authorization
 	authRoute.POST("/admin/deals", s.adminCreateDealHandler)                    // added token authorization
@@ -60,18 +61,19 @@ func (s *Server) SetupRouter() {
 	authRoute.GET("/deals/vas", s.getOngoingDeals)                 //added token authorization
 	authRoute.GET("/deals/filtered", s.getFilteredDeals)           // added token authorization
 	authRoute.GET("deals/filtered/count", s.getCountFilteredDeals) //added token authorization
-
+	// handler exist in sales... updates users username only for sales
+	authRoute.PUT("/sales/update/user", s.salesUpdateuserHandler)
 	//SALES-REP
 	authRoute.POST("/sales/pitchReq", s.salesCreatePitchReqHandler) //added token authorization
 
 	//this should be the general update user without even for password
-	authRoute.PUT("/sales/update/user", s.salesUpdateuserHandler) //change password should be separate                                 //added token authorization (for sales only)
+	 //change password should be separate                                 //added token authorization (for sales only)
 	authRoute.GET("/pitchrequest/", s.salesViewPitchRequests)                                        // added token authorization
-	authRoute.DELETE("/sales/pitchReq/delete/:sales_rep_id/:pitch_id", s.salesDeletePitchReqHandler) // added token authorization
+	authRoute.DELETE("/sales/pitchReq/delete/:sales_username/:sales_rep_id/:pitch_id", s.salesDeletePitchReqHandler) // added token authorization
 	authRoute.GET("sales/deals", s.getSalesDeals)                                                    //added token authorization
 	// authRoute.GET("sales/count/deals", s.getSalesDealsCount)
 
-	//General
+	//Password Update
 	authRoute.PUT("/users/password", s.updatePassWordLoggedIn) //added token authorization
 	// router.PUT("/users/forgotpassword", s.forgotPassword)
 

@@ -114,7 +114,6 @@ func (s *Server) adminUpdateUserHandler(ctx *gin.Context) {
 		Time:  time.Now(),
 		Valid: true,
 	}
-	// Hash password
 	args := db.AdminUpdateUserParams{
 		ID:        usr.ID,
 		FullName:  req.Fullname,
