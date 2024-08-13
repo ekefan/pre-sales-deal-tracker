@@ -8,6 +8,9 @@ package db
 import (
 	"context"
 	"database/sql"
+	"time"
+
+	"github.com/lib/pq"
 )
 
 const adminDealExists = `-- name: AdminDealExists :one
@@ -60,7 +63,7 @@ func (q *Queries) AdminGetDealForUpdate(ctx context.Context, id int64) (Deal, er
 		&i.PitchID,
 		&i.SalesRepName,
 		&i.CustomerName,
-		&i.ServiceToRender,
+		pq.Array(&i.ServiceToRender),
 		&i.Status,
 		&i.StatusTag,
 		&i.CurrentPitchRequest,
@@ -85,18 +88,18 @@ RETURNING id, pitch_id, sales_rep_name, customer_name, service_to_render, status
 
 type AdminUpdateDealParams struct {
 	ID                  int64
-	ServiceToRender     string
+	ServiceToRender     []string
 	Status              string
 	StatusTag           string
 	CurrentPitchRequest string
-	ClosedAt            sql.NullTime
-	UpdatedAt           sql.NullTime
+	ClosedAt            time.Time
+	UpdatedAt           time.Time
 }
 
 func (q *Queries) AdminUpdateDeal(ctx context.Context, arg AdminUpdateDealParams) (Deal, error) {
 	row := q.queryRow(ctx, q.adminUpdateDealStmt, adminUpdateDeal,
 		arg.ID,
-		arg.ServiceToRender,
+		pq.Array(arg.ServiceToRender),
 		arg.Status,
 		arg.StatusTag,
 		arg.CurrentPitchRequest,
@@ -109,7 +112,7 @@ func (q *Queries) AdminUpdateDeal(ctx context.Context, arg AdminUpdateDealParams
 		&i.PitchID,
 		&i.SalesRepName,
 		&i.CustomerName,
-		&i.ServiceToRender,
+		pq.Array(&i.ServiceToRender),
 		&i.Status,
 		&i.StatusTag,
 		&i.CurrentPitchRequest,
@@ -135,7 +138,7 @@ type AdminUpdateUserParams struct {
 	FullName  string
 	Email     string
 	Username  string
-	UpdatedAt sql.NullTime
+	UpdatedAt time.Time
 }
 
 func (q *Queries) AdminUpdateUser(ctx context.Context, arg AdminUpdateUserParams) (User, error) {
@@ -202,7 +205,7 @@ func (q *Queries) AdminViewDeals(ctx context.Context, arg AdminViewDealsParams) 
 			&i.PitchID,
 			&i.SalesRepName,
 			&i.CustomerName,
-			&i.ServiceToRender,
+			pq.Array(&i.ServiceToRender),
 			&i.Status,
 			&i.StatusTag,
 			&i.CurrentPitchRequest,
@@ -284,7 +287,7 @@ type CreateDealParams struct {
 	PitchID             sql.NullInt64
 	SalesRepName        string
 	CustomerName        string
-	ServiceToRender     string
+	ServiceToRender     []string
 	Status              string
 	StatusTag           string
 	CurrentPitchRequest string
@@ -295,7 +298,7 @@ func (q *Queries) CreateDeal(ctx context.Context, arg CreateDealParams) (Deal, e
 		arg.PitchID,
 		arg.SalesRepName,
 		arg.CustomerName,
-		arg.ServiceToRender,
+		pq.Array(arg.ServiceToRender),
 		arg.Status,
 		arg.StatusTag,
 		arg.CurrentPitchRequest,
@@ -306,7 +309,7 @@ func (q *Queries) CreateDeal(ctx context.Context, arg CreateDealParams) (Deal, e
 		&i.PitchID,
 		&i.SalesRepName,
 		&i.CustomerName,
-		&i.ServiceToRender,
+		pq.Array(&i.ServiceToRender),
 		&i.Status,
 		&i.StatusTag,
 		&i.CurrentPitchRequest,
@@ -420,7 +423,7 @@ type UpdatePassWordParams struct {
 	ID              int64
 	Password        string
 	PasswordChanged bool
-	UpdatedAt       sql.NullTime
+	UpdatedAt       time.Time
 }
 
 func (q *Queries) UpdatePassWord(ctx context.Context, arg UpdatePassWordParams) error {

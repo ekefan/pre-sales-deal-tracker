@@ -7,8 +7,9 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"time"
+
+	"github.com/lib/pq"
 )
 
 const createPitchRequest = `-- name: CreatePitchRequest :one
@@ -26,7 +27,7 @@ type CreatePitchRequestParams struct {
 	Status          string
 	CustomerName    string
 	PitchTag        string
-	CustomerRequest string
+	CustomerRequest []string
 	RequestDeadline time.Time
 }
 
@@ -37,7 +38,7 @@ func (q *Queries) CreatePitchRequest(ctx context.Context, arg CreatePitchRequest
 		arg.Status,
 		arg.CustomerName,
 		arg.PitchTag,
-		arg.CustomerRequest,
+		pq.Array(arg.CustomerRequest),
 		arg.RequestDeadline,
 	)
 	var i PitchRequest
@@ -48,7 +49,7 @@ func (q *Queries) CreatePitchRequest(ctx context.Context, arg CreatePitchRequest
 		&i.Status,
 		&i.CustomerName,
 		&i.PitchTag,
-		&i.CustomerRequest,
+		pq.Array(&i.CustomerRequest),
 		&i.RequestDeadline,
 		&i.AdminViewed,
 		&i.CreatedAt,
@@ -84,7 +85,7 @@ func (q *Queries) GetPitchRequestForUpdate(ctx context.Context, id int64) (Pitch
 		&i.Status,
 		&i.CustomerName,
 		&i.PitchTag,
-		&i.CustomerRequest,
+		pq.Array(&i.CustomerRequest),
 		&i.RequestDeadline,
 		&i.AdminViewed,
 		&i.CreatedAt,
@@ -124,9 +125,9 @@ type UpdatePitchRequestParams struct {
 	ID              int64
 	Status          string
 	PitchTag        string
-	CustomerRequest string
+	CustomerRequest []string
 	AdminViewed     bool
-	UpdatedAt       sql.NullTime
+	UpdatedAt       time.Time
 	RequestDeadline time.Time
 }
 
@@ -135,7 +136,7 @@ func (q *Queries) UpdatePitchRequest(ctx context.Context, arg UpdatePitchRequest
 		arg.ID,
 		arg.Status,
 		arg.PitchTag,
-		arg.CustomerRequest,
+		pq.Array(arg.CustomerRequest),
 		arg.AdminViewed,
 		arg.UpdatedAt,
 		arg.RequestDeadline,
@@ -148,7 +149,7 @@ func (q *Queries) UpdatePitchRequest(ctx context.Context, arg UpdatePitchRequest
 		&i.Status,
 		&i.CustomerName,
 		&i.PitchTag,
-		&i.CustomerRequest,
+		pq.Array(&i.CustomerRequest),
 		&i.RequestDeadline,
 		&i.AdminViewed,
 		&i.CreatedAt,
@@ -167,7 +168,7 @@ RETURNING id, username, role, full_name, email, password, password_changed, upda
 type UpdateUserParams struct {
 	ID        int64
 	Username  string
-	UpdatedAt sql.NullTime
+	UpdatedAt time.Time
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
@@ -216,7 +217,7 @@ func (q *Queries) ViewPitchRequests(ctx context.Context, arg ViewPitchRequestsPa
 			&i.Status,
 			&i.CustomerName,
 			&i.PitchTag,
-			&i.CustomerRequest,
+			pq.Array(&i.CustomerRequest),
 			&i.RequestDeadline,
 			&i.AdminViewed,
 			&i.CreatedAt,

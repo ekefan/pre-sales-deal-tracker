@@ -14,17 +14,17 @@ type Deal struct {
 	PitchID         sql.NullInt64
 	SalesRepName    string
 	CustomerName    string
-	ServiceToRender string
+	ServiceToRender []string
 	// it is either ongoing or closed
 	Status string
 	// tag for the status can be, working on: survey, proposal, costing depending
 	StatusTag           string
 	CurrentPitchRequest string
-	NetTotalCost        sql.NullString
-	Profit              sql.NullString
+	NetTotalCost        string
+	Profit              string
 	CreatedAt           time.Time
-	UpdatedAt           sql.NullTime
-	ClosedAt            sql.NullTime
+	UpdatedAt           time.Time
+	ClosedAt            time.Time
 	Awarded             bool
 }
 
@@ -35,11 +35,11 @@ type PitchRequest struct {
 	Status          string
 	CustomerName    string
 	PitchTag        string
-	CustomerRequest string
+	CustomerRequest []string
 	RequestDeadline time.Time
 	AdminViewed     bool
 	CreatedAt       time.Time
-	UpdatedAt       sql.NullTime
+	UpdatedAt       time.Time
 }
 
 type User struct {
@@ -51,6 +51,6 @@ type User struct {
 	Email           string
 	Password        string
 	PasswordChanged bool
-	UpdatedAt       sql.NullTime
+	UpdatedAt       time.Time
 	CreatedAt       time.Time
 }
