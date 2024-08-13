@@ -14,7 +14,7 @@ import (
 type CreateUsrReq struct {
 	Username string `json:"username" binding:"required,alphanum"`
 	Role     string `json:"Role" binding:"required,valid-role"`
-	FullName string `json:"fullname" binding:"required"`
+	FullName string `json:"fullname" binding:"required,alpha"`
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required,min=6"`
 }
@@ -23,7 +23,7 @@ type CreateUsrReq struct {
 type CreateUsrResp struct {
 	Role      string    `json:"Role"`
 	Username  string    `json:"username"`
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt int64 `json:"created_at"`
 }
 
 // adminCreateUserHandler http handler for the api end point for creating a new user
@@ -61,7 +61,7 @@ func (s *Server) adminCreateUserHandler(ctx *gin.Context) {
 	resp := CreateUsrResp{
 		Role:      user.Role,
 		Username:  user.Username,
-		CreatedAt: user.CreatedAt,
+		CreatedAt: user.CreatedAt.Unix(),
 	}
 	ctx.JSON(http.StatusOK, resp)
 }
