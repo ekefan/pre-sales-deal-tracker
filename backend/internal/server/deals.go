@@ -20,7 +20,7 @@ func (s *Server) getDealsHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	if !multipleAuthAccess(ctx, []string{utils.AdminRole, utils.ManagerRole, utils.SalesRole}) {
+	if !multipleAuthAccess(ctx, []string{utils.AdminRole, utils.ManagerRole}) {
 		return
 	}
 	args := db.AdminViewDealsParams{
@@ -62,15 +62,15 @@ func (s *Server) getOngoingDeals(ctx *gin.Context) {
 }
 
 type FilterDealReq struct {
-	CustomerName    *string `json:"customer_name"`
-	ServiceToRender *string `json:"service_to_render"`
-	Status          *string `json:"status"`
-	MaxProfit       *string `json:"max_profit"`
-	MinProfit       *string `json:"min_profit"`
-	Awarded         *bool   `json:"awarded"`
-	SalesRepName    *string `json:"sales_rep_name"`
-	PageSize        int32   `json:"page_size"`
-	PageID          int32   `json:"page_id"`
+	CustomerName    *string  `json:"customer_name"`
+	ServiceToRender []string `json:"service_to_render"`
+	Status          *string  `json:"status"`
+	MaxProfit       *string  `json:"max_profit"`
+	MinProfit       *string  `json:"min_profit"`
+	Awarded         *bool    `json:"awarded"`
+	SalesRepName    *string  `json:"sales_rep_name"`
+	PageSize        int32    `json:"page_size"`
+	PageID          int32    `json:"page_id"`
 }
 
 func (s *Server) getFilteredDeals(ctx *gin.Context) {
@@ -84,15 +84,15 @@ func (s *Server) getFilteredDeals(ctx *gin.Context) {
 		return
 	}
 	args := db.FilterDealsParams{
-		Column1: req.CustomerName,    // column1 == customer_name
-		Column2: req.ServiceToRender, // column2 == service_to_render
-		Column3: req.Status,          // column3 == status
-		Column4: req.MinProfit,       // column4 == min_profit
-		Column5: req.MaxProfit,       // column5 == max_profit
-		Column6: req.Awarded,         // column6 == awarded
-		Column7: req.SalesRepName,    // column7 == sales_rep_name
-		Limit:   req.PageSize,
-		Offset:  (req.PageID - 1) * req.PageSize,
+		CustomerName:    req.CustomerName,    // column1 == customer_name
+		ServiceToRender: req.ServiceToRender, // column2 == service_to_render
+		Status:          req.Status,          // column3 == status
+		Profit:          req.MinProfit,       // column4 == min_profit
+		Profit_2:        req.MaxProfit,       // column5 == max_profit
+		Awarded:         req.Awarded,         // column6 == awarded
+		SalesRepName:    req.SalesRepName,    // column7 == sales_rep_name
+		Limit:           req.PageSize,
+		Offset:          (req.PageID - 1) * req.PageSize,
 	}
 
 	deals, err := s.Store.FilterDeals(ctx, args)
@@ -112,7 +112,7 @@ func (s *Server) getFilteredDeals(ctx *gin.Context) {
 
 type CountFilterDealReq struct {
 	CustomerName    *string `json:"customer_name"`
-	ServiceToRender *string `json:"service_to_render"`
+	ServiceToRender []string `json:"service_to_render"`
 	Status          *string `json:"status"`
 	MaxProfit       *string `json:"max_profit"`
 	MinProfit       *string `json:"min_profit"`
@@ -132,13 +132,13 @@ func (s *Server) getCountFilteredDeals(ctx *gin.Context) {
 	}
 
 	args := db.CountFilteredDealsParams{
-		Column1: req.CustomerName,    // column1 == customer_name
-		Column2: req.ServiceToRender, // column2 == service_to_render
-		Column3: req.Status,          // column3 == status
-		Column4: req.MinProfit,       // column4 == min_profit
-		Column5: req.MaxProfit,       // column5 == max_profit
-		Column6: req.Awarded,         // column6 == awarded
-		Column7: req.SalesRepName,    // column7 == sales_rep_name
+		CustomerName:    req.CustomerName,    // column1 == customer_name
+		ServiceToRender: req.ServiceToRender, // column2 == service_to_render
+		Status:          req.Status,          // column3 == status
+		Profit:          req.MinProfit,       // column4 == min_profit
+		Profit_2:        req.MaxProfit,       // column5 == max_profit
+		Awarded:         req.Awarded,         // column6 == awarded
+		SalesRepName:    req.SalesRepName,    // column7 == sales_rep_name
 	}
 	count, err := s.Store.CountFilteredDeals(ctx, args)
 	if err != nil {
