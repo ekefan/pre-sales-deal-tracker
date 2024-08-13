@@ -6,12 +6,14 @@ import (
 
 	db "github.com/ekefan/deal-tracker/internal/db/sqlc"
 	"github.com/ekefan/deal-tracker/internal/server"
+	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 )
 
 // main entry point of the application
 func main() {
 	//connect to database
+	gin.SetMode(gin.TestMode)
 	config, err := server.LoadConfig(".env")
 	if err != nil {
 		log.Fatal(err)
