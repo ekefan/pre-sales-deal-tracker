@@ -6,7 +6,6 @@ package server
 // adminDeleteDealHandler
 // listUsersHandler
 import (
-	"database/sql"
 	"fmt"
 	"net/http"
 	"time"
@@ -21,7 +20,7 @@ type CreateDealReq struct {
 	PitchID             int64  `json:"pitch_id" binding:"required"`
 	SalesRepName        string `json:"sales_rep_name" binding:"required"`
 	CustomerName        string `json:"customer_name" binding:"required"`
-	ServiceToRender     string `json:"service_to_render" binding:"required"`
+	ServicesToRender     []string `json:"services_to_render" binding:"required"`
 	Status              string `json:"status" binding:"required"`
 	StatusTag           string `json:"status_tag" binding:"required"`
 	CurrentPitchRequest string `json:"current_pitch_request" binding:"required"`
@@ -32,15 +31,15 @@ type CreateDealResp struct {
 	PitchID             int64     `json:"pitch_id"`
 	SalesRepName        string    `json:"sales_rep_name"`
 	CustomerName        string    `json:"customer_name"`
-	ServiceToRender     string    `json:"service_to_render"`
+	ServiceToRender     []string    `json:"service_to_render"`
 	Status              string    `json:"status"`
 	StatusTag           string    `json:"status_tag"`
 	CurrentPitchRequest string    `json:"current_pitch_request"`
 	NetTotalCost        string    `json:"net_total_cost"`
 	Profit              string    `json:"profit"`
-	CreatedAt           time.Time `json:"created_at"`
-	UpdatedAt           time.Time `json:"updated_at"`
-	ClosedAt            time.Time `json:"closed_at"`
+	CreatedAt           int64 `json:"created_at"`
+	UpdatedAt           int64 `json:"updated_at"`
+	ClosedAt            int64 `json:"closed_at"`
 	Awarded             bool      `json:"awarded"`
 }
 
@@ -62,7 +61,7 @@ func (s *Server) adminCreateDealHandler(ctx *gin.Context) {
 		PitchID:             db.SetNullPitchID(req.PitchID),
 		SalesRepName:        req.SalesRepName,
 		CustomerName:        req.CustomerName,
-		ServiceToRender:     req.ServiceToRender,
+		ServiceToRender:     req.ServicesToRender,
 		Status:              req.Status,
 		StatusTag:           req.StatusTag,
 		CurrentPitchRequest: req.CurrentPitchRequest,
@@ -85,11 +84,11 @@ func (s *Server) adminCreateDealHandler(ctx *gin.Context) {
 		Status:              deal.Status,
 		StatusTag:           deal.StatusTag,
 		CurrentPitchRequest: deal.CurrentPitchRequest,
-		NetTotalCost:        deal.NetTotalCost.String,
-		Profit:              deal.Profit.String,
-		CreatedAt:           deal.CreatedAt,
-		UpdatedAt:           deal.UpdatedAt.Time,
-		ClosedAt:            deal.ClosedAt.Time,
+		NetTotalCost:        deal.NetTotalCost,
+		Profit:              deal.Profit,
+		CreatedAt:           deal.CreatedAt.Unix(),
+		UpdatedAt:           deal.UpdatedAt.Unix(),
+		ClosedAt:            deal.ClosedAt.Unix(),
 		Awarded:             deal.Awarded,
 	}
 
@@ -99,11 +98,10 @@ func (s *Server) adminCreateDealHandler(ctx *gin.Context) {
 // UpdateDealReq holds fields used to update a deal
 type UpdateDealReq struct {
 	ID                  int64    `json:"id" binding:"required"`
-	ServiceToRender     string   `json:"service_to_render" binding:"required"`
+	ServicesToRender     []string   `json:"services_to_render" binding:"required"`
 	Status              string   `json:"status" binding:"required"`
 	StatusTag           string   `json:"status_tag" binding:"required"`
 	CurrentPitchRequest string   `json:"current_pitch_request" binding:"required"`
-	UpdatedAt           UnixTime `json:"updated_at" binding:"required"`
 	ClosedAt            UnixTime `json:"closed_at"`
 }
 
@@ -129,22 +127,14 @@ func (s *Server) adminUpdateDealHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-	updatedAt := sql.NullTime{
-		Time:  req.UpdatedAt.Time,
-		Valid: req.UpdatedAt.Valid,
-	}
-	closedAt := sql.NullTime{
-		Time:  req.UpdatedAt.Time,
-		Valid: req.ClosedAt.Valid,
-	}
 	updatedDeal, err := s.Store.AdminUpdateDeal(ctx, db.AdminUpdateDealParams{
 		ID:                  deal.ID,
-		ServiceToRender:     req.ServiceToRender,
+		ServiceToRender:     req.ServicesToRender,
 		Status:              req.Status,
 		StatusTag:           req.StatusTag,
 		CurrentPitchRequest: req.CurrentPitchRequest,
-		UpdatedAt:           updatedAt,
-		ClosedAt:            closedAt,
+		UpdatedAt:           time.Now(),
+		ClosedAt:            req.ClosedAt.Time,
 	})
 
 	if err != nil {
@@ -163,11 +153,11 @@ func (s *Server) adminUpdateDealHandler(ctx *gin.Context) {
 		Status:              updatedDeal.Status,
 		StatusTag:           updatedDeal.StatusTag,
 		CurrentPitchRequest: updatedDeal.CurrentPitchRequest,
-		NetTotalCost:        updatedDeal.NetTotalCost.String,
-		Profit:              updatedDeal.Profit.String,
-		CreatedAt:           updatedDeal.CreatedAt,
-		UpdatedAt:           updatedDeal.UpdatedAt.Time,
-		ClosedAt:            updatedDeal.ClosedAt.Time,
+		NetTotalCost:        updatedDeal.NetTotalCost,
+		Profit:              updatedDeal.Profit,
+		CreatedAt:           updatedDeal.CreatedAt.Unix(),
+		UpdatedAt:           updatedDeal.UpdatedAt.Unix(),
+		ClosedAt:            updatedDeal.ClosedAt.Unix(),
 		Awarded:             updatedDeal.Awarded,
 	}
 
@@ -237,6 +227,6 @@ func (s *Server) listUsersHandler(ctx *gin.Context) {
 }
 
 // ===== TODO =====
-// write tests for backend service....
-///////////////////////
-///Test working of authorization
+///////////////////////////
+// start the frontend.....
+// implement Handling user sessions
