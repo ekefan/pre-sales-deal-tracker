@@ -1,7 +1,6 @@
 package server
 
 import (
-	"database/sql"
 	"fmt"
 	"net/http"
 	"time"
@@ -19,7 +18,7 @@ type PitchReq struct {
 	Status          string   `json:"status" binding:"required"`
 	CustomerName    string   `json:"customer_name" binding:"required"`
 	PitchTag        string   `json:"pitch_tag" binding:"required"`
-	CustomerRequest string   `json:"customer_request" binding:"required"`
+	CustomerRequest []string   `json:"customer_request" binding:"required"`
 	RequestDeadline UnixTime `json:"request_deadline" binding:"required"`
 }
 
@@ -58,11 +57,11 @@ func (s *Server) salesCreatePitchReqHandler(ctx *gin.Context) {
 		Status:          pitchRequest.Status,
 		CustomerName:    pitchRequest.CustomerName,
 		PitchTag:        pitchRequest.PitchTag,
-		CustomerRequest: pitchRequest.CustomerRequest,
-		RequestDeadline: pitchRequest.RequestDeadline,
+		CustomerRequests: pitchRequest.CustomerRequest,
+		RequestDeadline: pitchRequest.RequestDeadline.Unix(),
 		AdminViewed:     pitchRequest.AdminViewed,
-		CreatedAt:       pitchRequest.CreatedAt,
-		UpdatedAt:       pitchRequest.UpdatedAt.Time,
+		CreatedAt:       pitchRequest.CreatedAt.Unix(),
+		UpdatedAt:       pitchRequest.UpdatedAt.Unix(),
 	}
 	ctx.JSON(http.StatusOK, resp)
 }
@@ -91,16 +90,10 @@ func (s *Server) salesUpdateuserHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-	// Set update time to time now....
-	updateTime := sql.NullTime{
-		Time:  time.Now(),
-		Valid: true,
-	}
-	// Hash password
 	args := db.UpdateUserParams{
 		ID:        usr.ID,
 		Username:  req.Username,
-		UpdatedAt: updateTime,
+		UpdatedAt: time.Now(),
 	}
 	// get
 	newUsr, err := s.Store.UpdateUser(ctx, args)
@@ -118,7 +111,7 @@ func (s *Server) salesUpdateuserHandler(ctx *gin.Context) {
 		Fullname:        newUsr.FullName,
 		Email:           newUsr.Email,
 		PasswordChanged: newUsr.PasswordChanged,
-		UpdatedAt:       newUsr.UpdatedAt.Time,
+		UpdatedAt:       newUsr.UpdatedAt,
 		CreatedAt:       newUsr.CreatedAt,
 	}
 	ctx.JSON(http.StatusOK, resp)
