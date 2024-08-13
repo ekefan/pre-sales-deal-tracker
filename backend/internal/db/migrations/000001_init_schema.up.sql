@@ -6,7 +6,7 @@ CREATE TABLE "users" (
   "email" varchar UNIQUE NOT NULL,
   "password" varchar NOT NULL,
   "password_changed" bool NOT NULL DEFAULT false,
-  "updated_at" timestamp DEFAULT null,
+  "updated_at" TIMESTAMP NOT NULL DEFAULT '0001-01-01 00:00:00',
   "created_at" timestamp NOT NULL DEFAULT (now())
 );
 
@@ -15,15 +15,15 @@ CREATE TABLE "deals" (
   "pitch_id" bigint UNIQUE,
   "sales_rep_name" varchar NOT NULL,
   "customer_name" varchar NOT NULL,
-  "service_to_render" varchar NOT NULL DEFAULT 'none',
-  "status" varchar NOT NULL DEFAULT 'ongoing',
+  "service_to_render" TEXT[],
+  "status" varchar NOT NULL,
   "status_tag" varchar NOT NULL,
   "current_pitch_request" varchar NOT NULL,
-  "net_total_cost" numeric(11,2),
-  "profit" numeric(11,2),
-  "created_at" timestamp DEFAULT (now()) NOT NULL,
-  "updated_at" timestamp DEFAULT NULL,
-  "closed_at" timestamp DEFAULT NULL,
+  "net_total_cost" numeric(11,2) NOT NULL DEFAULT '0',
+  "profit" numeric(11,2) NOT NULL DEFAULT '0',
+  "created_at" timestamp NOT NULL DEFAULT (now()) ,
+  "updated_at" TIMESTAMP NOT NULL DEFAULT '0001-01-01 00:00:00',
+  "closed_at" timestamp NOT NULL DEFAULT '0001-01-01 00:00:00',
   "awarded" bool DEFAULT false NOT NULL
 );
 
@@ -31,14 +31,14 @@ CREATE TABLE "pitch_requests" (
   "id" bigserial PRIMARY KEY,
   "sales_rep_id" bigint NOT NULL,
   "sales_rep_name" varchar NOT NULL,
-  "status" varchar NOT NULL DEFAULT 'ongoing',
+  "status" varchar NOT NULL,
   "customer_name" varchar NOT NULL,
   "pitch_tag" varchar NOT NULL,
-  "customer_request" varchar NOT NULL DEFAULT 'proposal',
-  "request_deadline" timestamp NOT NULL DEFAULT(CURRENT_TIMESTAMP + INTERVAL '3 days'),
+  "customer_request" TEXT[],
+  "request_deadline" TIMESTAMP NOT NULL DEFAULT (CURRENT_TIMESTAMP + INTERVAL '3 days'),
   "admin_viewed" bool DEFAULT false NOT NULL,
   "created_at" timestamp DEFAULT (now()) NOT NULL,
-  "updated_at" timestamp DEFAULT NULL
+  "updated_at" TIMESTAMP NOT NULL DEFAULT '0001-01-01 00:00:00'
 );
 
 CREATE INDEX ON "users" ("role");
