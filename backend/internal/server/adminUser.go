@@ -1,7 +1,6 @@
 package server
 
 import (
-	"database/sql"
 	"fmt"
 	"net/http"
 	"time"
@@ -110,16 +109,12 @@ func (s *Server) adminUpdateUserHandler(ctx *gin.Context) {
 		return
 	}
 	// Set update time to time now....
-	updateTime := sql.NullTime{
-		Time:  time.Now(),
-		Valid: true,
-	}
 	args := db.AdminUpdateUserParams{
 		ID:        usr.ID,
 		FullName:  req.Fullname,
 		Email:     req.Email,
 		Username:  req.Username,
-		UpdatedAt: updateTime,
+		UpdatedAt: time.Now(),
 	}
 	// get
 	newUsr, err := s.Store.AdminUpdateUser(ctx, args)
@@ -136,7 +131,7 @@ func (s *Server) adminUpdateUserHandler(ctx *gin.Context) {
 		Role:            newUsr.Role,
 		Fullname:        newUsr.FullName,
 		Email:           newUsr.Email,
-		UpdatedAt:       newUsr.UpdatedAt.Time,
+		UpdatedAt:       newUsr.UpdatedAt,
 		PasswordChanged: newUsr.PasswordChanged,
 		CreatedAt:       newUsr.CreatedAt,
 	}
