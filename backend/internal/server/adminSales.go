@@ -5,7 +5,6 @@ package server
 // userLogin
 //
 import (
-	"database/sql"
 	"fmt"
 	"net/http"
 	"time"
@@ -28,8 +27,8 @@ type LoginResp struct {
 	Role      string    `json:"role"`
 	FullName  string    `json:"fullname"`
 	Email     string    `json:"email"`
-	UpdatedAt time.Time `json:"updated_at"`
-	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt int64 `json:"updated_at"`
+	CreatedAt int64 `json:"created_at"`
 }
 
 type UserResp struct {
@@ -55,10 +54,6 @@ func (s *Server) userLogin(ctx *gin.Context) {
 		return
 	}
 
-	// if user has not updated password...
-	// redirect user to update password...
-	//set password,
-	//update newPassword
 	//this is frontend logic
 	if !utils.CheckPasswordHash(req.Password, user.Password) {
 		ctx.JSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("password invalid: %v", err)))
@@ -80,8 +75,8 @@ func (s *Server) userLogin(ctx *gin.Context) {
 		Role:      user.Role,
 		FullName:  user.FullName,
 		Email:     user.Email,
-		UpdatedAt: user.UpdatedAt.Time,
-		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt.Unix(),
+		CreatedAt: user.CreatedAt.Unix(),
 	}
 	resp := UserResp{
 		AccessToken: accessToken,
@@ -95,7 +90,7 @@ type UpdatePitchReq struct {
 	ID              int64    `json:"pitch_request_id" binding:"required"`
 	Status          string   `json:"status" binding:"required"`
 	PitchTag        string   `json:"pitch_tag" binding:"required"`
-	CustomerRequest string   `json:"customer_request" binding:"required"`
+	CustomerRequests []string   `json:"customer_requests" binding:"required"`
 	AdminViewed     bool     `json:"admin_viewed"`
 	RequestDealine  UnixTime `json:"request_deadline"`
 }
@@ -107,11 +102,11 @@ type PitchResp struct {
 	Status          string    `json:"status"`
 	CustomerName    string    `json:"customer_name"`
 	PitchTag        string    `json:"pitch_tag"`
-	CustomerRequest string    `json:"customer_request"`
-	RequestDeadline time.Time `json:"request_deadline"`
+	CustomerRequests []string    `json:"customer_requests"`
+	RequestDeadline int64 `json:"request_deadline"`
 	AdminViewed     bool      `json:"admin_viewed"`
-	CreatedAt       time.Time `json:"created_at"`
-	UpdatedAt       time.Time `json:"updated_at"`
+	CreatedAt       int64 `json:"created_at"`
+	UpdatedAt       int64 `json:"updated_at"`
 }
 
 func (s *Server) updatePitchReqHandler(ctx *gin.Context) {
@@ -135,10 +130,6 @@ func (s *Server) updatePitchReqHandler(ctx *gin.Context) {
 		return
 	}
 
-	updateTime := sql.NullTime{
-		Time:  time.Now(),
-		Valid: true,
-	}
 	var deadline time.Time
 	if req.RequestDealine.Valid {
 		deadline = req.RequestDealine.Time
@@ -149,9 +140,9 @@ func (s *Server) updatePitchReqHandler(ctx *gin.Context) {
 		ID:              pitchReq.ID,
 		Status:          req.Status,
 		PitchTag:        req.PitchTag,
-		CustomerRequest: req.CustomerRequest,
+		CustomerRequest: req.CustomerRequests,
 		AdminViewed:     req.AdminViewed,
-		UpdatedAt:       updateTime,
+		UpdatedAt:       time.Now(),
 		RequestDeadline: deadline,
 	}
 	updatedPitchReq, err := s.Store.UpdatePitchRequest(ctx, args)
@@ -169,11 +160,11 @@ func (s *Server) updatePitchReqHandler(ctx *gin.Context) {
 		Status:          updatedPitchReq.Status,
 		CustomerName:    updatedPitchReq.CustomerName,
 		PitchTag:        updatedPitchReq.PitchTag,
-		CustomerRequest: updatedPitchReq.CustomerRequest,
-		RequestDeadline: updatedPitchReq.RequestDeadline,
+		CustomerRequests: updatedPitchReq.CustomerRequest,
+		RequestDeadline: updatedPitchReq.RequestDeadline.Unix(),
 		AdminViewed:     updatedPitchReq.AdminViewed,
-		CreatedAt:       updatedPitchReq.CreatedAt,
-		UpdatedAt:       updatedPitchReq.UpdatedAt.Time,
+		CreatedAt:       updatedPitchReq.CreatedAt.Unix(),
+		UpdatedAt:       updatedPitchReq.UpdatedAt.Unix(),
 	}
 	ctx.JSON(http.StatusOK, resp)
 }
