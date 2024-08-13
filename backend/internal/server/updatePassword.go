@@ -1,7 +1,6 @@
 package server
 
 import (
-	"database/sql"
 	"fmt"
 	"net/http"
 	"time"
@@ -45,10 +44,7 @@ func (s *Server) updatePassWordLoggedIn(ctx *gin.Context) {
 		ID:              req.UserID,
 		Password:        req.Password,
 		PasswordChanged: true,
-		UpdatedAt: sql.NullTime{
-			Time:  time.Now(),
-			Valid: true,
-		},
+		UpdatedAt:  time.Now(),
 	})
 	if success != nil {
 		if sqlNoRowsHandler(ctx, err) {
