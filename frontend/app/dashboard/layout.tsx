@@ -1,12 +1,10 @@
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <div className="bg-slate-700 z-10 w-full h-screen md:w-5/6 md:rounded-r-2xl">
-        <div className="flex p-4 gap-2 bg-white flex-col md:flex-row md:overflow-hidden">
-          <div className="border p-2">
-            <p>SideNav</p>
-          </div>
-          <div className="border flex-grow md:overflow-y-auto">{children}</div>
+      <div className="bg-slate-200 flex w-full h-screen md:w-11/12 md:rounded-r-2xl items-center p-2">
+        <div className="bg-slate-100 w-full h-full rounded md:absolute md:right-0 md:h-5/6 md:rounded-l-2xl md:w-11/12 flex gap-2 p-3 flex-col md:flex-row">
+          <div className="bg-slate-50 rounded md:rounded-2xl">SideNav</div>
+          <main className="bg-slate-50 rounded flex-grow md:rounded-2xl">{children}</main>
         </div>
       </div>
     </>
