@@ -5,10 +5,12 @@
 - Client-Server Model: The frontend (client) interacts with the backend(server) through a well-defined set of RESTful APIs. The backend handles the applications logic, processes client requests and interacts with the backend to get the desired data.
 - RESTful API: The backend exposes endpoints for various operations, allowing the frontend to fetch, create, update, delete and process data as needed.
 ### Backend:
-- The backend is responsible for processing requests from the frontend. Key responsibilities include:
+- The backend is responsible for processing requests from the client. Key responsibilities include:
     - Data Management: handles the CRUD operations for deals, customers, users and any related entities
     - Business Logi: implements the logic to manage deals and track their progress through various stages, generating a means to make data driven decisions about deal negotiations in the future.
     - API Endpoints: Provides RESTful API endpoints to supply data to the frontend, ensuring seamles communication between the client and server
+### Frontend:
+- Working on it...
 ### Technologies Used:
 - Programming Languages: Go, Node.js(typescript)
 - Frameworks: Gin, Next.js
