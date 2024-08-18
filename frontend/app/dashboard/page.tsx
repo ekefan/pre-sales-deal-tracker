@@ -23,24 +23,3 @@ export default async function Page() {
     </div>
   );
 }
-
-/*
-main
-  div
-    div
-    div
-      section
-        div
-          div
-*/
-
-/*
- <div className="flex gap-5 justify-end items-center mt-5 bg-sky-400 p-2">
-            <button className="border rounded">
-              <MoveLeft />
-            </button>
-            <button className="border rounded">
-              <MoveRight />
-            </button>
-          </div>
-*/
