@@ -15,4 +15,4 @@
 - Programming Languages: Go, Node.js(typescript)
 - Frameworks: Gin, Next.js
 - Database: PostgreSQL
-- UI & components: Tailwind, Schdcn UI
+- UI & components: Tailwind, Shadcn UI
