@@ -79,7 +79,7 @@ export default function NavLinks({ user }: Prop) {
         key="profile"
         href="/dashboard/profile"
         className={clsx(
-          " w-full bg-gray-100 flex h-[48px] items-center justify-center md:justify-normal gap-2 rounded-md p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-500",
+          " w-full bg-gray-100 flex h-[32px] md:h-[48px] items-center justify-center md:justify-normal gap-2 rounded-md p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-500",
           {
             "bg-sky-100 text-blue-600": pathname === "/dashboard/profile",
           }
@@ -88,7 +88,7 @@ export default function NavLinks({ user }: Prop) {
         <User className="size-4 md:size-6" />
         <p className="hidden md:block">Profile</p>
       </Link>
-      <form className="w-full bg-gray-100 flex h-[48px] items-center justify-center md:justify-normal gap-2 rounded-md p-3 text-sm font-medium hover:bg-green-100 hover:text-green-400">
+      <form className="w-full bg-gray-100 flex h-[32px] md:h-[48px] items-center justify-center md:justify-normal gap-2 rounded-md p-3 text-sm font-medium hover:bg-green-100 hover:text-green-400">
         <LogOut className="size-4 md:size-6" />
         <button className="hidden md:flex  items-start grow pl-1">
           Log out
