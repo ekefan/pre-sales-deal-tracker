@@ -34,7 +34,6 @@ const salesLinks: Links[] = [
 const managerLinks: Links[] = [
   { name: "Home", href: "/dashboard", icon: House },
   { name: "Deals", href: "/dashboard/deals", icon: Handshake },
-  { name: "Staff", href: "/dashboard/users", icon: UsersRound },
 ];
 
 type Prop = {
