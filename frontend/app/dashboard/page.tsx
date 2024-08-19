@@ -4,7 +4,7 @@ export default async function Page() {
   const dateString = newDate.toDateString();
 
   return (
-    <div className="flex flex-col pb-2 px-2 h-full w-full relative">
+    <div className="flex flex-col p-2 h-full w-full xl:w-11/12 relative text-sm">
       <div className="flex flex-col p-3 bg-slate-50 gap-4 sm:text-base md:text-lg text-slate-700">
         <div>
           <p className="font-medium">Welcome {`<first name>`}</p>
