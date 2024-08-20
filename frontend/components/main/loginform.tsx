@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function LoginForm() {
   return (
     <form action="">
@@ -24,7 +26,7 @@ export default function LoginForm() {
         </div>
       </div>
       <div className="w-full flex justify-center items-center">
-        <button className="border rounded-md w-1/4 ">login</button>
+        <Link href="/dashboard" className="border flex items-center justify-center rounded-md w-1/4 ">login</Link>
       </div>
     </div>
   </form>

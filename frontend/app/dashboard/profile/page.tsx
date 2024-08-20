@@ -1,3 +1,4 @@
+import Link from "next/link";
 export default async function Page() {
   return (
     <div className="flex text-sm md:text-base flex-col p-2 h-full w-full sm:w-5/6 md:w-10/12 lg:w-8/12 xl:w-6/12 relative">
@@ -5,7 +6,7 @@ export default async function Page() {
       <div className="px-3 py-1 flex flex-col gap-3 w-full">
         <div className="flex justify-between items-center">
           <p className="font-medium">Personal Information</p>
-          <button className="rounded-lg items-center bg-slate-800 hover:bg-sky-200 hover:text-slate-900 text-white p-2">Update profile</button>
+          <Link href="/dashboard/profile/update" className="rounded-lg items-center bg-slate-800 hover:bg-sky-200 hover:text-slate-900 text-white p-2">Update profile</Link>
         </div>
         <div className="flex border rounded-xl p-2 gap-1">
           <p>username:</p>
@@ -20,7 +21,7 @@ export default async function Page() {
           <p>{"<email>"}</p>
         </div>
         <div>
-          <button className="rounded-lg border p-2 font-medium hover:bg-green-100 hover:text-green-400">Update password</button>
+          <Link href="/dashboard/profile/password" className="rounded-lg border p-2 font-medium hover:bg-green-100 hover:text-green-400">Update password</Link>
         </div>
       </div>
     </div>
