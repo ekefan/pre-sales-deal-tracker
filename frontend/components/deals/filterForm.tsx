@@ -239,7 +239,7 @@ export function FilterDealsForm() {
           )}
         />
         <Button className="mt-4 w-1/6 bg-slate-800 hover:bg-slate-900" type="submit">
-          Submit
+          Filter
         </Button>
       </form>
     </Form>
