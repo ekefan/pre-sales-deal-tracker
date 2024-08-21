@@ -76,6 +76,7 @@ export function UpdateDealForm(props: CreateDealProps) {
                   placeholder="Select services"
                 />
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />
