@@ -3,7 +3,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { MultiSelect } from "@/components/ui/mutiSelect";
+import { useUser } from "@/context/userContext";
 
 import {
   Form,
@@ -16,25 +16,23 @@ import {
 import { Input } from "@/components/ui/input";
 
 const formSchema = z.object({
-  username: z.string(),
-  role: z.string(),
-  fullname: z.string(),
-  email: z.string(),
+  username: z.string().min(1),
+  userId: z.number().optional(),
+  fullname: z.string().min(1),
+  email: z.string().email(),
 });
 
-type UpdateUserProps = {
-    username: string,
-    fullname: string,
-    email: string,
-}
 
-export function UpdateUserForm(user: UpdateUserProps) {
+
+export function UpdateUserForm() {
+  const { user }  = useUser();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      username: user.username,
-      fullname:  user.fullname,
-      email: user.email,
+    defaultValues: user || {
+      userId: 0,
+      username: "",
+      fullname: "",
+      email: "",
     },
   });
 

@@ -1,5 +1,5 @@
 import Link from "next/link";
-
+import { PitchReqCard } from "@/components/pitchRequests/card";
 export default async function Page() {
   return (
     <div className="flex flex-col text-sm md:text-base p-2 h-full w-full xl:w-11/12 relative">
@@ -35,7 +35,7 @@ export default async function Page() {
               <p>deal</p>
             </Link>
           </div>
-          <div className="bg-pink-300 w-full h-32 rounded-lg border"></div>
+          <PitchReqCard/>
         </section>
       </div>
     </div>

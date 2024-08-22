@@ -6,7 +6,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import Link from "next/link";
-
+import { DealCard } from "@/components/deals/card";
 export default function Page() {
   return (
     <>
@@ -28,9 +28,9 @@ export default function Page() {
         <div className="flex flex-col gap-3  p-3 w-full grow h-auto">
           <section className="flex flex-col w-full h-full gap-3 ">
             <div className="bg-green-200 w-full h-32 rounded-lg border flex justify-end items-center">
-              <Link href="/dashboard/deals/update" className="border p-2 rounded-xl h-full flex items-center justify-center bg-green-500"><p>update</p></Link>
+ 
             </div>
-            <div className="bg-yellow-200 w-full h-32 rounded-lg border"></div>
+            <DealCard />
             <div className="bg-indigo-300 w-full h-32 rounded-lg border"></div>
             <div className="bg-pink-300 w-full h-32 rounded-lg border"></div>
           </section>
