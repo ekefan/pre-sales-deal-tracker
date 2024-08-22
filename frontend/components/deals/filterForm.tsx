@@ -1,12 +1,4 @@
 "use client";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -18,7 +10,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { string, z } from "zod";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -31,19 +23,18 @@ import {
 } from "@/components/ui/select";
 import { MultiSelect } from "@/components/ui/mutiSelect";
 
+export const services = [
+  { label: "Service 1", value: "service1" },
+  { label: "Service 2", value: "service2" },
+  { label: "Service 3", value: "service3" },
+  { label: "Service 4", value: "service4" },
+  { label: "Service 5", value: "service5" },
+  { label: "goat meat", value: "goat" },
+  { label: "beans", value: "beans" },
+  { label: "rice", value: "rice" },
 
-const services = [
-    { label: "Service 1", value: "service1" },
-    { label: "Service 2", value: "service2" },
-    { label: "Service 3", value: "service3" },
-    { label: "Service 4", value: "service4" },
-    { label: "Service 5", value: "service5" },
-    { label: "goat meat", value: "goat" },
-    { label: "beans", value: "beans" },
-    { label: "rice", value: "rice" },
-  
-    // Add more services as needed
-  ];
+  // Add more services as needed
+];
 
 const FormSchema = z.object({
   customerName: z.string().optional().nullable(),
@@ -238,7 +229,10 @@ export function FilterDealsForm() {
             </FormItem>
           )}
         />
-        <Button className="mt-4 w-1/6 bg-slate-800 hover:bg-slate-900" type="submit">
+        <Button
+          className="mt-4 w-1/6 bg-slate-800 hover:bg-slate-900"
+          type="submit"
+        >
           Filter
         </Button>
       </form>
