@@ -37,21 +37,21 @@ func NewServer(store db.Store, config Config) (*Server, error) {
 // SetupRouter ini
 func (s *Server) SetupRouter() {
 	router := gin.Default()
-
 	// register validation to gin context
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		v.RegisterValidation("valid-role", utils.RoleValidator)
 	}
 	corsConfig := cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000"}, // Change to your frontend's origin                AllowMethods:     []string{"POST", "GET", "OPTIONS", "PUT", "DELETE"},
-		AllowHeaders:     []string{"Origin", "Authorization", "Content-Type"},
+		AllowOrigins:     []string{"http://localhost:3000"}, // Allow all origins
 		AllowMethods:     []string{"POST", "GET", "OPTIONS", "PUT", "DELETE"},
+		AllowHeaders:     []string{"Origin", "Authorization", "Content-Type"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}
 
 	router.Use(cors.New(corsConfig))
+	
 	// ADMIN
 	router.POST("/users", s.adminCreateUserHandler)
 	router.POST("/users/login", s.userLogin) //added token
@@ -61,7 +61,7 @@ func (s *Server) SetupRouter() {
 	authRoute.PUT("/users/update/", s.adminUpdateUserHandler)                   //added token authorization
 	authRoute.DELETE("/users/delete/:id/", s.adminDeleteUserHandler)            //added token authorization
 	authRoute.POST("/admin/deals", s.adminCreateDealHandler)                    // added token authorization
-	authRoute.PUT("admin/deals/update", s.adminUpdateDealHandler)               //added token authorization
+	authRoute.PUT("/admin/deals/update", s.adminUpdateDealHandler)               //added token authorization
 	authRoute.DELETE("/admin/deals/delete/:deal_id/", s.adminDeleteDealHandler) //added token authorization
 	authRoute.GET("/users", s.listUsersHandler)                                 //added  token authorization
 
@@ -71,7 +71,7 @@ func (s *Server) SetupRouter() {
 	authRoute.GET("/deals", s.getDealsHandler)                     // added token authorization
 	authRoute.GET("/deals/vas", s.getOngoingDeals)                 //added token authorization
 	authRoute.GET("/deals/filtered", s.getFilteredDeals)           // added token authorization
-	authRoute.GET("deals/filtered/count", s.getCountFilteredDeals) //added token authorization
+	authRoute.GET("/deals/filtered/count", s.getCountFilteredDeals) //added token authorization
 	// handler exist in sales... updates users username only for sales
 	authRoute.PUT("/sales/update/user", s.salesUpdateuserHandler)
 	//SALES-REP
@@ -81,7 +81,7 @@ func (s *Server) SetupRouter() {
 	//change password should be separate                                 //added token authorization (for sales only)
 	authRoute.GET("/pitchrequest/", s.salesViewPitchRequests)                                                        // added token authorization
 	authRoute.DELETE("/sales/pitchReq/delete/:sales_username/:sales_rep_id/:pitch_id", s.salesDeletePitchReqHandler) // added token authorization
-	authRoute.GET("sales/deals", s.getSalesDeals)                                                                    //added token authorization
+	authRoute.GET("/sales/deals", s.getSalesDeals)                                                                    //added token authorization
 	// authRoute.GET("sales/count/deals", s.getSalesDealsCount)
 
 	//Password Update
