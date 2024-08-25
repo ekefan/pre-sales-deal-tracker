@@ -2,10 +2,12 @@ package server
 
 import (
 	"fmt"
+	"time"
 
 	db "github.com/ekefan/deal-tracker/internal/db/sqlc"
 	"github.com/ekefan/deal-tracker/internal/token"
 	"github.com/ekefan/deal-tracker/internal/utils"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
@@ -40,14 +42,23 @@ func (s *Server) SetupRouter() {
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		v.RegisterValidation("valid-role", utils.RoleValidator)
 	}
+	corsConfig := cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000"}, // Change to your frontend's origin                AllowMethods:     []string{"POST", "GET", "OPTIONS", "PUT", "DELETE"},
+		AllowHeaders:     []string{"Origin", "Authorization", "Content-Type"},
+		AllowMethods:     []string{"POST", "GET", "OPTIONS", "PUT", "DELETE"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}
 
+	router.Use(cors.New(corsConfig))
 	// ADMIN
 	router.POST("/users", s.adminCreateUserHandler)
 	router.POST("/users/login", s.userLogin) //added token
 
 	authRoute := router.Group("/a").Use(authMiddleware(s.TokenMaker))
 	//this update user... updates the users full name, email, or username...
-	authRoute.PUT("/users/update/", s.adminUpdateUserHandler)                //added token authorization
+	authRoute.PUT("/users/update/", s.adminUpdateUserHandler)                   //added token authorization
 	authRoute.DELETE("/users/delete/:id/", s.adminDeleteUserHandler)            //added token authorization
 	authRoute.POST("/admin/deals", s.adminCreateDealHandler)                    // added token authorization
 	authRoute.PUT("admin/deals/update", s.adminUpdateDealHandler)               //added token authorization
@@ -67,10 +78,10 @@ func (s *Server) SetupRouter() {
 	authRoute.POST("/sales/pitchReq", s.salesCreatePitchReqHandler) //added token authorization
 
 	//this should be the general update user without even for password
-	 //change password should be separate                                 //added token authorization (for sales only)
-	authRoute.GET("/pitchrequest/", s.salesViewPitchRequests)                                        // added token authorization
+	//change password should be separate                                 //added token authorization (for sales only)
+	authRoute.GET("/pitchrequest/", s.salesViewPitchRequests)                                                        // added token authorization
 	authRoute.DELETE("/sales/pitchReq/delete/:sales_username/:sales_rep_id/:pitch_id", s.salesDeletePitchReqHandler) // added token authorization
-	authRoute.GET("sales/deals", s.getSalesDeals)                                                    //added token authorization
+	authRoute.GET("sales/deals", s.getSalesDeals)                                                                    //added token authorization
 	// authRoute.GET("sales/count/deals", s.getSalesDealsCount)
 
 	//Password Update
