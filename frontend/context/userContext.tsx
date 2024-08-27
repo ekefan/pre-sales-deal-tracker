@@ -3,8 +3,8 @@
 import React, { createContext, useContext, useState } from 'react';
 
 type UserContextType = {
-  user: { userId: number; username: string; fullname: string; email: string } | null;
-  setUser: (user: { userId: number; username: string; fullname: string; email: string }) => void;
+  user: LoginResp | null;
+  setUser: (user: LoginResp) => void;
 };
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
