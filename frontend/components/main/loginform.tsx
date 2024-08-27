@@ -1,5 +1,4 @@
 "use client";
-import Link from "next/link";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -8,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -16,7 +14,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useUser } from "@/context/userContext";
-import {useRouter} from "next/navigation"
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   username: z.string().min(1, { message: "username is required" }),
@@ -28,23 +26,20 @@ export default function LoginForm() {
     resolver: zodResolver(formSchema),
   });
 
-  const {setUser} = useUser()
+  const { setUser } = useUser();
   const router = useRouter();
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const response = await axios.post<LoginResp>('/api/login', {
+      const response = await axios.post<User>("/api/login", {
         username: values.username,
         password: values.password,
       });
       const user = response.data;
-
       //set context here
-      setUser(user)
+      setUser(user);
       // if user is not null or empty link to dashboard...
-      router.push("/dashboard")
-
-      
+      router.push("/dashboard");
     } catch (error) {
       console.log("Login error:", error);
     }
