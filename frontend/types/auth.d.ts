@@ -7,3 +7,8 @@ declare interface LoginResp {
     updatedAt: number;
     createdAt: number;
   }
+
+  declare interface User {
+    access_token: string;
+    user: LoginResp
+}
