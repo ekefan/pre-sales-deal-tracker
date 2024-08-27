@@ -15,6 +15,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useUser } from "@/context/userContext";
+import {useRouter} from "next/navigation"
 
 const formSchema = z.object({
   username: z.string().min(1, { message: "username is required" }),
@@ -36,20 +38,26 @@ export default function LoginForm() {
     resolver: zodResolver(formSchema),
   });
 
+  const {setUser} = useUser()
+  const router = useRouter();
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       const response = await axios.post<LoginResp>('/api/login', {
         username: values.username,
         password: values.password,
       });
-
-      console.log("Response Status:", response.status);
       const user = response.data;
-      console.log(user);
+
+      //set context here
+      setUser(user)
+      // if user is not null or empty link to dashboard...
+      router.push("/dashboard")
+
+      
     } catch (error) {
       console.log("Login error:", error);
     }
-    console.log(values);
   }
   return (
     <Form {...form}>
