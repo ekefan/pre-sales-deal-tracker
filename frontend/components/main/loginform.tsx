@@ -23,16 +23,6 @@ const formSchema = z.object({
   password: z.string().min(6),
 });
 
-interface LoginResp {
-  user_id: string;
-  username: string;
-  role: string;
-  fullname: string;
-  email: string;
-  updatedAt: number;
-  createdAt: number;
-}
-
 export default function LoginForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
