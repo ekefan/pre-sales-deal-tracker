@@ -2,16 +2,6 @@
 import { NextResponse } from 'next/server';
 import axios from 'axios';
 
-interface LoginResp {
-  user_id: string;
-  username: string;
-  role: string;
-  fullname: string;
-  email: string;
-  updatedAt: number;
-  createdAt: number;
-}
-
 export async function POST(request: Request) {
   try {
     const { username, password } = await request.json();
@@ -21,13 +11,10 @@ export async function POST(request: Request) {
         baseURL: "http://localhost:8080",
         url:"/users/login",
         data: {
-        username: "james",
-        password: "123456",
+        username: username,
+        password: password,
         }
     })
-    console.log("program never got here");
-    console.log(response.status)
-
     return NextResponse.json(response.data);
   } catch (error: any) {
     if (error.response) {
