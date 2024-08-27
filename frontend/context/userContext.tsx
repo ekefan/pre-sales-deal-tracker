@@ -1,19 +1,36 @@
-'use client';
+"use client";
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState } from "react";
 
 type UserContextType = {
-  user: { userId: number; username: string; fullname: string; email: string } | null;
-  setUser: (user: { userId: number; username: string; fullname: string; email: string }) => void;
+  usr: User | null;
+  setUser: (usr: User) => void;
 };
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<UserContextType['user']>(null);
+export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const [usr, setUser] = useState<UserContextType["usr"]>(() => {
+    //check if user exists in localstorage
+    if (typeof window !== "undefined") {
+      const storedUser = localStorage.getItem("user");
+      return storedUser ? JSON.parse(storedUser) : null;
+    }
+    return null;
+  });
 
+  const updateUser = (user: User) => {
+    setUser(user);
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+    } else {
+      localStorage.removeItem("user");
+    }
+  };
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider value={{ usr, setUser: updateUser }}>
       {children}
     </UserContext.Provider>
   );
@@ -22,7 +39,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 export const useUser = () => {
   const context = useContext(UserContext);
   if (!context) {
-    throw new Error('useUser must be used within a UserProvider');
+    throw new Error("useUser must be used within a UserProvider");
   }
   return context;
 };

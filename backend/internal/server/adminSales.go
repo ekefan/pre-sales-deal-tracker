@@ -56,7 +56,7 @@ func (s *Server) userLogin(ctx *gin.Context) {
 
 	//this is frontend logic
 	if !utils.CheckPasswordHash(req.Password, user.Password) {
-		ctx.JSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("password invalid: %v", err)))
+		ctx.JSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("password invalid",)))
 		return
 	}
 

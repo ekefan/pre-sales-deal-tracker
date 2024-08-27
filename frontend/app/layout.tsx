@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter as FontSans } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { UserProvider } from "@/context/userContext";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -28,7 +29,7 @@ export default function RootLayout({
           fontSans.variable
         )}
       >
-        {children}
+        <UserProvider>{children}</UserProvider>
       </body>
     </html>
   );

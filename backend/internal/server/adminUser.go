@@ -13,8 +13,8 @@ import (
 // CreateUsrReq holds fields that must be provided by client to create user
 type CreateUsrReq struct {
 	Username string `json:"username" binding:"required,alphanum"`
-	Role     string `json:"Role" binding:"required,valid-role"`
-	FullName string `json:"fullname" binding:"required,alpha"`
+	Role     string `json:"role" binding:"required,valid-role"`
+	FullName string `json:"fullname" binding:"required"`
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required,min=6"`
 }
