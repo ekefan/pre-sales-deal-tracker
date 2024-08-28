@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
 
 	db "github.com/ekefan/deal-tracker/internal/db/sqlc"
@@ -36,12 +37,13 @@ func (s *Server) getDealsHandler(ctx *gin.Context) {
 }
 
 type OngoingDealsReq struct {
-	Status string `json:"status" binding:"required"`
+	Status string `form:"status" binding:"required"`
 }
 
 func (s *Server) getOngoingDeals(ctx *gin.Context) {
 	var req OngoingDealsReq
-	if err := ctx.ShouldBindJSON(&req); err != nil {
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		fmt.Println("bad request", err, ctx.Request.Body)
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
