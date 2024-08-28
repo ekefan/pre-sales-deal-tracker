@@ -30,3 +30,21 @@ declare interface Deal {
   closed_at: stirng;
   awarded: boolean;
 }
+
+
+declare interface Status {
+  status: string;
+}
+
+declare interface DealFilter {
+  customer_name: string | null;
+  service_to_render: string[] | null;
+  status: string | null;
+  max_profit: string | null;
+  min_profit: string | null;
+  awarded: bool | null
+  sales_rep_name: string | null;
+  page_size: number;
+  page_id: number;
+}
+
