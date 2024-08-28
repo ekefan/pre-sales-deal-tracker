@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
 
 	db "github.com/ekefan/deal-tracker/internal/db/sqlc"
@@ -36,12 +37,13 @@ func (s *Server) getDealsHandler(ctx *gin.Context) {
 }
 
 type OngoingDealsReq struct {
-	Status string `json:"status" binding:"required"`
+	Status string `form:"status" binding:"required"`
 }
 
 func (s *Server) getOngoingDeals(ctx *gin.Context) {
 	var req OngoingDealsReq
-	if err := ctx.ShouldBindJSON(&req); err != nil {
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		fmt.Println("bad request", err, ctx.Request.Body)
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
@@ -62,20 +64,20 @@ func (s *Server) getOngoingDeals(ctx *gin.Context) {
 }
 
 type FilterDealReq struct {
-	CustomerName    *string  `json:"customer_name"`
-	ServiceToRender []string `json:"service_to_render"`
-	Status          *string  `json:"status"`
-	MaxProfit       *string  `json:"max_profit"`
-	MinProfit       *string  `json:"min_profit"`
-	Awarded         *bool    `json:"awarded"`
-	SalesRepName    *string  `json:"sales_rep_name"`
-	PageSize        int32    `json:"page_size"`
-	PageID          int32    `json:"page_id"`
+	CustomerName    *string  `form:"customer_name"`
+	ServiceToRender []string `form:"service_to_render"`
+	Status          *string  `form:"status"`
+	MaxProfit       *string  `form:"max_profit"`
+	MinProfit       *string  `form:"min_profit"`
+	Awarded         *bool    `form:"awarded"`
+	SalesRepName    *string  `form:"sales_rep_name"`
+	PageSize        int32    `form:"page_size"`
+	PageID          int32    `form:"page_id"`
 }
 
 func (s *Server) getFilteredDeals(ctx *gin.Context) {
 	var req FilterDealReq
-	if err := ctx.ShouldBindJSON(&req); err != nil {
+	if err := ctx.ShouldBindQuery(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}

@@ -10,22 +10,22 @@ import (
 )
 
 type Deal struct {
-	ID              int64
-	PitchID         sql.NullInt64
-	SalesRepName    string
-	CustomerName    string
-	ServiceToRender []string
+	ID              int64 `json:"deal_id"`
+	PitchID         sql.NullInt64 `json:"pitch_id"`
+	SalesRepName    string `json:"sales_rep_name"`
+	CustomerName    string `json:"customer_name"`
+	ServiceToRender []string `json:"services_to_render"`
 	// it is either ongoing or closed
-	Status string
+	Status string 	`json:"deal_status"`
 	// tag for the status can be, working on: survey, proposal, costing depending
-	StatusTag           string
-	CurrentPitchRequest string
-	NetTotalCost        string
-	Profit              string
-	CreatedAt           time.Time
-	UpdatedAt           time.Time
-	ClosedAt            time.Time
-	Awarded             bool
+	StatusTag           string `json:"department"`
+	CurrentPitchRequest string 	`json:"current-pitch_request"`
+	NetTotalCost        string `json:"net_total_cost"`
+	Profit              string `json:"profit"`
+	CreatedAt           time.Time `json:"created_at"`
+	UpdatedAt           time.Time 	`json:"updated_at"`
+	ClosedAt            time.Time 	`json:"closed_at"`
+	Awarded             bool `json:"awarded"`
 }
 
 type PitchRequest struct {
