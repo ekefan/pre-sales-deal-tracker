@@ -22,6 +22,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { MultiSelect } from "@/components/ui/mutiSelect";
+import { useDeal } from "@/context/dealContext";
+import { DEFAULT_PAGE_SIZE } from "@/lib/utils";
 
 export const services = [
   { label: "Service 1", value: "service1" },
@@ -37,21 +39,19 @@ export const services = [
 ];
 
 const FormSchema = z.object({
-  customerName: z.string().optional().nullable(),
-  serviceToRender: z.array(z.string()).optional(),
-  status: z.enum(["ongoing", "closed"]).optional().nullable(),
+  customerName: z.string().nullable(),
+  serviceToRender: z.array(z.string()).optional().default([]),
+  status: z.enum(["ongoing", "closed"]).nullable(),
   maxProfit: z
     .number()
     .gt(-1, { message: "please enter a profit greater than 0" })
-    .optional()
     .nullable(),
   minProfit: z
     .number()
     .gt(-1, { message: "please enter a profit greater than 0" })
-    .optional()
     .nullable(),
-  awarded: z.boolean().optional().nullable(),
-  salesRepName: z.string().optional().nullable(),
+  awarded: z.boolean().nullable(),
+  salesRepName: z.string().nullable(),
 });
 
 /**
@@ -67,6 +67,7 @@ const FormSchema = z.object({
  * @param {salesRepName} values.salesRepName - Name of the sales rep who brought in the deal
  */
 export function FilterDealsForm() {
+  const { setDealParam } = useDeal();
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -81,7 +82,21 @@ export function FilterDealsForm() {
   });
 
   function onSubmit(values: z.infer<typeof FormSchema>) {
-    console.log(values); // Print form values
+    console.log(values);
+    const dealfilterParams: DealFilter = {
+      customer_name: values?.customerName,
+      service_to_render: values?.serviceToRender,
+      status: values?.status,
+      max_profit: values?.maxProfit != null ? String(values?.maxProfit) : null,
+      min_profit: values?.minProfit != null ? String(values?.minProfit) : null,
+      awarded: values?.awarded,
+      sales_rep_name: values?.salesRepName,
+      page_size: DEFAULT_PAGE_SIZE,
+      page_id: 1,
+    };
+
+    /// set deal params here//////////////////////////////
+    setDealParam(dealfilterParams);
   }
 
   return (
@@ -90,7 +105,6 @@ export function FilterDealsForm() {
         onSubmit={form.handleSubmit(onSubmit)}
         className="border p-2 rounded-md flex flex-col gap-2"
       >
-       
         <FormField
           control={form.control}
           name="customerName"
