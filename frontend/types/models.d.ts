@@ -8,7 +8,7 @@ declare interface LoginResp {
     createdAt: number;
   }
 
-  declare interface User {
+  declare interface UserResp {
     access_token: string;
     user: LoginResp
 }
@@ -31,11 +31,6 @@ declare interface Deal {
   awarded: boolean;
 }
 
-
-declare interface Status {
-  status: string;
-}
-
 declare interface DealFilter {
   customer_name: string | null;
   service_to_render: string[] | null;
@@ -48,3 +43,19 @@ declare interface DealFilter {
   page_id: number;
 }
 
+declare interface Status {
+  status: string;
+}
+
+declare interface User {
+  fullname: string;
+  username: string;
+  email: string;
+  userId: number;
+}
+
+
+declare interface UserParam {
+  page_id: number;
+  page_size: number;
+}
