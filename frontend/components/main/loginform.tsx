@@ -31,7 +31,7 @@ export default function LoginForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const response = await axios.post<User>("/api/login", {
+      const response = await axios.post<UserResp>("/api/login", {
         username: values.username,
         password: values.password,
       });
