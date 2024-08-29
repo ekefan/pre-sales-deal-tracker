@@ -29,28 +29,28 @@ type Deal struct {
 }
 
 type PitchRequest struct {
-	ID              int64
-	SalesRepID      int64
-	SalesRepName    string
-	Status          string
-	CustomerName    string
-	PitchTag        string
-	CustomerRequest []string
-	RequestDeadline time.Time
-	AdminViewed     bool
-	CreatedAt       time.Time
-	UpdatedAt       time.Time
+	ID              int64 `json:"pitch_id"`
+	SalesRepID      int64 	`json:"sales_rep_id"`
+	SalesRepName    string `json:"sales_rep_name"`
+	Status          string `json:"status"`
+	CustomerName    string `json:"customer_name"`
+	PitchTag        string `json:"department"`
+	CustomerRequest []string `json:"customer_request"`
+	RequestDeadline time.Time `json:"request_deadline"`
+	AdminViewed     bool `json:"admin_viewed"`
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
 }
 
 type User struct {
-	ID       int64
-	Username string
+	ID       int64 `json:"user_id"`
+	Username string `json:"username"`
 	// Role of the user, e.g., sales rep, admin, manager
-	Role            string
-	FullName        string
-	Email           string
-	Password        string
-	PasswordChanged bool
-	UpdatedAt       time.Time
-	CreatedAt       time.Time
+	Role            string `json:"role"`
+	FullName        string `json:"fullname"`
+	Email           string `json:"email"`
+	Password        string `json:"password"`
+	PasswordChanged bool `json:"password_changed"`
+	UpdatedAt       time.Time `json:"updated_at"`
+	CreatedAt       time.Time `json:"created_at"`
 }

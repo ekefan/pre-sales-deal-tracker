@@ -3,8 +3,8 @@
 import React, { createContext, useContext, useState } from "react";
 
 type UserContextType = {
-  usr: User | null;
-  setUser: (usr: User) => void;
+  usr: UserResp | null;
+  setUser: (usr: UserResp) => void;
 };
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -21,7 +21,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     return null;
   });
 
-  const updateUser = (user: User) => {
+  const updateUser = (user: UserResp) => {
     setUser(user);
     if (user) {
       localStorage.setItem("user", JSON.stringify(user));

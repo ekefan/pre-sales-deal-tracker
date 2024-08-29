@@ -6,5 +6,6 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 
-export const DEFAULT_PAGE_SIZE: number = 20;
+export const DEFAULT_PAGE_SIZE: number = 10;
 export const ADMIN_ROLE: string = "admin";
+export const BASE_URL: string = "http://localhost:8080/"

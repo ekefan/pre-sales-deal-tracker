@@ -37,7 +37,7 @@ export function DealCard({ deal }: DealProp) {
       className={cn(
         `bg-gray-100 w-full min-h-20 h-auto rounded-lg border p-2  gap-1 text-sm xl:text-base flex`,
         deal.status === "ongoing"
-          ? "border-red-200"
+          ? "border-green-200"
           : deal.awarded === true
           ? "border-yellow-200"
           : "border-red-200"

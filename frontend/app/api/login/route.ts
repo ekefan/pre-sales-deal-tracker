@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
 import axios from 'axios';
+import { BASE_URL } from '@/lib/utils';
 
 export async function POST(request: Request) {
   try {
     const { username, password } = await request.json();
         const response = await axios({
         method: "post",
-        baseURL: "http://localhost:8080",
+        baseURL: BASE_URL,
         url:"/users/login",
         data: {
         username: username,
