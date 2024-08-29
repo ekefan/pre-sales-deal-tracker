@@ -1,3 +1,4 @@
+// LoginResp -- props for user in login Respo
 declare interface LoginResp {
     user_id: string;
     username: string;
@@ -8,12 +9,13 @@ declare interface LoginResp {
     createdAt: number;
   }
 
+  // UserResp --- props or Login Response
   declare interface UserResp {
     access_token: string;
     user: LoginResp
 }
 
-
+//Deal --- props for Deal model
 declare interface Deal {
   deal_id: number;
   pitch_id: {num: number; valid: boolean};
@@ -31,6 +33,7 @@ declare interface Deal {
   awarded: boolean;
 }
 
+// DealFilter --- params needed to get filtered deals at /a/deals/filtered
 declare interface DealFilter {
   customer_name: string | null;
   service_to_render: string[] | null;
@@ -47,6 +50,7 @@ declare interface Status {
   status: string;
 }
 
+//User --- props for user model
 declare interface User {
   fullname: string;
   username: string;
@@ -55,7 +59,23 @@ declare interface User {
 }
 
 
+// UserParams --- params needed to get list of users at /a/users
 declare interface UserParam {
   page_id: number;
   page_size: number;
+}
+
+//PitchReq --- props for pitch request model
+declare interface PitchReq {
+  pitch_id: number;
+  sales_rep_id: number;
+  sales_rep_name: string;
+  status: string;
+  customer_name: string;
+  department: string;
+  customer_request: string[];
+  request_deadline: string;
+  admin_viewed: boolean;
+  created_at: string;
+  updated_at: string;
 }
