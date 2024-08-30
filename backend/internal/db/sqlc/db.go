@@ -36,6 +36,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.adminGetDealForUpdateStmt, err = db.PrepareContext(ctx, adminGetDealForUpdate); err != nil {
 		return nil, fmt.Errorf("error preparing query AdminGetDealForUpdate: %w", err)
 	}
+	if q.adminGetPitchRequestStmt, err = db.PrepareContext(ctx, adminGetPitchRequest); err != nil {
+		return nil, fmt.Errorf("error preparing query AdminGetPitchRequest: %w", err)
+	}
 	if q.adminUpdateDealStmt, err = db.PrepareContext(ctx, adminUpdateDeal); err != nil {
 		return nil, fmt.Errorf("error preparing query AdminUpdateDeal: %w", err)
 	}
@@ -125,6 +128,11 @@ func (q *Queries) Close() error {
 	if q.adminGetDealForUpdateStmt != nil {
 		if cerr := q.adminGetDealForUpdateStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing adminGetDealForUpdateStmt: %w", cerr)
+		}
+	}
+	if q.adminGetPitchRequestStmt != nil {
+		if cerr := q.adminGetPitchRequestStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing adminGetPitchRequestStmt: %w", cerr)
 		}
 	}
 	if q.adminUpdateDealStmt != nil {
@@ -280,6 +288,7 @@ type Queries struct {
 	adminDeleteDealStmt          *sql.Stmt
 	adminDeleteUserStmt          *sql.Stmt
 	adminGetDealForUpdateStmt    *sql.Stmt
+	adminGetPitchRequestStmt     *sql.Stmt
 	adminUpdateDealStmt          *sql.Stmt
 	adminUpdateUserStmt          *sql.Stmt
 	adminUserExistsStmt          *sql.Stmt
@@ -312,6 +321,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		adminDeleteDealStmt:          q.adminDeleteDealStmt,
 		adminDeleteUserStmt:          q.adminDeleteUserStmt,
 		adminGetDealForUpdateStmt:    q.adminGetDealForUpdateStmt,
+		adminGetPitchRequestStmt:     q.adminGetPitchRequestStmt,
 		adminUpdateDealStmt:          q.adminUpdateDealStmt,
 		adminUpdateUserStmt:          q.adminUpdateUserStmt,
 		adminUserExistsStmt:          q.adminUserExistsStmt,

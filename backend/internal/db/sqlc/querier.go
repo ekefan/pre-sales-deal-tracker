@@ -13,6 +13,7 @@ type Querier interface {
 	AdminDeleteDeal(ctx context.Context, id int64) error
 	AdminDeleteUser(ctx context.Context, id int64) error
 	AdminGetDealForUpdate(ctx context.Context, id int64) (Deal, error)
+	AdminGetPitchRequest(ctx context.Context, adminViewed bool) ([]PitchRequest, error)
 	AdminUpdateDeal(ctx context.Context, arg AdminUpdateDealParams) (Deal, error)
 	AdminUpdateUser(ctx context.Context, arg AdminUpdateUserParams) (User, error)
 	AdminUserExists(ctx context.Context, id int64) (bool, error)
