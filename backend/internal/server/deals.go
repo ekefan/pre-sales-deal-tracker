@@ -82,7 +82,7 @@ func (s *Server) getFilteredDeals(ctx *gin.Context) {
 		return
 	}
 
-	if !multipleAuthAccess(ctx, []string{utils.AdminRole, utils.ManagerRole}) {
+	if !multipleAuthAccess(ctx, []string{utils.AdminRole, utils.ManagerRole, utils.SalesRole}) {
 		return
 	}
 	args := db.FilterDealsParams{
