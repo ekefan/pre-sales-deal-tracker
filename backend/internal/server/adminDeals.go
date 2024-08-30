@@ -222,7 +222,6 @@ func (s *Server) listUsersHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(fmt.Errorf("i don't know")))
 		return
 	}
-	fmt.Println(len(users))
 	ctx.JSON(http.StatusOK, users)
 }
 
@@ -230,3 +229,28 @@ func (s *Server) listUsersHandler(ctx *gin.Context) {
 ///////////////////////////
 // start the frontend.....
 // implement Handling user sessions
+
+type AdminPitchReq struct {
+	Admin_viewed bool `form:"admin_viewed" binding:"boolean"`
+}
+
+func (s *Server) adminGetPitchRequests(ctx *gin.Context) {
+	var req AdminPitchReq
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	if !authAccess(ctx, utils.AdminRole) {
+		return
+	}
+	pitchRequests, err := s.Store.AdminGetPitchRequest(ctx, req.Admin_viewed)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(fmt.Errorf("admin getting pitch requests I haven't fixed this yet %s", err)))
+		return
+	}
+	ctx.JSON(http.StatusOK, pitchRequests)
+
+
+
+}

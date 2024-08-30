@@ -64,6 +64,7 @@ func (s *Server) SetupRouter() {
 	authRoute.PUT("/admin/deals/update", s.adminUpdateDealHandler)               //added token authorization
 	authRoute.DELETE("/admin/deals/delete/:deal_id/", s.adminDeleteDealHandler) //added token authorization
 	authRoute.GET("/users", s.listUsersHandler)                                 //added  token authorization
+	authRoute.GET("/admin/pitchrequest", s.adminGetPitchRequests)
 
 	// ADMINSALES
 	authRoute.PUT("pitchrequest/update", s.updatePitchReqHandler) // added token authorization

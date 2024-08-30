@@ -89,3 +89,8 @@ SELECT * FROM users
 WHERE email = $1
 LIMIT 1
 FOR UPDATE;
+
+
+-- name: AdminGetPitchRequest :many
+SELECT * FROM pitch_requests
+WHERE admin_viewed = $1;

@@ -77,6 +77,46 @@ func (q *Queries) AdminGetDealForUpdate(ctx context.Context, id int64) (Deal, er
 	return i, err
 }
 
+const adminGetPitchRequest = `-- name: AdminGetPitchRequest :many
+SELECT id, sales_rep_id, sales_rep_name, status, customer_name, pitch_tag, customer_request, request_deadline, admin_viewed, created_at, updated_at FROM pitch_requests
+WHERE admin_viewed = $1
+`
+
+func (q *Queries) AdminGetPitchRequest(ctx context.Context, adminViewed bool) ([]PitchRequest, error) {
+	rows, err := q.query(ctx, q.adminGetPitchRequestStmt, adminGetPitchRequest, adminViewed)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []PitchRequest{}
+	for rows.Next() {
+		var i PitchRequest
+		if err := rows.Scan(
+			&i.ID,
+			&i.SalesRepID,
+			&i.SalesRepName,
+			&i.Status,
+			&i.CustomerName,
+			&i.PitchTag,
+			pq.Array(&i.CustomerRequest),
+			&i.RequestDeadline,
+			&i.AdminViewed,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const adminUpdateDeal = `-- name: AdminUpdateDeal :one
 UPDATE deals
     set service_to_render = $2, status = $3,
