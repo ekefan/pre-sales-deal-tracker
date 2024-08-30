@@ -79,7 +79,7 @@ func (s *Server) SetupRouter() {
 
 	//this should be the general update user without even for password
 	//change password should be separate                                 //added token authorization (for sales only)
-	authRoute.GET("/pitchrequest/", s.salesViewPitchRequests)                                                        // added token authorization
+	authRoute.GET("/sales/pitchrequest/", s.salesViewPitchRequests)                                                        // added token authorization
 	authRoute.DELETE("/sales/pitchReq/delete/:sales_username/:sales_rep_id/:pitch_id", s.salesDeletePitchReqHandler) // added token authorization
 	authRoute.GET("/sales/deals", s.getSalesDeals)                                                                    //added token authorization
 	// authRoute.GET("sales/count/deals", s.getSalesDealsCount)
