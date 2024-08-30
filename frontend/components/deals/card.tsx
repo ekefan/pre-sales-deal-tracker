@@ -4,11 +4,9 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { cn } from "@/lib/utils";
-import Link from "next/link";
 import { ADMIN_ROLE } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/context/userContext";
-import { revalidatePath } from "next/cache";
 interface DealProp {
   deal: Deal;
 }
@@ -26,7 +24,7 @@ export function DealCard({ deal }: DealProp) {
 
   const onSubmit = (userRole: string | undefined, deal_id: number) => {
     if (userRole !== ADMIN_ROLE) {
-      revalidatePath("/dashboard/deals/")
+      return
     }
 
     const url = `/dashboard/deals/update?id=${deal_id}`
