@@ -1,6 +1,6 @@
 // LoginResp -- props for user in login Respo
 declare interface LoginResp {
-    user_id: string;
+    user_id: number;
     username: string;
     role: string;
     fullname: string;
@@ -78,4 +78,9 @@ declare interface PitchReq {
   admin_viewed: boolean;
   created_at: string;
   updated_at: string;
+}
+declare interface SalesPitchReqParams {
+  sales_rep_id: number;
+  page_id: number;
+  page_size: number;
 }
