@@ -55,7 +55,7 @@ declare interface User {
   fullname: string;
   username: string;
   email: string;
-  userId: number;
+  user_id: number;
 }
 
 
@@ -83,4 +83,8 @@ declare interface SalesPitchReqParams {
   sales_rep_id: number;
   page_id: number;
   page_size: number;
+}
+
+declare interface AdminPitchReqParams {
+  admin_viewed: boolean;
 }

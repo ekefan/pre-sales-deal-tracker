@@ -30,7 +30,6 @@ export function UserCardSection() {
         });
 
         const users: User[] = await resp.data;
-        console.log(users)
         setUsers(users);
       } catch (error) {
         console.log(error);
@@ -52,7 +51,7 @@ export function UserCardSection() {
           return (
             <UserCard
               key={user.username}
-              userId={user.userId}
+              userId={user.user_id}
               username={user.username}
               fullname={user.fullname}
               email={user.email}

@@ -1,6 +1,4 @@
-'use client'
 import Link from "next/link";
-import { useUser } from "@/context/userContext";
 export function UserCard({
   userId,
   username,
@@ -12,10 +10,9 @@ export function UserCard({
   fullname: string;
   email: string;
 }) {
-  const { setUser } = useUser();
 
   const handleUpdateClick = () => {
-    setUser({ userId, username, fullname, email });
+    console.log("waiting to be set", username, userId)
   };
   return (
     <div className="w-full h-32 rounded-xl bg-slate-100 flex gap-2 p-1 text-sm md:text-base">
@@ -30,7 +27,7 @@ export function UserCard({
           <p>password</p>
         </button>
         <Link
-          href="/dashboard/users/update"
+          href={`/dashboard/users/update/?user_id=${userId}`}
           onClick={handleUpdateClick}
           className="p-2 rounded-xl h-full w-full flex items-center border border-slate-300 justify-center bg-slate-200"
         >

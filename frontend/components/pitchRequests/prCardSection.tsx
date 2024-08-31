@@ -15,7 +15,7 @@ export function PitchReqCardSection() {
     async function getPitchRequests(
       token: string | undefined,
       url: string,
-      param: SalesPitchReqParams
+      param: SalesPitchReqParams | AdminPitchReqParams
     ) {
       try {
         if (!token) {
@@ -31,16 +31,15 @@ export function PitchReqCardSection() {
           },
         });
         const pitchReqs: PitchReq[] = await resp.data;
-        console.log(pitchReqs);
         setPitchRequests(pitchReqs);
       } catch (error) {
         console.log(error);
       }
     }
-    if (usr?.user.role == "admin") {
-      console.log("waiting to write api for that");
-    } else if (usr?.user.role == "sales") {
-      getPitchRequests(usr?.access_token, "a/sales/pitchrequest/", {
+    if (usr?.user?.role === "admin") {
+      getPitchRequests(usr?.access_token, "a/admin/pitchrequest", {admin_viewed: false})
+    } else if (usr?.user?.role === "sales") {
+      getPitchRequests(usr?.access_token, "a/sales/pitchrequest", {
         sales_rep_id: usr?.user.user_id,
         page_id: 1,
         page_size: DEFAULT_PAGE_SIZE,
