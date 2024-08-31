@@ -58,11 +58,11 @@ func (s *Server) SetupRouter() {
 
 	authRoute := router.Group("/a").Use(authMiddleware(s.TokenMaker))
 	//this update user... updates the users full name, email, or username...
-	authRoute.PUT("/users/update/", s.adminUpdateUserHandler)                   //added token authorization
-	authRoute.DELETE("/users/delete/:id/", s.adminDeleteUserHandler)            //added token authorization
+	authRoute.PUT("/users/update", s.adminUpdateUserHandler)                   //added token authorization
+	authRoute.DELETE("/users/delete/:id", s.adminDeleteUserHandler)            //added token authorization
 	authRoute.POST("/admin/deals", s.adminCreateDealHandler)                    // added token authorization
 	authRoute.PUT("/admin/deals/update", s.adminUpdateDealHandler)               //added token authorization
-	authRoute.DELETE("/admin/deals/delete/:deal_id/", s.adminDeleteDealHandler) //added token authorization
+	authRoute.DELETE("/admin/deals/delete/:deal_id", s.adminDeleteDealHandler) //added token authorization
 	authRoute.GET("/users", s.listUsersHandler)                                 //added  token authorization
 	authRoute.GET("/admin/pitchrequest", s.adminGetPitchRequests)
 
