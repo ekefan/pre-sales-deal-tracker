@@ -120,8 +120,9 @@ func (q *Queries) AdminGetPitchRequest(ctx context.Context, adminViewed bool) ([
 const adminUpdateDeal = `-- name: AdminUpdateDeal :one
 UPDATE deals
     set service_to_render = $2, status = $3,
-    status_tag = $4, current_pitch_request = $5, updated_at = $7,
-    closed_at = $6
+    status_tag = $4, current_pitch_request = $5,
+    closed_at = $6, updated_at = $7, net_total_cost = $8,
+    profit = $9, awarded = $10
 WHERE id = $1
 RETURNING id, pitch_id, sales_rep_name, customer_name, service_to_render, status, status_tag, current_pitch_request, net_total_cost, profit, created_at, updated_at, closed_at, awarded
 `
@@ -134,6 +135,9 @@ type AdminUpdateDealParams struct {
 	CurrentPitchRequest string
 	ClosedAt            time.Time
 	UpdatedAt           time.Time
+	NetTotalCost        string
+	Profit              string
+	Awarded             bool
 }
 
 func (q *Queries) AdminUpdateDeal(ctx context.Context, arg AdminUpdateDealParams) (Deal, error) {
@@ -145,6 +149,9 @@ func (q *Queries) AdminUpdateDeal(ctx context.Context, arg AdminUpdateDealParams
 		arg.CurrentPitchRequest,
 		arg.ClosedAt,
 		arg.UpdatedAt,
+		arg.NetTotalCost,
+		arg.Profit,
+		arg.Awarded,
 	)
 	var i Deal
 	err := row.Scan(
