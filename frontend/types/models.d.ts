@@ -22,7 +22,7 @@ declare interface Deal {
   sales_rep_name: string;
   customer_name: string;
   services_to_render: string[];
-  status: string;
+  deal_status: string;
   department: string;
   current_pitch_request: string;
   net_total_cost: string;
