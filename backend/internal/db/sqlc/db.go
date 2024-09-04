@@ -75,6 +75,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.forgotPasswordStmt, err = db.PrepareContext(ctx, forgotPassword); err != nil {
 		return nil, fmt.Errorf("error preparing query ForgotPassword: %w", err)
 	}
+	if q.getDealsByIdStmt, err = db.PrepareContext(ctx, getDealsById); err != nil {
+		return nil, fmt.Errorf("error preparing query GetDealsById: %w", err)
+	}
 	if q.getDealsBySalesRepStmt, err = db.PrepareContext(ctx, getDealsBySalesRep); err != nil {
 		return nil, fmt.Errorf("error preparing query GetDealsBySalesRep: %w", err)
 	}
@@ -195,6 +198,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing forgotPasswordStmt: %w", cerr)
 		}
 	}
+	if q.getDealsByIdStmt != nil {
+		if cerr := q.getDealsByIdStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getDealsByIdStmt: %w", cerr)
+		}
+	}
 	if q.getDealsBySalesRepStmt != nil {
 		if cerr := q.getDealsBySalesRepStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getDealsBySalesRepStmt: %w", cerr)
@@ -301,6 +309,7 @@ type Queries struct {
 	deletePitchRequestStmt       *sql.Stmt
 	filterDealsStmt              *sql.Stmt
 	forgotPasswordStmt           *sql.Stmt
+	getDealsByIdStmt             *sql.Stmt
 	getDealsBySalesRepStmt       *sql.Stmt
 	getDealsByStatusStmt         *sql.Stmt
 	getPitchRequestForUpdateStmt *sql.Stmt
@@ -334,6 +343,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		deletePitchRequestStmt:       q.deletePitchRequestStmt,
 		filterDealsStmt:              q.filterDealsStmt,
 		forgotPasswordStmt:           q.forgotPasswordStmt,
+		getDealsByIdStmt:             q.getDealsByIdStmt,
 		getDealsBySalesRepStmt:       q.getDealsBySalesRepStmt,
 		getDealsByStatusStmt:         q.getDealsByStatusStmt,
 		getPitchRequestForUpdateStmt: q.getPitchRequestForUpdateStmt,

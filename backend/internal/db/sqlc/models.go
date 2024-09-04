@@ -19,7 +19,7 @@ type Deal struct {
 	Status string 	`json:"deal_status"`
 	// tag for the status can be, working on: survey, proposal, costing depending
 	StatusTag           string `json:"department"`
-	CurrentPitchRequest string 	`json:"current-pitch_request"`
+	CurrentPitchRequest string 	`json:"current_pitch_request"`
 	NetTotalCost        string `json:"net_total_cost"`
 	Profit              string `json:"profit"`
 	CreatedAt           time.Time `json:"created_at"`
