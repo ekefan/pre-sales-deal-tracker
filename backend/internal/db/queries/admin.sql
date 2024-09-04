@@ -36,8 +36,9 @@ FOR UPDATE;
 -- name: AdminUpdateDeal :one
 UPDATE deals
     set service_to_render = $2, status = $3,
-    status_tag = $4, current_pitch_request = $5, updated_at = $7,
-    closed_at = $6
+    status_tag = $4, current_pitch_request = $5,
+    closed_at = $6, updated_at = $7, net_total_cost = $8,
+    profit = $9, awarded = $10
 WHERE id = $1
 RETURNING *;
 
