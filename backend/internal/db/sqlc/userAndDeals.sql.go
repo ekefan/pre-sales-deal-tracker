@@ -125,6 +125,34 @@ func (q *Queries) FilterDeals(ctx context.Context, arg FilterDealsParams) ([]Dea
 	return items, nil
 }
 
+const getDealsById = `-- name: GetDealsById :one
+SELECT id, pitch_id, sales_rep_name, customer_name, service_to_render, status, status_tag, current_pitch_request, net_total_cost, profit, created_at, updated_at, closed_at, awarded FROM deals
+WHERE id = $1
+LIMIT 1
+`
+
+func (q *Queries) GetDealsById(ctx context.Context, id int64) (Deal, error) {
+	row := q.queryRow(ctx, q.getDealsByIdStmt, getDealsById, id)
+	var i Deal
+	err := row.Scan(
+		&i.ID,
+		&i.PitchID,
+		&i.SalesRepName,
+		&i.CustomerName,
+		pq.Array(&i.ServiceToRender),
+		&i.Status,
+		&i.StatusTag,
+		&i.CurrentPitchRequest,
+		&i.NetTotalCost,
+		&i.Profit,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.ClosedAt,
+		&i.Awarded,
+	)
+	return i, err
+}
+
 const getDealsBySalesRep = `-- name: GetDealsBySalesRep :many
 SELECT id, pitch_id, sales_rep_name, customer_name, service_to_render, status, status_tag, current_pitch_request, net_total_cost, profit, created_at, updated_at, closed_at, awarded FROM deals
 WHERE sales_rep_name = $1

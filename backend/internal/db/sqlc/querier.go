@@ -26,6 +26,7 @@ type Querier interface {
 	DeletePitchRequest(ctx context.Context, id int64) error
 	FilterDeals(ctx context.Context, arg FilterDealsParams) ([]Deal, error)
 	ForgotPassword(ctx context.Context, email string) (User, error)
+	GetDealsById(ctx context.Context, id int64) (Deal, error)
 	GetDealsBySalesRep(ctx context.Context, arg GetDealsBySalesRepParams) ([]Deal, error)
 	GetDealsByStatus(ctx context.Context, status string) ([]Deal, error)
 	GetPitchRequestForUpdate(ctx context.Context, id int64) (PitchRequest, error)
