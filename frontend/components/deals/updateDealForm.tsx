@@ -13,7 +13,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import axios from "axios";
+import { BASE_URL } from "@/lib/utils";
+import { useUser } from "@/context/userContext";
 const formSchema = z.object({
   serviceToRender: z.array(z.string()),
   status: z.string(),
@@ -21,34 +25,61 @@ const formSchema = z.object({
   currentPitchRequest: z.string(),
   netTotalCost: z.number(),
   profit: z.number(),
+  awarded: z.boolean(),
 });
 type CreateDealProps = {
+  deal_id: number;
   status: string;
-  statusTag: string;
+  department: string;
   servicesToRender: string[];
   netTotalCost: number;
   profit: number;
-  CurrentPitchRequest: string; //eg. costing
+  CurrentPitchRequest: string;
+  awarded: boolean;
 };
 export function UpdateDealForm(props: CreateDealProps) {
+  const {usr} = useUser()
   //1. Define your form
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       serviceToRender: props.servicesToRender,
       status: props.status,
-      statusTag: props.statusTag,
+      statusTag: props.department,
       currentPitchRequest: props.CurrentPitchRequest,
       netTotalCost: props.netTotalCost,
       profit: props.profit,
+      awarded: props.awarded,
     },
   });
 
   //2. Define a submit handler
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+
+    try {
+      const resp  = await axios({
+        method:"put",
+        baseURL: BASE_URL,
+        url: "a/admin/deals/update",
+        data: {
+          id: props.deal_id,
+          services_to_render: values.serviceToRender,
+          status: values.status,
+          department: values.statusTag,
+          current_pitch_request: values.currentPitchRequest,
+          net_total_cost: values.netTotalCost,
+          profit: values.profit,
+          awarded: values.awarded
+        },
+        headers: {
+          Authorization: `Bearer ${usr?.access_token}`
+        }
+      })
+      const updatedDeal = await resp.data
+      console.log(updatedDeal, "the updated deal")
+    } catch (error){
+      console.log(error)
+    }
   }
   return (
     <Form {...form}>
@@ -107,35 +138,36 @@ export function UpdateDealForm(props: CreateDealProps) {
             </FormItem>
           )}
         />
-
-        {/* netTotalCost */}
-        <FormField
-          control={form.control}
-          name="netTotalCost"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Net total cost</FormLabel>
-              <FormControl>
-                <Input placeholder="expenditure" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        {/* profit */}
-        <FormField
-          control={form.control}
-          name="profit"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Profit</FormLabel>
-              <FormControl>
-                <Input placeholder="profit" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="flex justify-around gap-3 w-full flex-grow">
+          {/* netTotalCost */}
+          <FormField
+            control={form.control}
+            name="netTotalCost"
+            render={({ field }) => (
+              <FormItem className="flex flex-col grow">
+                <FormLabel>Net total cost</FormLabel>
+                <FormControl>
+                  <Input placeholder="expenditure" {...field}/>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* profit */}
+          <FormField
+            control={form.control}
+            name="profit"
+            render={({ field }) => (
+              <FormItem className="flex flex-col grow">
+                <FormLabel>Profit</FormLabel>
+                <FormControl>
+                  <Input placeholder="profit" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
         {/* currentPitchRequest */}
         <FormField
           control={form.control}
@@ -153,7 +185,24 @@ export function UpdateDealForm(props: CreateDealProps) {
             </FormItem>
           )}
         />
-        <Button type="submit">Submit</Button>
+
+        <FormField
+          control={form.control}
+          name="awarded"
+          render={({ field }) => (
+            <FormItem className="flex gap-4 items-end">
+              <FormLabel>Contract awarded</FormLabel>
+              <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit">Update</Button>
       </form>
     </Form>
   );
