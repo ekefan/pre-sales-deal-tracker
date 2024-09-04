@@ -64,7 +64,7 @@ func pqErrHandler(ctx *gin.Context, use string, err error) (pqErrExist bool) {
 	default:
 		errMsg = fmt.Sprintf("database error: %s", pqErr.Code.Name())
 	}
-	ctx.JSON(http.StatusConflict, errorResponse(fmt.Errorf(errMsg)))
+	ctx.JSON(http.StatusConflict, errorResponse(fmt.Errorf("%s",errMsg)))
 	return true
 }
 
