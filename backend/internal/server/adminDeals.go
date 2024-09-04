@@ -8,6 +8,7 @@ package server
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	db "github.com/ekefan/deal-tracker/internal/db/sqlc"
@@ -17,30 +18,30 @@ import (
 
 // CreateDealReq holds fields needed to create a new deal
 type CreateDealReq struct {
-	PitchID             int64  `json:"pitch_id" binding:"required"`
-	SalesRepName        string `json:"sales_rep_name" binding:"required"`
-	CustomerName        string `json:"customer_name" binding:"required"`
-	ServicesToRender     []string `json:"services_to_render" binding:"required"`
-	Status              string `json:"status" binding:"required"`
-	StatusTag           string `json:"status_tag" binding:"required"`
-	CurrentPitchRequest string `json:"current_pitch_request" binding:"required"`
+	PitchID             int64    `json:"pitch_id" binding:"required"`
+	SalesRepName        string   `json:"sales_rep_name" binding:"required"`
+	CustomerName        string   `json:"customer_name" binding:"required"`
+	ServicesToRender    []string `json:"services_to_render" binding:"required"`
+	Status              string   `json:"status" binding:"required"`
+	StatusTag           string   `json:"status_tag" binding:"required"`
+	CurrentPitchRequest string   `json:"current_pitch_request" binding:"required"`
 }
 
 type CreateDealResp struct {
-	ID                  int64     `json:"id"`
-	PitchID             int64     `json:"pitch_id"`
-	SalesRepName        string    `json:"sales_rep_name"`
-	CustomerName        string    `json:"customer_name"`
-	ServiceToRender     []string    `json:"service_to_render"`
-	Status              string    `json:"status"`
-	StatusTag           string    `json:"status_tag"`
-	CurrentPitchRequest string    `json:"current_pitch_request"`
-	NetTotalCost        string    `json:"net_total_cost"`
-	Profit              string    `json:"profit"`
-	CreatedAt           int64 `json:"created_at"`
-	UpdatedAt           int64 `json:"updated_at"`
-	ClosedAt            int64 `json:"closed_at"`
-	Awarded             bool      `json:"awarded"`
+	ID                  int64    `json:"id"`
+	PitchID             int64    `json:"pitch_id"`
+	SalesRepName        string   `json:"sales_rep_name"`
+	CustomerName        string   `json:"customer_name"`
+	ServiceToRender     []string `json:"service_to_render"`
+	Status              string   `json:"status"`
+	StatusTag           string   `json:"status_tag"`
+	CurrentPitchRequest string   `json:"current_pitch_request"`
+	NetTotalCost        string   `json:"net_total_cost"`
+	Profit              string   `json:"profit"`
+	CreatedAt           int64    `json:"created_at"`
+	UpdatedAt           int64    `json:"updated_at"`
+	ClosedAt            int64    `json:"closed_at"`
+	Awarded             bool     `json:"awarded"`
 }
 
 // adminCreateDealHandler http handler for the api end point for creating a new deal
@@ -97,12 +98,14 @@ func (s *Server) adminCreateDealHandler(ctx *gin.Context) {
 
 // UpdateDealReq holds fields used to update a deal
 type UpdateDealReq struct {
-	ID                  int64    `json:"id" binding:"required"`
-	ServicesToRender     []string   `json:"services_to_render" binding:"required"`
+	ID                  int64    `json:"id" binding:"required,numeric"`
+	ServicesToRender    []string `json:"services_to_render" binding:"required"`
 	Status              string   `json:"status" binding:"required"`
-	StatusTag           string   `json:"status_tag" binding:"required"`
+	StatusTag           string   `json:"department" binding:"required"`
 	CurrentPitchRequest string   `json:"current_pitch_request" binding:"required"`
-	ClosedAt            UnixTime `json:"closed_at"`
+	NetTotalCost        int64    `json:"net_total_cost" binding:"numeric,gte=0"`
+	Profit              int64    `json:"profit" binding:"numeric,gte=0"`
+	Awarded             bool     `json:"awarded" binding:"boolean"`
 }
 
 // adminUpdateDealsHandler http handler for the api end point for updating a deal
@@ -127,6 +130,15 @@ func (s *Server) adminUpdateDealHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
+
+	var closedAt time.Time
+	if req.Awarded {
+		closedAt = time.Now()
+	} else {
+		closedAt = deal.ClosedAt
+	}
+	netTotal := strconv.Itoa(int(req.NetTotalCost))
+	profit := strconv.Itoa(int(req.Profit))
 	updatedDeal, err := s.Store.AdminUpdateDeal(ctx, db.AdminUpdateDealParams{
 		ID:                  deal.ID,
 		ServiceToRender:     req.ServicesToRender,
@@ -134,7 +146,10 @@ func (s *Server) adminUpdateDealHandler(ctx *gin.Context) {
 		StatusTag:           req.StatusTag,
 		CurrentPitchRequest: req.CurrentPitchRequest,
 		UpdatedAt:           time.Now(),
-		ClosedAt:            req.ClosedAt.Time,
+		ClosedAt:            closedAt,
+		Awarded: req.Awarded,
+		NetTotalCost: netTotal,
+		Profit: profit,
 	})
 
 	if err != nil {
@@ -250,7 +265,5 @@ func (s *Server) adminGetPitchRequests(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, pitchRequests)
-
-
 
 }
