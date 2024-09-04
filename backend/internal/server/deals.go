@@ -160,3 +160,34 @@ func (s *Server) getCountFilteredDeals(ctx *gin.Context) {
 	}{Count: count}
 	ctx.JSON(http.StatusOK, resp)
 }
+
+type GetDealReq struct {
+	Deal_Id int64 `form:"deal_id" binding:"required"`
+}
+
+func (s *Server) getDealsById(ctx *gin.Context) {
+	var req GetDealReq
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	if !authAccess(ctx, utils.AdminRole) {
+		return
+	}
+
+	deal, err := s.Store.GetDealsById(ctx, req.Deal_Id)
+	if err != nil {
+		if sqlNoRowsHandler(ctx, err) {
+			return
+		}
+		if pqErrHandler(ctx, "deals", err) {
+			return
+		}
+
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, deal)
+}
