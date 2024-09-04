@@ -31,6 +31,10 @@ SELECT * FROM deals
 WHERE status = $1
 ORDER BY id;
 
+-- name: GetDealsById :one
+SELECT * FROM deals
+WHERE id = $1
+LIMIT 1;
 
 -- name: GetDealsBySalesRep :many
 SELECT * FROM deals
