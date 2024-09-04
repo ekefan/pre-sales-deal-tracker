@@ -27,14 +27,14 @@ export function DealCard({ deal }: DealProp) {
       return
     }
 
-    const url = `/dashboard/deals/update?id=${deal_id}`
+    const url = `/dashboard/deals/update?deal_id=${deal_id}`
     router.push(url)
   }
   return (
     <div
       className={cn(
         `bg-gray-100 w-full min-h-20 h-auto rounded-lg border p-2  gap-1 text-sm xl:text-base flex`,
-        deal.status === "ongoing"
+        deal.deal_status === "ongoing"
           ? "border-green-200"
           : deal.awarded === true
           ? "border-yellow-200"
