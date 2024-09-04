@@ -53,36 +53,42 @@ func (s *Server) SetupRouter() {
 	router.Use(cors.New(corsConfig))
 	
 	// ADMIN
-	router.POST("/users", s.adminCreateUserHandler)
-	router.POST("/users/login", s.userLogin) //added token
-
 	authRoute := router.Group("/a").Use(authMiddleware(s.TokenMaker))
+	router.POST("/users", s.adminCreateUserHandler)
+	
+
+	
 	//this update user... updates the users full name, email, or username...
-	authRoute.PUT("/users/update", s.adminUpdateUserHandler)                   //added token authorization
-	authRoute.DELETE("/users/delete/:id", s.adminDeleteUserHandler)            //added token authorization
-	authRoute.POST("/admin/deals", s.adminCreateDealHandler)                    // added token authorization
-	authRoute.PUT("/admin/deals/update", s.adminUpdateDealHandler)               //added token authorization
-	authRoute.DELETE("/admin/deals/delete/:deal_id", s.adminDeleteDealHandler) //added token authorization
-	authRoute.GET("/users", s.listUsersHandler)                                 //added  token authorization
+	authRoute.GET("/deals/vas", s.getOngoingDeals)
+	authRoute.GET("/deals/filtered", s.getFilteredDeals)
 	authRoute.GET("/admin/pitchrequest", s.adminGetPitchRequests)
+	authRoute.GET("/sales/pitchrequest/", s.salesViewPitchRequests)
+	router.POST("/users/login", s.userLogin) //added token
+	authRoute.PUT("/admin/deals/update", s.adminUpdateDealHandler)
+
+	authRoute.PUT("/users/update", s.adminUpdateUserHandler)                  
+	authRoute.DELETE("/users/delete/:id", s.adminDeleteUserHandler)           
+	authRoute.POST("/admin/deals", s.adminCreateDealHandler)                          
+	authRoute.DELETE("/admin/deals/delete/:deal_id", s.adminDeleteDealHandler)
+	authRoute.GET("/users", s.listUsersHandler)                                 
+	
 
 	// ADMINSALES
-	authRoute.PUT("pitchrequest/update", s.updatePitchReqHandler) // added token authorization
+	authRoute.GET("/admin/getdeal", s.getDealsById)
+	authRoute.PUT("pitchrequest/update", s.updatePitchReqHandler) 
 	// this route can be replaced with filtered... or user makes call here first then filters
-	authRoute.GET("/deals", s.getDealsHandler)                     // added token authorization
-	authRoute.GET("/deals/vas", s.getOngoingDeals)                 //added token authorization
-	authRoute.GET("/deals/filtered", s.getFilteredDeals)           // added token authorization
-	authRoute.GET("/deals/filtered/count", s.getCountFilteredDeals) //added token authorization
+	authRoute.GET("/deals", s.getDealsHandler)                     
+	authRoute.GET("/deals/filtered/count", s.getCountFilteredDeals)
 	// handler exist in sales... updates users username only for sales
 	authRoute.PUT("/sales/update/user", s.salesUpdateuserHandler)
 	//SALES-REP
-	authRoute.POST("/sales/pitchReq", s.salesCreatePitchReqHandler) //added token authorization
+	authRoute.POST("/sales/pitchReq", s.salesCreatePitchReqHandler)
 
 	//this should be the general update user without even for password
-	//change password should be separate                                 //added token authorization (for sales only)
-	authRoute.GET("/sales/pitchrequest/", s.salesViewPitchRequests)                                                        // added token authorization
-	authRoute.DELETE("/sales/pitchReq/delete/:sales_username/:sales_rep_id/:pitch_id", s.salesDeletePitchReqHandler) // added token authorization
-	authRoute.GET("/sales/deals", s.getSalesDeals)                                                                    //added token authorization
+	//change password should be separate                                 (for sales only)
+	                                                      
+	authRoute.DELETE("/sales/pitchReq/delete/:sales_username/:sales_rep_id/:pitch_id", s.salesDeletePitchReqHandler) 
+	authRoute.GET("/sales/deals", s.getSalesDeals)                                                                   
 	// authRoute.GET("sales/count/deals", s.getSalesDealsCount)
 
 	//Password Update
