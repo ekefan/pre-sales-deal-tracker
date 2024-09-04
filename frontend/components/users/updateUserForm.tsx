@@ -22,13 +22,12 @@ const formSchema = z.object({
   email: z.string().email(),
 });
 
-
-
 export function UpdateUserForm() {
-  const { user }  = useUser();
+  const { usr } = useUser();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: user || {
+
+    defaultValues: {
       userId: 0,
       username: "",
       fullname: "",
@@ -52,7 +51,7 @@ export function UpdateUserForm() {
             <FormItem>
               <FormLabel>{"username"}</FormLabel>
               <FormControl>
-                <Input placeholder="enter username" {...field} />
+                <Input placeholder="enter username" {...field} defaultValue={usr?.user.username} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -66,7 +65,7 @@ export function UpdateUserForm() {
             <FormItem>
               <FormLabel>{"fullname"}</FormLabel>
               <FormControl>
-                <Input placeholder="enter user full-name" {...field} />
+                <Input placeholder="enter user full-name" {...field}  defaultValue={usr?.user.fullname}/>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -80,7 +79,7 @@ export function UpdateUserForm() {
             <FormItem>
               <FormLabel>{"user email"}</FormLabel>
               <FormControl>
-                <Input placeholder="example@vastech.com" {...field} />
+                <Input placeholder="example@vastech.com" {...field} defaultValue={usr?.user.email}/>
               </FormControl>
               <FormMessage />
             </FormItem>
