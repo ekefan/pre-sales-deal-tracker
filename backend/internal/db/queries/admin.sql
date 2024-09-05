@@ -27,6 +27,11 @@ UPDATE users
 WHERE id = $1
 RETURNING *;
 
+-- name: UpdateDealUserName :exec
+UPDATE deals
+    SET sales_rep_name = $2
+WHERE sales_rep_name = $1;
+
 -- name: AdminGetDealForUpdate :one
 SELECT * FROM deals
 WHERE id = $1
