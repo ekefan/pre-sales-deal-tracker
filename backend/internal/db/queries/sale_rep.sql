@@ -12,6 +12,11 @@ WHERE sales_rep_id = $1
 LIMIT $2
 OFFSET $3;
 
+-- name: UpdatePitchRequestUserName :exec
+UPDATE pitch_requests
+    set sales_rep_name = $2
+WHERE sales_rep_id = $1;
+
 -- name: UpdatePitchRequest :one
 UPDATE pitch_requests
     set status = $2, pitch_tag = $3, customer_request = $4, admin_viewed = $5, updated_at = $6, request_deadline = $7
