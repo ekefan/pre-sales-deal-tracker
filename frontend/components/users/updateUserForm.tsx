@@ -14,31 +14,57 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useSearchParams } from "next/navigation";
+import axios from "axios";
+import { BASE_URL } from "@/lib/utils";
 
 const formSchema = z.object({
   username: z.string().min(1),
-  userId: z.number().optional(),
   fullname: z.string().min(1),
   email: z.string().email(),
 });
 
 export function UpdateUserForm() {
   const { usr } = useUser();
+  const searchParams = useSearchParams()
+  const user_id = searchParams.get("user_id")
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
 
     defaultValues: {
-      userId: 0,
       username: "",
       fullname: "",
       email: "",
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      if (!usr?.access_token) {
+        return
+      }
+
+      const resp = await axios({
+        method: "put",
+        baseURL: BASE_URL,
+        url: "/a/users/update",
+        headers: {
+          Authorization: `Bearer ${usr.access_token}`
+        },
+        data: {
+          user_id: user_id != null ? Number(user_id) : 0,
+          fullname: values.fullname,
+          username: values.username,
+          email: values.email
+        }
+      })
+
+      const updatedUsr = await resp.data
+      console.log(updatedUsr)
+    } catch(error) {
+      console.log(error)
+    }
+    console.log(values, user_id);
   }
   return (
     <Form {...form}>
