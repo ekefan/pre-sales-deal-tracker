@@ -158,6 +158,22 @@ func (q *Queries) UpdatePitchRequest(ctx context.Context, arg UpdatePitchRequest
 	return i, err
 }
 
+const updatePitchRequestUserName = `-- name: UpdatePitchRequestUserName :exec
+UPDATE pitch_requests
+    set sales_rep_name = $2
+WHERE sales_rep_id = $1
+`
+
+type UpdatePitchRequestUserNameParams struct {
+	SalesRepID   int64
+	SalesRepName string
+}
+
+func (q *Queries) UpdatePitchRequestUserName(ctx context.Context, arg UpdatePitchRequestUserNameParams) error {
+	_, err := q.exec(ctx, q.updatePitchRequestUserNameStmt, updatePitchRequestUserName, arg.SalesRepID, arg.SalesRepName)
+	return err
+}
+
 const updateUser = `-- name: UpdateUser :one
 UPDATE users
     set username = $2, updated_at = $3
