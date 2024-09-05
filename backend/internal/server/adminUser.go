@@ -21,9 +21,9 @@ type CreateUsrReq struct {
 
 // CreateUsrRep holds fields that must be provided to client after creating a user
 type CreateUsrResp struct {
-	Role      string    `json:"Role"`
-	Username  string    `json:"username"`
-	CreatedAt int64 `json:"created_at"`
+	Role      string `json:"Role"`
+	Username  string `json:"username"`
+	CreatedAt int64  `json:"created_at"`
 }
 
 // adminCreateUserHandler http handler for the api end point for creating a new user
@@ -42,11 +42,11 @@ func (s *Server) adminCreateUserHandler(ctx *gin.Context) {
 	}
 
 	args := db.CreateNewUserParams{
-		Username:        req.Username,
-		Role:            req.Role,
-		FullName:        req.FullName,
-		Email:           req.Email,
-		Password:        passwordHash,
+		Username: req.Username,
+		Role:     req.Role,
+		FullName: req.FullName,
+		Email:    req.Email,
+		Password: passwordHash,
 	}
 
 	user, err := s.Store.CreateNewUser(ctx, args)
@@ -71,10 +71,10 @@ func (s *Server) adminCreateUserHandler(ctx *gin.Context) {
 // They are all required, however if no new values are passed... the current
 // the current user fields will be used
 type AdminUpdateUsrReq struct {
-	ID        int64  `json:"user_id" binding:"required"`
-	Fullname  string `json:"fullname" binding:"required"`
-	Email     string `json:"email" binding:"required,email"`
-	Username  string `json:"username" binding:"required,alphanum"`
+	ID       int64  `json:"user_id" binding:"numeric,gt=0"`
+	Fullname string `json:"fullname" binding:"required"`
+	Email    string `json:"email" binding:"required,email"`
+	Username string `json:"username" binding:"required,alphanum"`
 }
 
 // AdminUpdateUsrResp holds the fields for responding accurately to updating user end-point
@@ -91,7 +91,10 @@ type AdminUpdateUsrResp struct {
 
 // adminUpdateUserHandler http handler for the api end point for updating a user
 func (s *Server) adminUpdateUserHandler(ctx *gin.Context) {
-	var req AdminUpdateUsrReq
+	var (
+		req AdminUpdateUsrReq
+		newUsr db.User
+	)
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
@@ -116,14 +119,38 @@ func (s *Server) adminUpdateUserHandler(ctx *gin.Context) {
 		Username:  req.Username,
 		UpdatedAt: time.Now(),
 	}
-	// get
-	newUsr, err := s.Store.AdminUpdateUser(ctx, args)
-	if err != nil {
-		if pqErrHandler(ctx, "user", err) {
+	
+	if usr.Role != utils.SalesRole {
+		newUsr, err = s.Store.AdminUpdateUser(ctx, args)
+		if err != nil {
+			if pqErrHandler(ctx, "user", err) {
+				return
+			}
+			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 			return
 		}
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-		return
+	} else {
+		err = s.Store.UpdateUserTxn(ctx, db.UpdateUsrTxnArgs{
+			ID:       usr.ID,
+			Fullname: req.Fullname,
+			Email:    req.Email,
+			Username: req.Username,
+		})
+		if err != nil {
+			if pqErrHandler(ctx, "user", err) {
+				return
+			}
+			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+			return
+		}
+		newUsr, err = s.Store.GetUser(ctx, args.Username)
+		if err != nil {
+			if pqErrHandler(ctx, "user", err) {
+				return
+			}
+			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+			return
+		}
 	}
 	resp := AdminUpdateUsrResp{
 		UserID:          newUsr.ID,
@@ -140,7 +167,7 @@ func (s *Server) adminUpdateUserHandler(ctx *gin.Context) {
 
 // AdminDeleteUserReq holds field user id that is to be deleted
 type AdminDeleteUserReq struct {
-	ID        int64  `uri:"id" binding:"required"`
+	ID int64 `uri:"id" binding:"required"`
 	// AdminRole string `uri:"admin_role" binding:"required"`
 }
 
@@ -151,7 +178,7 @@ func (s *Server) adminDeleteUserHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	
+
 	// authenticated access
 	if !authAccess(ctx, utils.AdminRole) {
 		return
