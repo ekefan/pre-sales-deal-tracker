@@ -460,6 +460,22 @@ func (q *Queries) GetUserForUpdate(ctx context.Context, id int64) (User, error) 
 	return i, err
 }
 
+const updateDealUserName = `-- name: UpdateDealUserName :exec
+UPDATE deals
+    SET sales_rep_name = $2
+WHERE sales_rep_name = $1
+`
+
+type UpdateDealUserNameParams struct {
+	SalesRepName   string
+	SalesRepName_2 string
+}
+
+func (q *Queries) UpdateDealUserName(ctx context.Context, arg UpdateDealUserNameParams) error {
+	_, err := q.exec(ctx, q.updateDealUserNameStmt, updateDealUserName, arg.SalesRepName, arg.SalesRepName_2)
+	return err
+}
+
 const updatePassWord = `-- name: UpdatePassWord :exec
 UPDATE users
     set password = $2, password_changed = $3, updated_at = $4

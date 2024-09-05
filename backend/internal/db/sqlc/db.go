@@ -96,11 +96,17 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.pitchRequestExistStmt, err = db.PrepareContext(ctx, pitchRequestExist); err != nil {
 		return nil, fmt.Errorf("error preparing query PitchRequestExist: %w", err)
 	}
+	if q.updateDealUserNameStmt, err = db.PrepareContext(ctx, updateDealUserName); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateDealUserName: %w", err)
+	}
 	if q.updatePassWordStmt, err = db.PrepareContext(ctx, updatePassWord); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdatePassWord: %w", err)
 	}
 	if q.updatePitchRequestStmt, err = db.PrepareContext(ctx, updatePitchRequest); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdatePitchRequest: %w", err)
+	}
+	if q.updatePitchRequestUserNameStmt, err = db.PrepareContext(ctx, updatePitchRequestUserName); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdatePitchRequestUserName: %w", err)
 	}
 	if q.updateUserStmt, err = db.PrepareContext(ctx, updateUser); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateUser: %w", err)
@@ -233,6 +239,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing pitchRequestExistStmt: %w", cerr)
 		}
 	}
+	if q.updateDealUserNameStmt != nil {
+		if cerr := q.updateDealUserNameStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateDealUserNameStmt: %w", cerr)
+		}
+	}
 	if q.updatePassWordStmt != nil {
 		if cerr := q.updatePassWordStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing updatePassWordStmt: %w", cerr)
@@ -241,6 +252,11 @@ func (q *Queries) Close() error {
 	if q.updatePitchRequestStmt != nil {
 		if cerr := q.updatePitchRequestStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing updatePitchRequestStmt: %w", cerr)
+		}
+	}
+	if q.updatePitchRequestUserNameStmt != nil {
+		if cerr := q.updatePitchRequestUserNameStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updatePitchRequestUserNameStmt: %w", cerr)
 		}
 	}
 	if q.updateUserStmt != nil {
@@ -290,69 +306,73 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db                           DBTX
-	tx                           *sql.Tx
-	adminDealExistsStmt          *sql.Stmt
-	adminDeleteDealStmt          *sql.Stmt
-	adminDeleteUserStmt          *sql.Stmt
-	adminGetDealForUpdateStmt    *sql.Stmt
-	adminGetPitchRequestStmt     *sql.Stmt
-	adminUpdateDealStmt          *sql.Stmt
-	adminUpdateUserStmt          *sql.Stmt
-	adminUserExistsStmt          *sql.Stmt
-	adminViewDealsStmt           *sql.Stmt
-	adminViewUsersStmt           *sql.Stmt
-	countFilteredDealsStmt       *sql.Stmt
-	createDealStmt               *sql.Stmt
-	createNewUserStmt            *sql.Stmt
-	createPitchRequestStmt       *sql.Stmt
-	deletePitchRequestStmt       *sql.Stmt
-	filterDealsStmt              *sql.Stmt
-	forgotPasswordStmt           *sql.Stmt
-	getDealsByIdStmt             *sql.Stmt
-	getDealsBySalesRepStmt       *sql.Stmt
-	getDealsByStatusStmt         *sql.Stmt
-	getPitchRequestForUpdateStmt *sql.Stmt
-	getUserStmt                  *sql.Stmt
-	getUserForUpdateStmt         *sql.Stmt
-	pitchRequestExistStmt        *sql.Stmt
-	updatePassWordStmt           *sql.Stmt
-	updatePitchRequestStmt       *sql.Stmt
-	updateUserStmt               *sql.Stmt
-	viewPitchRequestsStmt        *sql.Stmt
+	db                             DBTX
+	tx                             *sql.Tx
+	adminDealExistsStmt            *sql.Stmt
+	adminDeleteDealStmt            *sql.Stmt
+	adminDeleteUserStmt            *sql.Stmt
+	adminGetDealForUpdateStmt      *sql.Stmt
+	adminGetPitchRequestStmt       *sql.Stmt
+	adminUpdateDealStmt            *sql.Stmt
+	adminUpdateUserStmt            *sql.Stmt
+	adminUserExistsStmt            *sql.Stmt
+	adminViewDealsStmt             *sql.Stmt
+	adminViewUsersStmt             *sql.Stmt
+	countFilteredDealsStmt         *sql.Stmt
+	createDealStmt                 *sql.Stmt
+	createNewUserStmt              *sql.Stmt
+	createPitchRequestStmt         *sql.Stmt
+	deletePitchRequestStmt         *sql.Stmt
+	filterDealsStmt                *sql.Stmt
+	forgotPasswordStmt             *sql.Stmt
+	getDealsByIdStmt               *sql.Stmt
+	getDealsBySalesRepStmt         *sql.Stmt
+	getDealsByStatusStmt           *sql.Stmt
+	getPitchRequestForUpdateStmt   *sql.Stmt
+	getUserStmt                    *sql.Stmt
+	getUserForUpdateStmt           *sql.Stmt
+	pitchRequestExistStmt          *sql.Stmt
+	updateDealUserNameStmt         *sql.Stmt
+	updatePassWordStmt             *sql.Stmt
+	updatePitchRequestStmt         *sql.Stmt
+	updatePitchRequestUserNameStmt *sql.Stmt
+	updateUserStmt                 *sql.Stmt
+	viewPitchRequestsStmt          *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                           tx,
-		tx:                           tx,
-		adminDealExistsStmt:          q.adminDealExistsStmt,
-		adminDeleteDealStmt:          q.adminDeleteDealStmt,
-		adminDeleteUserStmt:          q.adminDeleteUserStmt,
-		adminGetDealForUpdateStmt:    q.adminGetDealForUpdateStmt,
-		adminGetPitchRequestStmt:     q.adminGetPitchRequestStmt,
-		adminUpdateDealStmt:          q.adminUpdateDealStmt,
-		adminUpdateUserStmt:          q.adminUpdateUserStmt,
-		adminUserExistsStmt:          q.adminUserExistsStmt,
-		adminViewDealsStmt:           q.adminViewDealsStmt,
-		adminViewUsersStmt:           q.adminViewUsersStmt,
-		countFilteredDealsStmt:       q.countFilteredDealsStmt,
-		createDealStmt:               q.createDealStmt,
-		createNewUserStmt:            q.createNewUserStmt,
-		createPitchRequestStmt:       q.createPitchRequestStmt,
-		deletePitchRequestStmt:       q.deletePitchRequestStmt,
-		filterDealsStmt:              q.filterDealsStmt,
-		forgotPasswordStmt:           q.forgotPasswordStmt,
-		getDealsByIdStmt:             q.getDealsByIdStmt,
-		getDealsBySalesRepStmt:       q.getDealsBySalesRepStmt,
-		getDealsByStatusStmt:         q.getDealsByStatusStmt,
-		getPitchRequestForUpdateStmt: q.getPitchRequestForUpdateStmt,
-		getUserStmt:                  q.getUserStmt,
-		getUserForUpdateStmt:         q.getUserForUpdateStmt,
-		pitchRequestExistStmt:        q.pitchRequestExistStmt,
-		updatePassWordStmt:           q.updatePassWordStmt,
-		updatePitchRequestStmt:       q.updatePitchRequestStmt,
-		updateUserStmt:               q.updateUserStmt,
-		viewPitchRequestsStmt:        q.viewPitchRequestsStmt,
+		db:                             tx,
+		tx:                             tx,
+		adminDealExistsStmt:            q.adminDealExistsStmt,
+		adminDeleteDealStmt:            q.adminDeleteDealStmt,
+		adminDeleteUserStmt:            q.adminDeleteUserStmt,
+		adminGetDealForUpdateStmt:      q.adminGetDealForUpdateStmt,
+		adminGetPitchRequestStmt:       q.adminGetPitchRequestStmt,
+		adminUpdateDealStmt:            q.adminUpdateDealStmt,
+		adminUpdateUserStmt:            q.adminUpdateUserStmt,
+		adminUserExistsStmt:            q.adminUserExistsStmt,
+		adminViewDealsStmt:             q.adminViewDealsStmt,
+		adminViewUsersStmt:             q.adminViewUsersStmt,
+		countFilteredDealsStmt:         q.countFilteredDealsStmt,
+		createDealStmt:                 q.createDealStmt,
+		createNewUserStmt:              q.createNewUserStmt,
+		createPitchRequestStmt:         q.createPitchRequestStmt,
+		deletePitchRequestStmt:         q.deletePitchRequestStmt,
+		filterDealsStmt:                q.filterDealsStmt,
+		forgotPasswordStmt:             q.forgotPasswordStmt,
+		getDealsByIdStmt:               q.getDealsByIdStmt,
+		getDealsBySalesRepStmt:         q.getDealsBySalesRepStmt,
+		getDealsByStatusStmt:           q.getDealsByStatusStmt,
+		getPitchRequestForUpdateStmt:   q.getPitchRequestForUpdateStmt,
+		getUserStmt:                    q.getUserStmt,
+		getUserForUpdateStmt:           q.getUserForUpdateStmt,
+		pitchRequestExistStmt:          q.pitchRequestExistStmt,
+		updateDealUserNameStmt:         q.updateDealUserNameStmt,
+		updatePassWordStmt:             q.updatePassWordStmt,
+		updatePitchRequestStmt:         q.updatePitchRequestStmt,
+		updatePitchRequestUserNameStmt: q.updatePitchRequestUserNameStmt,
+		updateUserStmt:                 q.updateUserStmt,
+		viewPitchRequestsStmt:          q.viewPitchRequestsStmt,
 	}
 }

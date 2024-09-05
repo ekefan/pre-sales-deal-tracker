@@ -33,8 +33,10 @@ type Querier interface {
 	GetUser(ctx context.Context, username string) (User, error)
 	GetUserForUpdate(ctx context.Context, id int64) (User, error)
 	PitchRequestExist(ctx context.Context, arg PitchRequestExistParams) (bool, error)
+	UpdateDealUserName(ctx context.Context, arg UpdateDealUserNameParams) error
 	UpdatePassWord(ctx context.Context, arg UpdatePassWordParams) error
 	UpdatePitchRequest(ctx context.Context, arg UpdatePitchRequestParams) (PitchRequest, error)
+	UpdatePitchRequestUserName(ctx context.Context, arg UpdatePitchRequestUserNameParams) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
 	ViewPitchRequests(ctx context.Context, arg ViewPitchRequestsParams) ([]PitchRequest, error)
 }
