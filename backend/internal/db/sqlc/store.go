@@ -12,6 +12,7 @@ type Store interface {
 	Querier
 	UpdateUserTxn(ctx context.Context, args UpdateUsrTxnArgs) error
 	ResetPasswordTxn(ctx context.Context, args ResetPasswordArgs) error
+	CreateDealTxn(ctx context.Context, args CreateDealTxnArgs) error
 }
 
 // Extended single queries of Queries struct to enable transactions
@@ -27,6 +28,10 @@ func NewStore(db *sql.DB) Store {
 	}
 }
 
+// execTx takes a ctx and a function fn 
+// starts a db txn, create a new Queries instance with the txn
+// runs the function fn, with that Queries instance then commits the txn
+// On error from the tx, the db txn rolls back and returns an error
 func (store *SqlStore) execTx(ctx context.Context, fn func(*Queries) error) error {
 	tx, err := store.db.BeginTx(ctx, nil)
 	if err != nil {
