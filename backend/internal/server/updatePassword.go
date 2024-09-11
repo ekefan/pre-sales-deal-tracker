@@ -44,7 +44,7 @@ func (s *Server) updatePassWordLoggedIn(ctx *gin.Context) {
 		ID:              req.UserID,
 		Password:        req.Password,
 		PasswordChanged: true,
-		UpdatedAt:  time.Now(),
+		UpdatedAt:       time.Now(),
 	})
 	if success != nil {
 		if sqlNoRowsHandler(ctx, err) {
@@ -58,44 +58,37 @@ func (s *Server) updatePassWordLoggedIn(ctx *gin.Context) {
 	})
 }
 
+// UnderConstruction
+type resetPasswordReq struct {
+	UserToUpdateID int64 `json:"user_id" binding:"required,gt=0"`
+}
 
-//UnderConstruction
-// type ForgotPasswordReq struct {
-// 	Email string `json:"email" binding:"required,email"`
-// }
 
-// func (s *Server) forgotPassword(ctx *gin.Context) {
-// 	var req ForgotPasswordReq
-// 	if err := ctx.ShouldBindJSON(&req); err != nil {
-// 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-// 		return
-// 	}
+// resetPassword: endpoint for resetting user password to default password
+// sends user id from reset password request to perform password reset 
+// transaction returns successful if successful
+func (s *Server) resetPassword(ctx *gin.Context) {
+	var req resetPasswordReq
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
 
-// 	usr, err := s.Store.ForgotPassword(ctx, req.Email)
-// 	if err != nil {
-// 		if sqlNoRowsHandler(ctx, err) {
-// 			return
-// 		}
-// 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-// 		return
-// 	}
-// 	newRandomPass := randomPasswordCode()
-// 	updatePasswordArgs := db.UpdatePassWordParams{
-// 		ID:              usr.ID,
-// 		Password:        newRandomPass,
-// 		PasswordChanged: true,
-// 		UpdatedAt: sql.NullTime{
-// 			Time:  time.Now(),
-// 			Valid: true,
-// 		},
-// 	}
-// 	success := s.Store.UpdatePassWord(ctx, updatePasswordArgs)
-// 	if success != nil {
-// 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-// 		return
-// 	}
-// 	//send user the newPassword to their email....
-// 	ctx.JSON(http.StatusOK, gin.H{
-// 		"mesaage": "succesful",
-// 	})
-// }
+	// check if user is authorized
+	if !authAccess(ctx, utils.AdminRole) {
+		return
+	}
+	success := s.Store.ResetPasswordTxn(ctx, db.ResetPasswordArgs{
+		UserID: req.UserToUpdateID,
+	})
+	
+	if success != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(success))
+		return
+	}
+
+	//send user the newPassword to their email....
+	ctx.JSON(http.StatusOK, gin.H{
+		"mesaage": "succesful",
+	})
+}
