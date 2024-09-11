@@ -44,7 +44,7 @@ export function CardSection({ page }: Props) {
       }
     }
     if (page === "home") {
-      getDeals(usr?.access_token, "a/deals/vas", { status: "ongoing" });
+      getDeals(usr?.access_token, "/deals/vas", { status: "ongoing" });
     } else if (page === "deals") {
       const param =
         dealParam != null
@@ -60,7 +60,7 @@ export function CardSection({ page }: Props) {
               page_size: DEFAULT_PAGE_SIZE,
               page_id: 1,
             };
-      getDeals(usr?.access_token, "a/deals/filtered", param);
+      getDeals(usr?.access_token, "/deals/filtered", param);
     }
   }, [usr, page, dealParam]);
   return (

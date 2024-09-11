@@ -60,7 +60,7 @@ export function UpdateDealForm(props: CreateDealProps) {
       const resp  = await axios({
         method:"put",
         baseURL: BASE_URL,
-        url: "a/admin/deals/update",
+        url: "/admin/deals/update",
         data: {
           id: props.deal_id,
           services_to_render: values.serviceToRender,

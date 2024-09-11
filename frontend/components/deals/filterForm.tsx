@@ -82,7 +82,6 @@ export function FilterDealsForm() {
   });
 
   function onSubmit(values: z.infer<typeof FormSchema>) {
-    console.log(values);
     const dealfilterParams: DealFilter = {
       customer_name: values?.customerName,
       service_to_render: values?.serviceToRender,
