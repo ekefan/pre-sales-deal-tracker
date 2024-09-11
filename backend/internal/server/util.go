@@ -4,9 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"math/rand"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/ekefan/deal-tracker/internal/token"
@@ -104,10 +102,10 @@ func LoadConfig(envPath string) (config Config, err error) {
 }
 
 // randomPasswordCode generates a random password between MaxNumPass and MinNumPass
-func randomPasswordCode() string {
-	code := MinNumPass + rand.Intn(MaxNumPass-MinNumPass)
-	return strconv.Itoa(code)
-}
+// func randomPasswordCode() string {
+// 	code := MinNumPass + rand.Intn(MaxNumPass-MinNumPass)
+// 	return strconv.Itoa(code)
+// }
 
 // authAccess ...authenticates the request accessing the endpoint
 // it checks if the role matches the accessToken Payload role
