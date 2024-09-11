@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -63,6 +64,7 @@ func (s *SqlStore) UpdateUserTxn(ctx context.Context, args UpdateUsrTxnArgs) err
 	})
 }
 
+// ResetPasswordArgs holds the field user_id required to reset user password
 type ResetPasswordArgs struct {
 	UserID int64 `json:"user_id"`
 }
@@ -89,6 +91,44 @@ func (s *SqlStore)ResetPasswordTxn(ctx context.Context, args ResetPasswordArgs) 
 		err = q.UpdatePassWord(ctx, args)
 		if err != nil {
 			return fmt.Errorf("can't reset userPassword: %s", err)
+		}
+		return nil
+	})
+}
+
+// CreateDealTxnArgs holds the field for createDealTxn
+type CreateDealTxnArgs struct {
+	PitchID int64 `json:"pitch_id"`
+}
+
+
+// CreateDealTxn receives the pitch_id from args and creates a deal based on the request
+// On failure deal is not created
+func (s *SqlStore)CreateDealTxn(ctx context.Context, args CreateDealTxnArgs) error {
+	return s.execTx(ctx, func (q *Queries) error {
+
+		pitchReq, err := q.GetPitchRequestByID(ctx, args.PitchID)
+		if err != nil {
+			return fmt.Errorf("couldn't create deal from pitch request: %s", err)
+		}
+
+		requestID := sql.NullInt64{
+			Int64: pitchReq.ID,
+			Valid: true,
+		}
+		dealArgs := CreateDealParams{
+			PitchID: requestID,
+			SalesRepName: pitchReq.SalesRepName,
+			CustomerName: pitchReq.CustomerName,
+			ServiceToRender: pitchReq.CustomerRequest,
+			Status: utils.DefaultStatus,
+			StatusTag: utils.DefaultStatusTag,
+			CurrentPitchRequest: pitchReq.PitchTag,
+		}
+
+		_, err = q.CreateDeal(ctx, dealArgs)
+		if err != nil {
+			return fmt.Errorf("couldn't create deal from pitch_reques %s", err)
 		}
 		return nil
 	})
