@@ -58,19 +58,22 @@ func (s *Server) SetupRouter() {
 	
 
 	
-	//this update user... updates the users full name, email, or username...
+	//Currently used routes in the application
 	authRoute.GET("/deals/vas", s.getOngoingDeals)
 	authRoute.GET("/deals/filtered", s.getFilteredDeals)
 	authRoute.GET("/admin/pitchrequest", s.adminGetPitchRequests)
 	authRoute.GET("/sales/pitchrequest/", s.salesViewPitchRequests)
-	router.POST("/users/login", s.userLogin) //added token
+	router.POST("/users/login", s.userLogin)
 	authRoute.PUT("/admin/deals/update", s.adminUpdateDealHandler)
+	authRoute.GET("/users", s.listUsersHandler)
+	authRoute.PUT("/users/password-reset", s.resetPassword)
+
 
 	authRoute.PUT("/users/update", s.adminUpdateUserHandler)                  
 	authRoute.DELETE("/users/delete/:id", s.adminDeleteUserHandler)           
 	authRoute.POST("/admin/deals", s.adminCreateDealHandler)                          
 	authRoute.DELETE("/admin/deals/delete/:deal_id", s.adminDeleteDealHandler)
-	authRoute.GET("/users", s.listUsersHandler)                                 
+	                               
 	
 
 	// ADMINSALES
@@ -93,7 +96,7 @@ func (s *Server) SetupRouter() {
 
 	//Password Update
 	authRoute.PUT("/users/password", s.updatePassWordLoggedIn) //added token authorization
-	authRoute.PUT("/users/password-reset", s.resetPassword)
+	
 
 	s.Router = router
 }

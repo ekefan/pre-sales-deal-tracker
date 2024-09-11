@@ -18,13 +18,7 @@ import (
 
 // CreateDealReq holds fields needed to create a new deal
 type CreateDealReq struct {
-	PitchID             int64    `json:"pitch_id" binding:"required"`
-	SalesRepName        string   `json:"sales_rep_name" binding:"required"`
-	CustomerName        string   `json:"customer_name" binding:"required"`
-	ServicesToRender    []string `json:"services_to_render" binding:"required"`
-	Status              string   `json:"status" binding:"required"`
-	StatusTag           string   `json:"status_tag" binding:"required"`
-	CurrentPitchRequest string   `json:"current_pitch_request" binding:"required"`
+	PitchID int64 	`json:"pitch_id"`
 }
 
 type CreateDealResp struct {
@@ -58,42 +52,20 @@ func (s *Server) adminCreateDealHandler(ctx *gin.Context) {
 	}
 
 	//make call to database
-	deal, err := s.Store.CreateDeal(ctx, db.CreateDealParams{
-		PitchID:             db.SetNullPitchID(req.PitchID),
-		SalesRepName:        req.SalesRepName,
-		CustomerName:        req.CustomerName,
-		ServiceToRender:     req.ServicesToRender,
-		Status:              req.Status,
-		StatusTag:           req.StatusTag,
-		CurrentPitchRequest: req.CurrentPitchRequest,
+	success := s.Store.CreateDealTxn(ctx, db.CreateDealTxnArgs{
+		PitchID: req.PitchID,
 	})
 
-	if err != nil {
-		if pqErrHandler(ctx, "deal", err) {
+	if success != nil {
+		if pqErrHandler(ctx, "deal", success) {
 			return
 		}
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		ctx.JSON(http.StatusInternalServerError, errorResponse(success))
 		return
 	}
-
-	resp := CreateDealResp{
-		ID:                  deal.ID,
-		PitchID:             deal.PitchID.Int64, // .Int64 returns the value from the sql.NullInt64
-		SalesRepName:        deal.SalesRepName,
-		CustomerName:        deal.CustomerName,
-		ServiceToRender:     deal.ServiceToRender,
-		Status:              deal.Status,
-		StatusTag:           deal.StatusTag,
-		CurrentPitchRequest: deal.CurrentPitchRequest,
-		NetTotalCost:        deal.NetTotalCost,
-		Profit:              deal.Profit,
-		CreatedAt:           deal.CreatedAt.Unix(),
-		UpdatedAt:           deal.UpdatedAt.Unix(),
-		ClosedAt:            deal.ClosedAt.Unix(),
-		Awarded:             deal.Awarded,
-	}
-
-	ctx.JSON(http.StatusOK, resp)
+	ctx.JSON(http.StatusOK, gin.H{
+		"mesaage": "succesful",
+	})
 }
 
 // UpdateDealReq holds fields used to update a deal
