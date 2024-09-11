@@ -29,6 +29,7 @@ type Querier interface {
 	GetDealsById(ctx context.Context, id int64) (Deal, error)
 	GetDealsBySalesRep(ctx context.Context, arg GetDealsBySalesRepParams) ([]Deal, error)
 	GetDealsByStatus(ctx context.Context, status string) ([]Deal, error)
+	GetPitchRequestByID(ctx context.Context, id int64) (PitchRequest, error)
 	GetPitchRequestForUpdate(ctx context.Context, id int64) (PitchRequest, error)
 	GetUser(ctx context.Context, username string) (User, error)
 	GetUserForUpdate(ctx context.Context, id int64) (User, error)

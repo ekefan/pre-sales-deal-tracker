@@ -436,6 +436,31 @@ func (q *Queries) ForgotPassword(ctx context.Context, email string) (User, error
 	return i, err
 }
 
+const getPitchRequestByID = `-- name: GetPitchRequestByID :one
+SELECT id, sales_rep_id, sales_rep_name, status, customer_name, pitch_tag, customer_request, request_deadline, admin_viewed, created_at, updated_at FROM pitch_requests
+WHERE id = $1
+LIMIT 1
+`
+
+func (q *Queries) GetPitchRequestByID(ctx context.Context, id int64) (PitchRequest, error) {
+	row := q.queryRow(ctx, q.getPitchRequestByIDStmt, getPitchRequestByID, id)
+	var i PitchRequest
+	err := row.Scan(
+		&i.ID,
+		&i.SalesRepID,
+		&i.SalesRepName,
+		&i.Status,
+		&i.CustomerName,
+		&i.PitchTag,
+		pq.Array(&i.CustomerRequest),
+		&i.RequestDeadline,
+		&i.AdminViewed,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getUserForUpdate = `-- name: GetUserForUpdate :one
 SELECT id, username, role, full_name, email, password, password_changed, updated_at, created_at FROM users
 WHERE id = $1
