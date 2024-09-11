@@ -47,7 +47,7 @@ export function UpdateUserForm() {
       const resp = await axios({
         method: "put",
         baseURL: BASE_URL,
-        url: "/a/users/update",
+        url: "/users/update",
         headers: {
           Authorization: `Bearer ${usr.access_token}`
         },

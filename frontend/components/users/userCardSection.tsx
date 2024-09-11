@@ -39,7 +39,7 @@ export function UserCardSection() {
     getUsers(
       usr?.access_token,
       { page_id: 1, page_size: DEFAULT_PAGE_SIZE },
-      "/a/users"
+      "/users"
     );
   }, [usr]);
   return (
