@@ -67,11 +67,12 @@ func (s *Server) SetupRouter() {
 	authRoute.PUT("/admin/deals/update", s.adminUpdateDealHandler)
 	authRoute.GET("/users", s.listUsersHandler)
 	authRoute.PUT("/users/password-reset", s.resetPassword)
+	authRoute.POST("/admin/deals", s.adminCreateDealHandler) 
 
 
 	authRoute.PUT("/users/update", s.adminUpdateUserHandler)                  
 	authRoute.DELETE("/users/delete/:id", s.adminDeleteUserHandler)           
-	authRoute.POST("/admin/deals", s.adminCreateDealHandler)                          
+	                         
 	authRoute.DELETE("/admin/deals/delete/:deal_id", s.adminDeleteDealHandler)
 	                               
 	
