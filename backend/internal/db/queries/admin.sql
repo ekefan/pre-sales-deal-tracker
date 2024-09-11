@@ -82,8 +82,6 @@ ORDER BY id
 LIMIT $1
 OFFSET $2;
 
-
-
 -- name: UpdatePassWord :exec
 UPDATE users
     set password = $2, password_changed = $3, updated_at = $4
@@ -100,3 +98,8 @@ FOR UPDATE;
 -- name: AdminGetPitchRequest :many
 SELECT * FROM pitch_requests
 WHERE admin_viewed = $1;
+
+-- name: GetPitchRequestByID :one
+SELECT * FROM pitch_requests
+WHERE id = $1
+LIMIT 1;
