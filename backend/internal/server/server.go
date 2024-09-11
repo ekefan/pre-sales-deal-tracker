@@ -53,7 +53,7 @@ func (s *Server) SetupRouter() {
 	router.Use(cors.New(corsConfig))
 	
 	// ADMIN
-	authRoute := router.Group("/a").Use(authMiddleware(s.TokenMaker))
+	authRoute := router.Group("/").Use(authMiddleware(s.TokenMaker))
 	router.POST("/users", s.adminCreateUserHandler)
 	
 
@@ -93,7 +93,7 @@ func (s *Server) SetupRouter() {
 
 	//Password Update
 	authRoute.PUT("/users/password", s.updatePassWordLoggedIn) //added token authorization
-	// router.PUT("/users/forgotpassword", s.forgotPassword)
+	authRoute.PUT("/users/password-reset", s.resetPassword)
 
 	s.Router = router
 }
