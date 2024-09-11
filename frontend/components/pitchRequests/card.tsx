@@ -13,6 +13,7 @@ export function PitchReqCard({props}: PrProps) {
   const year = date.getFullYear().toString().slice(-2);
   const formattedDate = `${month}/${day}/${year}`; // "12/24/24"
   const duration =  Math.floor((Date.now() - Date.parse(props.created_at))/(60 * 60 * 1000 * 24))
+
   return (
     <div className={cn(props.status == "ongoing" ? "border-green-200": "border-red-200", "bg-gray-100 w-full min-h-20 h-auto rounded-lg border p-2  gap-1 text-sm xl:text-base flex")}>
       <div className="flex flex-grow flex-col sm:flex-row gap-1">
@@ -42,13 +43,12 @@ export function PitchReqCard({props}: PrProps) {
           <p className="text-xs p-1">Update</p>
         </Link>
 
-        <Link
-          href={`/dashboard/pitch-requests/create/?${props.pitch_id}}`}
+        <button
           className="bg-sky-100 w-full h-full rounded flex flex-col items-center justify-center border border-slate-300 p-1"
         >
           <p className="text-xs">create</p>
           <p className="text-xs">deal</p>
-        </Link>
+          </button>
       </div>
     </div>
   );

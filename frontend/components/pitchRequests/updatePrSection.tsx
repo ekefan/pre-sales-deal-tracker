@@ -37,7 +37,7 @@ export function UpdatePitchRequestSection() {
         console.log(error);
       }
     };
-    getDeal(usr?.access_token, "a/admin/getdeal", {
+    getDeal(usr?.access_token, "/admin/getdeal", {
       deal_id: id != null ? Number(id) : 0,
     });
   }, [id, usr]);

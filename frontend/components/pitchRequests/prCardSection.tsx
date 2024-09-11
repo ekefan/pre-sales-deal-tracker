@@ -5,8 +5,6 @@ import { useUser } from "@/context/userContext";
 import axios from "axios";
 import { BASE_URL, DEFAULT_PAGE_SIZE } from "@/lib/utils";
 import { PitchReqCard } from "@/components/pitchRequests/card";
-
-import Link from "next/link";
 export function PitchReqCardSection() {
   const { usr } = useUser();
   const [pitchRequests, setPitchRequests] = useState<PitchReq[]>([]);
@@ -37,9 +35,9 @@ export function PitchReqCardSection() {
       }
     }
     if (usr?.user?.role === "admin") {
-      getPitchRequests(usr?.access_token, "a/admin/pitchrequest", {admin_viewed: false})
+      getPitchRequests(usr?.access_token, "/admin/pitchrequest", {admin_viewed: false})
     } else if (usr?.user?.role === "sales") {
-      getPitchRequests(usr?.access_token, "a/sales/pitchrequest", {
+      getPitchRequests(usr?.access_token, "/sales/pitchrequest", {
         sales_rep_id: usr?.user.user_id,
         page_id: 1,
         page_size: DEFAULT_PAGE_SIZE,
