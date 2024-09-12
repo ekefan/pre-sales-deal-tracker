@@ -14,6 +14,10 @@ import (
 )
 
 // Server contains fields required by the server instance
+// Router: an instance of gin.Engine
+// Store: database interface
+// EnvVar: holds environment variables loaded into Config
+// TokenMaker: interface for creating and handling PASETO tokens
 type Server struct {
 	Router     *gin.Engine
 	Store      db.Store
@@ -34,7 +38,7 @@ func NewServer(store db.Store, config Config) (*Server, error) {
 	}, nil
 }
 
-// SetupRouter ini
+// SetupRouter sets up a router, register cors, and routes for api endpoints
 func (s *Server) SetupRouter() {
 	router := gin.Default()
 	// register validation to gin context
@@ -51,58 +55,35 @@ func (s *Server) SetupRouter() {
 	}
 
 	router.Use(cors.New(corsConfig))
-	
-	// ADMIN
 	authRoute := router.Group("/").Use(authMiddleware(s.TokenMaker))
-	router.POST("/users", s.adminCreateUserHandler)
-	
 
-	
-	//Currently used routes in the application
+
+	router.POST("/users", s.adminCreateUserHandler)
+	router.POST("/users/login", s.userLogin)
+	authRoute.POST("/sales/pitchReq", s.salesCreatePitchReqHandler)
+	authRoute.POST("/admin/deals", s.adminCreateDealHandler)
 	authRoute.GET("/deals/vas", s.getOngoingDeals)
 	authRoute.GET("/deals/filtered", s.getFilteredDeals)
-	authRoute.GET("/admin/pitchrequest", s.adminGetPitchRequests)
-	authRoute.GET("/sales/pitchrequest/", s.salesViewPitchRequests)
-	router.POST("/users/login", s.userLogin)
-	authRoute.PUT("/admin/deals/update", s.adminUpdateDealHandler)
+	authRoute.GET("/admin/pitchrequest", s.adminGetPitchRequests) 
+	authRoute.GET("/sales/pitchrequest", s.salesViewPitchRequests)
+	authRoute.GET("/admin/getdeal", s.getDealsById)
+	authRoute.GET("/sales/deals", s.getSalesDeals)
 	authRoute.GET("/users", s.listUsersHandler)
 	authRoute.PUT("/users/password-reset", s.resetPassword)
-	authRoute.POST("/admin/deals", s.adminCreateDealHandler) 
-
-
-	authRoute.PUT("/users/update", s.adminUpdateUserHandler)                  
-	authRoute.DELETE("/users/delete/:id", s.adminDeleteUserHandler)           
-	                         
-	authRoute.DELETE("/admin/deals/delete/:deal_id", s.adminDeleteDealHandler)
-	                               
-	
-
-	// ADMINSALES
-	authRoute.GET("/admin/getdeal", s.getDealsById)
-	authRoute.PUT("pitchrequest/update", s.updatePitchReqHandler) 
-	// this route can be replaced with filtered... or user makes call here first then filters
-	authRoute.GET("/deals", s.getDealsHandler)                     
-	authRoute.GET("/deals/filtered/count", s.getCountFilteredDeals)
-	// handler exist in sales... updates users username only for sales
-	authRoute.PUT("/sales/update/user", s.salesUpdateuserHandler)
-	//SALES-REP
-	authRoute.POST("/sales/pitchReq", s.salesCreatePitchReqHandler)
-
-	//this should be the general update user without even for password
-	//change password should be separate                                 (for sales only)
-	                                                      
-	authRoute.DELETE("/sales/pitchReq/delete/:sales_username/:sales_rep_id/:pitch_id", s.salesDeletePitchReqHandler) 
-	authRoute.GET("/sales/deals", s.getSalesDeals)                                                                   
-	// authRoute.GET("sales/count/deals", s.getSalesDealsCount)
-
-	//Password Update
-	authRoute.PUT("/users/password", s.updatePassWordLoggedIn) //added token authorization
+	authRoute.PUT("/admin/deals/update", s.adminUpdateDealHandler)
+	authRoute.PUT("/users/update", s.adminUpdateUserHandler)     
+	authRoute.PUT("/users/password", s.updatePassWordLoggedIn)
+	authRoute.PUT("/pitchrequest/update", s.updatePitchReqHandler)
+	authRoute.DELETE("/users/delete/:id", s.adminDeleteUserHandler)                                   
+	authRoute.DELETE("/admin/deals/delete/:deal_id", s.adminDeleteDealHandler)                 
+	authRoute.DELETE("/sales/pitchReq/delete/:sales_username/:sales_rep_id/:pitch_id", s.salesDeletePitchReqHandler)
 	
 
 	s.Router = router
 }
 
-// hostAddress string
+// StartServer starts the app server, takes the hostAddress
+// listens and serves on that address
 func (s *Server) StartServer(hostAddress string) error {
 	err := s.Router.Run(hostAddress)
 	if err != nil {
@@ -111,6 +92,9 @@ func (s *Server) StartServer(hostAddress string) error {
 	return nil
 }
 
+// errorResponse a custom error reponse handler for reusability
+// takes the  error (err) returns a gin.H{} struct with an error 
+// field equal to err.Error()
 func errorResponse(err error) gin.H {
 	return gin.H{
 		"error": err.Error(),
