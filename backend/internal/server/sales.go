@@ -21,6 +21,9 @@ type PitchReq struct {
 	RequestDeadline UnixTime `json:"request_deadline" binding:"required"`
 }
 
+// salesCreatePitchReqHandler api endpoint for creating a pitch request
+// expected to be called by a user with sales role
+// To be successful a PitchReq is sent to the handler
 func (s *Server) salesCreatePitchReqHandler(ctx *gin.Context) {
 	var req PitchReq
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -71,6 +74,8 @@ type ViewPitchReq struct {
 	PageSize   int32 `form:"page_size" binding:"required,min=5,max=10"`
 }
 
+// salesViewPitchRequest api endpoint for getting pitchrequests by the sales rep
+// on update to this function, the user who calls the function must be the owner of the sales_rep_id to be authorized
 func (s *Server) salesViewPitchRequests(ctx *gin.Context) {
 	var req ViewPitchReq
 	if err := ctx.ShouldBindQuery(&req); err != nil {
@@ -94,12 +99,17 @@ func (s *Server) salesViewPitchRequests(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, requests)
 }
 
+// DeletePitchReq holds fields required to delete pitch request
 type DeletePitchReq struct {
 	ID         int64 `uri:"pitch_id" binding:"required"`
 	SalesRepID int64 `uri:"sales_rep_id" binding:"required"`
 	Username string `uri:"sales_username" binding:"required"`
 }
 
+
+// salesDeletePitchReqHandler api handler for deleting a pitch request
+// username must match auth payload username.... (in any update, that bug should be fixed,
+// when a user is updated and the username changes, the session should be refreshed if the user is logged in
 func (s *Server) salesDeletePitchReqHandler(ctx *gin.Context) {
 	var req DeletePitchReq
 

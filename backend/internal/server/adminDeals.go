@@ -212,15 +212,12 @@ func (s *Server) listUsersHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, users)
 }
 
-// ===== TODO =====
-///////////////////////////
-// start the frontend.....
-// implement Handling user sessions
 
 type AdminPitchReq struct {
 	Admin_viewed bool `form:"admin_viewed" binding:"boolean"`
 }
 
+// adminGetPitchRequest api endpoint to get pitchrequests the admin has not viewed
 func (s *Server) adminGetPitchRequests(ctx *gin.Context) {
 	var req AdminPitchReq
 	if err := ctx.ShouldBindQuery(&req); err != nil {
@@ -239,3 +236,8 @@ func (s *Server) adminGetPitchRequests(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, pitchRequests)
 
 }
+
+
+// ===== TODO =====
+///////////////////////////
+// implement Handling user sessions

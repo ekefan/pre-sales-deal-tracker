@@ -41,6 +41,7 @@ func (maker *PasetoMaker) CreateToken(username, role string, duration time.Durat
 	return maker.paseto.Encrypt(maker.symmetricKey, payload, nil)
 }
 
+// VerfiyToken takes paseto token, decrypts it and return the payload on success
 func (maker *PasetoMaker) VerifyToken(token string) (*Payload, error) {
 	payload := &Payload{}
 	err := maker.paseto.Decrypt(token, maker.symmetricKey, payload, nil)
