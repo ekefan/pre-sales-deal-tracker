@@ -23,13 +23,6 @@ UPDATE pitch_requests
 WHERE id = $1
 RETURNING *;
 
-
--- name: UpdateUser :one
-UPDATE users
-    set username = $2, updated_at = $3
-WHERE id = $1
-RETURNING *;
-
 -- name: GetPitchRequestForUpdate :one
 SELECT * FROM pitch_requests
 WHERE id = $1

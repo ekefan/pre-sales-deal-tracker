@@ -76,23 +76,11 @@ ORDER BY id
 LIMIT $1
 OFFSET $2;
 
--- name: AdminViewDeals :many
-SELECT * FROM deals
-ORDER BY id
-LIMIT $1
-OFFSET $2;
 
 -- name: UpdatePassWord :exec
 UPDATE users
     set password = $2, password_changed = $3, updated_at = $4
 WHERE id = $1;
-
-
--- name: ForgotPassword :one
-SELECT * FROM users
-WHERE email = $1
-LIMIT 1
-FOR UPDATE;
 
 
 -- name: AdminGetPitchRequest :many
