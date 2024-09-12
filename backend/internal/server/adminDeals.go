@@ -18,7 +18,7 @@ import (
 
 // CreateDealReq holds fields needed to create a new deal
 type CreateDealReq struct {
-	PitchID int64 	`json:"pitch_id"`
+	PitchID int64 	`json:"pitch_id" binding:"required,gt=0"`
 }
 
 type CreateDealResp struct {

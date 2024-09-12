@@ -89,10 +89,10 @@ func (s *Server) userLogin(ctx *gin.Context) {
 type UpdatePitchReq struct {
 	ID              int64    `json:"pitch_request_id" binding:"required"`
 	Status          string   `json:"status" binding:"required"`
-	PitchTag        string   `json:"pitch_tag" binding:"required"`
+	PitchTag        string   `json:"department" binding:"required"`
 	CustomerRequests []string   `json:"customer_requests" binding:"required"`
-	AdminViewed     bool     `json:"admin_viewed"`
-	RequestDealine  UnixTime `json:"request_deadline"`
+	AdminViewed     bool     `json:"admin_viewed" binding:"boolean"`
+	RequestDealine  UnixTime `json:"request_deadline" binding:"required"`
 }
 
 type PitchResp struct {
