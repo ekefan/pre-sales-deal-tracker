@@ -48,14 +48,8 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.adminUserExistsStmt, err = db.PrepareContext(ctx, adminUserExists); err != nil {
 		return nil, fmt.Errorf("error preparing query AdminUserExists: %w", err)
 	}
-	if q.adminViewDealsStmt, err = db.PrepareContext(ctx, adminViewDeals); err != nil {
-		return nil, fmt.Errorf("error preparing query AdminViewDeals: %w", err)
-	}
 	if q.adminViewUsersStmt, err = db.PrepareContext(ctx, adminViewUsers); err != nil {
 		return nil, fmt.Errorf("error preparing query AdminViewUsers: %w", err)
-	}
-	if q.countFilteredDealsStmt, err = db.PrepareContext(ctx, countFilteredDeals); err != nil {
-		return nil, fmt.Errorf("error preparing query CountFilteredDeals: %w", err)
 	}
 	if q.createDealStmt, err = db.PrepareContext(ctx, createDeal); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateDeal: %w", err)
@@ -71,9 +65,6 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.filterDealsStmt, err = db.PrepareContext(ctx, filterDeals); err != nil {
 		return nil, fmt.Errorf("error preparing query FilterDeals: %w", err)
-	}
-	if q.forgotPasswordStmt, err = db.PrepareContext(ctx, forgotPassword); err != nil {
-		return nil, fmt.Errorf("error preparing query ForgotPassword: %w", err)
 	}
 	if q.getDealsByIdStmt, err = db.PrepareContext(ctx, getDealsById); err != nil {
 		return nil, fmt.Errorf("error preparing query GetDealsById: %w", err)
@@ -110,9 +101,6 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.updatePitchRequestUserNameStmt, err = db.PrepareContext(ctx, updatePitchRequestUserName); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdatePitchRequestUserName: %w", err)
-	}
-	if q.updateUserStmt, err = db.PrepareContext(ctx, updateUser); err != nil {
-		return nil, fmt.Errorf("error preparing query UpdateUser: %w", err)
 	}
 	if q.viewPitchRequestsStmt, err = db.PrepareContext(ctx, viewPitchRequests); err != nil {
 		return nil, fmt.Errorf("error preparing query ViewPitchRequests: %w", err)
@@ -162,19 +150,9 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing adminUserExistsStmt: %w", cerr)
 		}
 	}
-	if q.adminViewDealsStmt != nil {
-		if cerr := q.adminViewDealsStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing adminViewDealsStmt: %w", cerr)
-		}
-	}
 	if q.adminViewUsersStmt != nil {
 		if cerr := q.adminViewUsersStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing adminViewUsersStmt: %w", cerr)
-		}
-	}
-	if q.countFilteredDealsStmt != nil {
-		if cerr := q.countFilteredDealsStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing countFilteredDealsStmt: %w", cerr)
 		}
 	}
 	if q.createDealStmt != nil {
@@ -200,11 +178,6 @@ func (q *Queries) Close() error {
 	if q.filterDealsStmt != nil {
 		if cerr := q.filterDealsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing filterDealsStmt: %w", cerr)
-		}
-	}
-	if q.forgotPasswordStmt != nil {
-		if cerr := q.forgotPasswordStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing forgotPasswordStmt: %w", cerr)
 		}
 	}
 	if q.getDealsByIdStmt != nil {
@@ -267,11 +240,6 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing updatePitchRequestUserNameStmt: %w", cerr)
 		}
 	}
-	if q.updateUserStmt != nil {
-		if cerr := q.updateUserStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing updateUserStmt: %w", cerr)
-		}
-	}
 	if q.viewPitchRequestsStmt != nil {
 		if cerr := q.viewPitchRequestsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing viewPitchRequestsStmt: %w", cerr)
@@ -324,15 +292,12 @@ type Queries struct {
 	adminUpdateDealStmt            *sql.Stmt
 	adminUpdateUserStmt            *sql.Stmt
 	adminUserExistsStmt            *sql.Stmt
-	adminViewDealsStmt             *sql.Stmt
 	adminViewUsersStmt             *sql.Stmt
-	countFilteredDealsStmt         *sql.Stmt
 	createDealStmt                 *sql.Stmt
 	createNewUserStmt              *sql.Stmt
 	createPitchRequestStmt         *sql.Stmt
 	deletePitchRequestStmt         *sql.Stmt
 	filterDealsStmt                *sql.Stmt
-	forgotPasswordStmt             *sql.Stmt
 	getDealsByIdStmt               *sql.Stmt
 	getDealsBySalesRepStmt         *sql.Stmt
 	getDealsByStatusStmt           *sql.Stmt
@@ -345,7 +310,6 @@ type Queries struct {
 	updatePassWordStmt             *sql.Stmt
 	updatePitchRequestStmt         *sql.Stmt
 	updatePitchRequestUserNameStmt *sql.Stmt
-	updateUserStmt                 *sql.Stmt
 	viewPitchRequestsStmt          *sql.Stmt
 }
 
@@ -361,15 +325,12 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		adminUpdateDealStmt:            q.adminUpdateDealStmt,
 		adminUpdateUserStmt:            q.adminUpdateUserStmt,
 		adminUserExistsStmt:            q.adminUserExistsStmt,
-		adminViewDealsStmt:             q.adminViewDealsStmt,
 		adminViewUsersStmt:             q.adminViewUsersStmt,
-		countFilteredDealsStmt:         q.countFilteredDealsStmt,
 		createDealStmt:                 q.createDealStmt,
 		createNewUserStmt:              q.createNewUserStmt,
 		createPitchRequestStmt:         q.createPitchRequestStmt,
 		deletePitchRequestStmt:         q.deletePitchRequestStmt,
 		filterDealsStmt:                q.filterDealsStmt,
-		forgotPasswordStmt:             q.forgotPasswordStmt,
 		getDealsByIdStmt:               q.getDealsByIdStmt,
 		getDealsBySalesRepStmt:         q.getDealsBySalesRepStmt,
 		getDealsByStatusStmt:           q.getDealsByStatusStmt,
@@ -382,7 +343,6 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		updatePassWordStmt:             q.updatePassWordStmt,
 		updatePitchRequestStmt:         q.updatePitchRequestStmt,
 		updatePitchRequestUserNameStmt: q.updatePitchRequestUserNameStmt,
-		updateUserStmt:                 q.updateUserStmt,
 		viewPitchRequestsStmt:          q.viewPitchRequestsStmt,
 	}
 }

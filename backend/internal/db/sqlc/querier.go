@@ -17,15 +17,12 @@ type Querier interface {
 	AdminUpdateDeal(ctx context.Context, arg AdminUpdateDealParams) (Deal, error)
 	AdminUpdateUser(ctx context.Context, arg AdminUpdateUserParams) (User, error)
 	AdminUserExists(ctx context.Context, id int64) (bool, error)
-	AdminViewDeals(ctx context.Context, arg AdminViewDealsParams) ([]Deal, error)
 	AdminViewUsers(ctx context.Context, arg AdminViewUsersParams) ([]User, error)
-	CountFilteredDeals(ctx context.Context, arg CountFilteredDealsParams) (int64, error)
 	CreateDeal(ctx context.Context, arg CreateDealParams) (Deal, error)
 	CreateNewUser(ctx context.Context, arg CreateNewUserParams) (User, error)
 	CreatePitchRequest(ctx context.Context, arg CreatePitchRequestParams) (PitchRequest, error)
 	DeletePitchRequest(ctx context.Context, id int64) error
 	FilterDeals(ctx context.Context, arg FilterDealsParams) ([]Deal, error)
-	ForgotPassword(ctx context.Context, email string) (User, error)
 	GetDealsById(ctx context.Context, id int64) (Deal, error)
 	GetDealsBySalesRep(ctx context.Context, arg GetDealsBySalesRepParams) ([]Deal, error)
 	GetDealsByStatus(ctx context.Context, status string) ([]Deal, error)
@@ -38,7 +35,6 @@ type Querier interface {
 	UpdatePassWord(ctx context.Context, arg UpdatePassWordParams) error
 	UpdatePitchRequest(ctx context.Context, arg UpdatePitchRequestParams) (PitchRequest, error)
 	UpdatePitchRequestUserName(ctx context.Context, arg UpdatePitchRequestUserNameParams) error
-	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
 	ViewPitchRequests(ctx context.Context, arg ViewPitchRequestsParams) ([]PitchRequest, error)
 }
 

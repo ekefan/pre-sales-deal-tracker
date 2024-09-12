@@ -11,44 +11,6 @@ import (
 	"github.com/lib/pq"
 )
 
-const countFilteredDeals = `-- name: CountFilteredDeals :one
-SELECT COUNT(*)
-FROM deals
-WHERE 
-    (customer_name = $1 OR $1 IS NULL) AND
-    (service_to_render && $2::TEXT[] OR $2 IS NULL) AND
-    (status = $3 OR $3 IS NULL) AND
-    (profit >= $4 OR $4 IS NULL) AND
-    (profit <= $5 OR $5 IS NULL) AND
-    (awarded = $6 OR $6 IS NULL) AND
-    (sales_rep_name = $7 OR $7 IS NULL)
-`
-
-type CountFilteredDealsParams struct {
-	CustomerName *string
-	ServiceToRender []string
-	Status       *string
-	Profit       *string
-	Profit_2     *string
-	Awarded      *bool
-	SalesRepName *string
-}
-
-func (q *Queries) CountFilteredDeals(ctx context.Context, arg CountFilteredDealsParams) (int64, error) {
-	row := q.queryRow(ctx, q.countFilteredDealsStmt, countFilteredDeals,
-		arg.CustomerName,
-		pq.Array(arg.ServiceToRender),
-		arg.Status,
-		arg.Profit,
-		arg.Profit_2,
-		arg.Awarded,
-		arg.SalesRepName,
-	)
-	var count int64
-	err := row.Scan(&count)
-	return count, err
-}
-
 const filterDeals = `-- name: FilterDeals :many
 SELECT id, pitch_id, sales_rep_name, customer_name, service_to_render, status, status_tag, current_pitch_request, net_total_cost, profit, created_at, updated_at, closed_at, awarded
 FROM deals

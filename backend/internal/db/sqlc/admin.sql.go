@@ -226,56 +226,6 @@ func (q *Queries) AdminUserExists(ctx context.Context, id int64) (bool, error) {
 	return exists, err
 }
 
-const adminViewDeals = `-- name: AdminViewDeals :many
-SELECT id, pitch_id, sales_rep_name, customer_name, service_to_render, status, status_tag, current_pitch_request, net_total_cost, profit, created_at, updated_at, closed_at, awarded FROM deals
-ORDER BY id
-LIMIT $1
-OFFSET $2
-`
-
-type AdminViewDealsParams struct {
-	Limit  int32
-	Offset int32
-}
-
-func (q *Queries) AdminViewDeals(ctx context.Context, arg AdminViewDealsParams) ([]Deal, error) {
-	rows, err := q.query(ctx, q.adminViewDealsStmt, adminViewDeals, arg.Limit, arg.Offset)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []Deal{}
-	for rows.Next() {
-		var i Deal
-		if err := rows.Scan(
-			&i.ID,
-			&i.PitchID,
-			&i.SalesRepName,
-			&i.CustomerName,
-			pq.Array(&i.ServiceToRender),
-			&i.Status,
-			&i.StatusTag,
-			&i.CurrentPitchRequest,
-			&i.NetTotalCost,
-			&i.Profit,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.ClosedAt,
-			&i.Awarded,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const adminViewUsers = `-- name: AdminViewUsers :many
 SELECT id, username, role, full_name, email, password, password_changed, updated_at, created_at FROM users
 ORDER BY id
@@ -397,30 +347,6 @@ func (q *Queries) CreateNewUser(ctx context.Context, arg CreateNewUserParams) (U
 		arg.Password,
 		arg.PasswordChanged,
 	)
-	var i User
-	err := row.Scan(
-		&i.ID,
-		&i.Username,
-		&i.Role,
-		&i.FullName,
-		&i.Email,
-		&i.Password,
-		&i.PasswordChanged,
-		&i.UpdatedAt,
-		&i.CreatedAt,
-	)
-	return i, err
-}
-
-const forgotPassword = `-- name: ForgotPassword :one
-SELECT id, username, role, full_name, email, password, password_changed, updated_at, created_at FROM users
-WHERE email = $1
-LIMIT 1
-FOR UPDATE
-`
-
-func (q *Queries) ForgotPassword(ctx context.Context, email string) (User, error) {
-	row := q.queryRow(ctx, q.forgotPasswordStmt, forgotPassword, email)
 	var i User
 	err := row.Scan(
 		&i.ID,
