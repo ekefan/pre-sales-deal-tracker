@@ -2,8 +2,7 @@ package server
 
 import (
 	"fmt"
-	"net/http"
-	"time"
+	"net/http" 
 
 	db "github.com/ekefan/deal-tracker/internal/db/sqlc"
 	"github.com/ekefan/deal-tracker/internal/token"
@@ -62,57 +61,6 @@ func (s *Server) salesCreatePitchReqHandler(ctx *gin.Context) {
 		AdminViewed:     pitchRequest.AdminViewed,
 		CreatedAt:       pitchRequest.CreatedAt.Unix(),
 		UpdatedAt:       pitchRequest.UpdatedAt.Unix(),
-	}
-	ctx.JSON(http.StatusOK, resp)
-}
-
-type SalesUpdateUserReq struct {
-	ID       int64  `json:"user_id" binding:"required"`
-	Username string `json:"username" binding:"required,alphanum"`
-}
-
-// LoginReq holds fields required to access user details
-func (s *Server) salesUpdateuserHandler(ctx *gin.Context) {
-	var req SalesUpdateUserReq
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-		return
-	}
-	if !authAccess(ctx, utils.SalesRole) {
-		return
-	}
-	//get user for update
-	usr, err := s.Store.GetUserForUpdate(ctx, req.ID)
-	if err != nil {
-		if sqlNoRowsHandler(ctx, err) {
-			return
-		}
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-		return
-	}
-	args := db.UpdateUserParams{
-		ID:        usr.ID,
-		Username:  req.Username,
-		UpdatedAt: time.Now(),
-	}
-	// get
-	newUsr, err := s.Store.UpdateUser(ctx, args)
-	if err != nil {
-		if pqErrHandler(ctx, "sales-rep", err) {
-			return
-		}
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-		return
-	}
-	resp := AdminUpdateUsrResp{
-		UserID:          newUsr.ID,
-		Username:        newUsr.Username,
-		Role:            newUsr.Role,
-		Fullname:        newUsr.FullName,
-		Email:           newUsr.Email,
-		PasswordChanged: newUsr.PasswordChanged,
-		UpdatedAt:       newUsr.UpdatedAt,
-		CreatedAt:       newUsr.CreatedAt,
 	}
 	ctx.JSON(http.StatusOK, resp)
 }
@@ -195,15 +143,15 @@ func (s *Server) salesDeletePitchReqHandler(ctx *gin.Context) {
 
 
 type SalesDealsReq struct {
-	SalesRepName string `json:"sales_rep" binding:"required"`
-	PageSize int32 `json:"page_size" binding:"required"`
-	PageID int32 `json:"page_id" binding:"required"`
+	SalesRepName string `form:"sales_rep" binding:"required"`
+	PageSize int32 `form:"page_size" binding:"required"`
+	PageID int32 `form:"page_id" binding:"required"`
 }
 
 // getSalesDeals returns deals associated with a sales rep pitch request
 func (s *Server) getSalesDeals(ctx *gin.Context) {
 	var req SalesDealsReq
-	if err := ctx.ShouldBindJSON(&req); err != nil {
+	if err := ctx.ShouldBindQuery(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
