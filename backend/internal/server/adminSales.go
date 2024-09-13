@@ -86,6 +86,8 @@ func (s *Server) userLogin(ctx *gin.Context) {
 
 }
 
+
+// UpdatePitchReq holds fields required to udpate pitchReq
 type UpdatePitchReq struct {
 	ID              int64    `json:"pitch_request_id" binding:"required"`
 	Status          string   `json:"status" binding:"required"`
@@ -109,6 +111,8 @@ type PitchResp struct {
 	UpdatedAt       int64 `json:"updated_at"`
 }
 
+// updatePitchReqHandler api endpoint for updating pitch request
+// allows either an admin or sales user to update pitch request
 func (s *Server) updatePitchReqHandler(ctx *gin.Context) {
 	var req UpdatePitchReq
 	if err := ctx.ShouldBindJSON(&req); err != nil {

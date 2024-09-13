@@ -27,6 +27,9 @@ type CreateUsrResp struct {
 }
 
 // adminCreateUserHandler http handler for the api end point for creating a new user
+// must receive a CreateUserReq with username, role fullname, email and password
+// on update to the handler, default password would be used so there wouldn't be a need
+// to provide password in request
 func (s *Server) adminCreateUserHandler(ctx *gin.Context) {
 	var req CreateUsrReq
 	//validate and bind request

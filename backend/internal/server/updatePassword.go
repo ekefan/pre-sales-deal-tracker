@@ -58,7 +58,7 @@ func (s *Server) updatePassWordLoggedIn(ctx *gin.Context) {
 	})
 }
 
-// UnderConstruction
+// resetPasswordReq holds the id of the user whose password should be updated
 type resetPasswordReq struct {
 	UserToUpdateID int64 `json:"user_id" binding:"required,gt=0"`
 }

@@ -13,16 +13,12 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-// Server contains fields required by the server instance
-// Router: an instance of gin.Engine
-// Store: database interface
-// EnvVar: holds environment variables loaded into Config
-// TokenMaker: interface for creating and handling PASETO tokens
+// Server contains fields required by a server instance
 type Server struct {
-	Router     *gin.Engine
-	Store      db.Store
-	EnvVar     Config
-	TokenMaker token.TokenMaker
+	Router     *gin.Engine //Router an instance of gin.Engine
+	Store      db.Store    //Store the database interface for interacting with the db
+	EnvVar     Config      //EnvVar holds the environment variables loaded into the server instance
+	TokenMaker token.TokenMaker // interface for creating and managing tokens
 }
 
 // NewServer create a server instance, having a router that connect api endpoints
@@ -57,27 +53,25 @@ func (s *Server) SetupRouter() {
 	router.Use(cors.New(corsConfig))
 	authRoute := router.Group("/").Use(authMiddleware(s.TokenMaker))
 
-
 	router.POST("/users", s.adminCreateUserHandler)
 	router.POST("/users/login", s.userLogin)
 	authRoute.POST("/sales/pitchReq", s.salesCreatePitchReqHandler)
 	authRoute.POST("/admin/deals", s.adminCreateDealHandler)
 	authRoute.GET("/deals/vas", s.getOngoingDeals)
 	authRoute.GET("/deals/filtered", s.getFilteredDeals)
-	authRoute.GET("/admin/pitchrequest", s.adminGetPitchRequests) 
+	authRoute.GET("/admin/pitchrequest", s.adminGetPitchRequests)
 	authRoute.GET("/sales/pitchrequest", s.salesViewPitchRequests)
 	authRoute.GET("/admin/getdeal", s.getDealsById)
 	authRoute.GET("/sales/deals", s.getSalesDeals)
 	authRoute.GET("/users", s.listUsersHandler)
 	authRoute.PUT("/users/password-reset", s.resetPassword)
 	authRoute.PUT("/admin/deals/update", s.adminUpdateDealHandler)
-	authRoute.PUT("/users/update", s.adminUpdateUserHandler)     
+	authRoute.PUT("/users/update", s.adminUpdateUserHandler)
 	authRoute.PUT("/users/password", s.updatePassWordLoggedIn)
 	authRoute.PUT("/pitchrequest/update", s.updatePitchReqHandler)
-	authRoute.DELETE("/users/delete/:id", s.adminDeleteUserHandler)                                   
-	authRoute.DELETE("/admin/deals/delete/:deal_id", s.adminDeleteDealHandler)                 
+	authRoute.DELETE("/users/delete/:id", s.adminDeleteUserHandler)
+	authRoute.DELETE("/admin/deals/delete/:deal_id", s.adminDeleteDealHandler)
 	authRoute.DELETE("/sales/pitchReq/delete/:sales_username/:sales_rep_id/:pitch_id", s.salesDeletePitchReqHandler)
-	
 
 	s.Router = router
 }
@@ -93,7 +87,7 @@ func (s *Server) StartServer(hostAddress string) error {
 }
 
 // errorResponse a custom error reponse handler for reusability
-// takes the  error (err) returns a gin.H{} struct with an error 
+// takes the  error (err) returns a gin.H{} struct with an error
 // field equal to err.Error()
 func errorResponse(err error) gin.H {
 	return gin.H{

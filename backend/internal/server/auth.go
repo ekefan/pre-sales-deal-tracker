@@ -15,6 +15,10 @@ const (
 	authPayloadKey = "authorization_payload"
 )
 
+// authMiddleware checks if the user authorized to access resource
+// it checks the request header for the authorization field
+// validates the authorization used, and on success gets the tokens payload
+// sets it in the current server context instance
 func authMiddleware(maker token.TokenMaker) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		//Check header for authorization header

@@ -9,10 +9,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// OngoingDealsReq holds the field for getting ongoing deals
 type OngoingDealsReq struct {
 	Status string `form:"status" binding:"required"`
 }
 
+// getOngoingDeals api endpoint for getting all deals where status is ongoing
+// all users have if authorized can get such deals
 func (s *Server) getOngoingDeals(ctx *gin.Context) {
 	var req OngoingDealsReq
 	if err := ctx.ShouldBindQuery(&req); err != nil {
@@ -36,6 +39,7 @@ func (s *Server) getOngoingDeals(ctx *gin.Context) {
 
 }
 
+// FilterDealReq holds fields need to filter deals based on requested conditions
 type FilterDealReq struct {
 	CustomerName    *string  `form:"customer_name"`
 	ServiceToRender []string `form:"service_to_render"`
@@ -48,6 +52,8 @@ type FilterDealReq struct {
 	PageID          int32    `form:"page_id"`
 }
 
+// getFilteredDeals returns deals filtered by the request fields
+// all users if authorized can filter deals
 func (s *Server) getFilteredDeals(ctx *gin.Context) {
 	var req FilterDealReq
 	if err := ctx.ShouldBindQuery(&req); err != nil {
@@ -85,11 +91,12 @@ func (s *Server) getFilteredDeals(ctx *gin.Context) {
 
 }
 
-
+// GetDealReq holds the field required to get the deal whose id is sames as deal_id
 type GetDealReq struct {
 	Deal_Id int64 `form:"deal_id" binding:"required"`
 }
 
+// getDealsById api endpoint for getting a deal by it's id
 func (s *Server) getDealsById(ctx *gin.Context) {
 	var req GetDealReq
 	if err := ctx.ShouldBindQuery(&req); err != nil {
