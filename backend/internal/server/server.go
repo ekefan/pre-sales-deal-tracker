@@ -63,7 +63,7 @@ func (s *Server) SetupRouter() {
 	authRoute.GET("/sales/pitchrequest", s.salesViewPitchRequests)
 	authRoute.GET("/admin/getdeal", s.getDealsById)
 	authRoute.GET("/sales/deals", s.getSalesDeals)
-	authRoute.GET("/users", s.listUsersHandler)
+	authRoute.GET("/list-users", s.listUsersHandler)
 	authRoute.PUT("/users/password-reset", s.resetPassword)
 	authRoute.PUT("/admin/deals/update", s.adminUpdateDealHandler)
 	authRoute.PUT("/users/update", s.adminUpdateUserHandler)
