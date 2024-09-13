@@ -12,8 +12,8 @@ schemes:
 paths:
   /users:
     post:
-      tags:
-        - Create User
+      # tags:
+      #   - Create User
       summary: 'Admin creates a new user'
       description: ''
       operationId: adminCreateUser
@@ -39,7 +39,36 @@ paths:
           description: server error
           schema:
             $ref: '#/definitions/errorResp'
-  # /users/login:
+  /users/login:
+    post:
+      # tags:
+      #   - User Login
+      summary: To login user
+      description: ''
+      parameters:
+        - name: LoginReq
+          in: body
+          description: An Object holding user's username and password
+          required: true
+          schema:
+            $ref: '#/definitions/LoginReq'
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/LoginResp'
+        '400':
+          description: bad request
+          schema:
+            $ref: '#/definitions/errorResp'
+        '401':
+          description: unauthorized operation or wrong password
+          schema:
+            $ref: '#/definitions/errorResp'
+        '500':
+          description: server error
+          schema:
+            $ref: '#/definitions/errorResp'         
   # /sales/pitchReq:
   # /admin/deals:
   # /deals/filtered:
@@ -47,7 +76,7 @@ paths:
   # /sales/pitchrequest:
   # /admin/getdeal:
   # /sales/deals:
-  # /users:
+  # /list-users:
   # /users/password-reset:
   # /admin/deal/update:
   # /users/update:
@@ -85,4 +114,28 @@ definitions:
     properties:
       error:
         type: string
+  LoginReq:
+    type: object
+    properties:
+      username:
+        type: string
+      password:
+        type: string
+  LoginResp:
+    type: object
+    properties:
+      user_id:
+        type: integer
+      username:
+        type: string
+      role:
+        type: string
+      fullname:
+        type: string
+      email:
+        type: string
+      updated_at:
+        type: integer
+      created_at:
+        type: integer
   
