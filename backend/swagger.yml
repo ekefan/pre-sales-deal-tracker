@@ -168,6 +168,10 @@ paths:
           description: unauthorized access
           schema:
             $ref: '#/definitions/errorResp'
+        '404':
+          description: unauthorized access
+          schema:
+            $ref: '#/definitions/errorResp'
         '500':
           description: server error
           schema:
@@ -245,6 +249,14 @@ paths:
           description: unauthorized access
           schema:
             $ref: '#/definitions/errorResp'
+        '404':
+          description: unauthorized access
+          schema:
+            $ref: '#/definitions/errorResp'
+        '409':
+          description: unauthorized access
+          schema:
+            $ref: '#/definitions/errorResp'
         '500':
           description: server error
           schema:
@@ -292,6 +304,22 @@ paths:
       operationId: salesViewPitchRequests
       produces:
         - 'application/json'
+      parameters:
+        - name: sales_rep_id
+          in: query
+          description: The id of the sales rep that created the pitch request
+          required: true
+          type: integer
+        - name: page_id
+          in: query
+          description: The page number or offset from which to start retrieving pitch requests. Determines where the current page of results starts in the overall list.
+          required: true
+          type: integer
+        - name: page_size
+          in: query
+          description: The number of pitch requests to return per page (used for pagination). Defines how many results to display in a single response.
+          required: true
+          type: integer
       responses:
         '200':
           description: successful request
@@ -311,7 +339,45 @@ paths:
           description: server error
           schema:
             $ref: '#/definitions/errorResp'
-  # /admin/getdeal:
+  /admin/getdeal:
+    get:
+      # tags:
+      #   - Get Deal by deal_id
+      summary: Get deal by it's id
+      description: ''
+      operationId: getDealsById
+      produces:
+        - 'application/json'
+      parameters:
+        - name: deal_id
+          in: query
+          description: The id of the deal to be retrieved
+          type: integer
+      responses:
+        '200':
+          description: 'successful request'
+          schema:
+            $ref: '#/definitions/Deal'
+        '400':
+          description: bad request
+          schema:
+            $ref: '#/definitions/errorResp'
+        '401':
+          description: unauthorized access
+          schema:
+            $ref: '#/definitions/errorResp'
+        '404':
+          description: unauthorized access
+          schema:
+            $ref: '#/definitions/errorResp'
+        '409':
+          description: unauthorized access
+          schema:
+            $ref: '#/definitions/errorResp'
+        '500':
+          description: server error
+          schema:
+            $ref: '#/definitions/errorResp'
   # /sales/deals:
   # /list-users:
   # /users/password-reset:
@@ -495,3 +561,37 @@ definitions:
         type: integer
       updated_at:
         type: integer
+  Deal:
+    type: object
+    properties:
+      deal_id:
+        type: integer
+      pitch_id:
+        type: integer
+      sales_rep_name:
+        type: string
+      customer_name:
+        type: string
+      services_to_render:
+        type: array
+        items: {
+          type: string
+        }
+      deal_status:
+        type: string
+      department:
+        type: string
+      current_pitch_request:
+        type: string
+      net_total_cost:
+        type: string
+      profit:
+        type: string
+      created_at:
+        type: integer
+      updated_at:
+        type: integer
+      closed_at:
+        type: integer
+      awarded:
+        type: boolean
