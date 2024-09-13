@@ -48,7 +48,7 @@ paths:
       parameters:
         - name: LoginReq
           in: body
-          description: An Object holding user's username and password
+          description: An object holding user's username and password
           required: true
           schema:
             $ref: '#/definitions/LoginReq'
@@ -69,7 +69,36 @@ paths:
           description: server error
           schema:
             $ref: '#/definitions/errorResp'         
-  # /sales/pitchReq:
+  /sales/pitchReq:
+    post:
+      # tags:
+      #   - Create Pitch Request
+      summary: Creates a (customer) pitch request
+      description: ''
+      parameters:
+        - name: PitchReq
+          in: body
+          description: An object holding fields needed to create a customer (pitch) request
+          required: true
+          schema:
+            $ref: '#/definitions/PitchReq'
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/PitchResp'
+        '400':
+          description: bad request
+          schema:
+            $ref: '#/definitions/errorResp'
+        '401':
+          description: unauthorized operation
+          schema:
+            $ref: '#/definitions/errorResp'
+        '500':
+          description: server error
+          schema:
+            $ref: '#/definitions/errorResp'
   # /admin/deals:
   # /deals/filtered:
   # /admin/pitchrequest:
@@ -138,4 +167,51 @@ definitions:
         type: integer
       created_at:
         type: integer
-  
+  PitchReq:
+    type: object
+    properties:
+      sales_rep_id:
+        type: integer
+      sales_rep_name:
+        type: string
+      status:
+        type: string
+      customer_name:
+        type: string
+      pitch_tag:
+        type: string
+      customer_requests:
+        type: array
+        items: {
+          type: string
+        }       
+      request_deadline:
+        type: integer
+  PitchResp:
+    type: object
+    properties:
+      pitch_request_id:
+        type: integer
+      sales_rep_id:
+        type: integer
+      sales_rep_name:
+        type: string
+      status:
+        type: string
+      customer_name:
+        type: string
+      pitch_tag:
+        type: string
+      customer_requests:
+        type: array
+        items: {
+          type: string
+        }
+      request_deadline:
+        type: integer
+      admin_viewed: 
+        type: boolean
+      created_at:
+        type: integer
+      updated_at:
+        type: integer

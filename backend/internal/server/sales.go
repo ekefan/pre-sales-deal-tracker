@@ -17,7 +17,7 @@ type PitchReq struct {
 	Status          string   `json:"status" binding:"required"`
 	CustomerName    string   `json:"customer_name" binding:"required"`
 	PitchTag        string   `json:"pitch_tag" binding:"required"`
-	CustomerRequest []string   `json:"customer_request" binding:"required"`
+	CustomerRequests []string   `json:"customer_requests" binding:"required"`
 	RequestDeadline UnixTime `json:"request_deadline" binding:"required"`
 }
 
@@ -43,7 +43,7 @@ func (s *Server) salesCreatePitchReqHandler(ctx *gin.Context) {
 		Status:          req.Status,
 		CustomerName:    req.CustomerName,
 		PitchTag:        req.PitchTag,
-		CustomerRequest: req.CustomerRequest,
+		CustomerRequest: req.CustomerRequests,
 		RequestDeadline: req.RequestDeadline.Time,
 	}
 	pitchRequest, err := s.Store.CreatePitchRequest(ctx, args)
