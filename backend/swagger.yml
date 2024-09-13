@@ -142,7 +142,7 @@ paths:
     get:
       # tags:
       #   - Get Deals with Status:ongoing
-      summary: Get all deals with an ongoing status
+      summary: Get deals with an ongoing status
       description: ''
       operationId: getOngoingDeals
       produces: 
@@ -249,7 +249,28 @@ paths:
           description: server error
           schema:
             $ref: '#/definitions/errorResp' 
-  # /admin/pitchrequest:
+  /admin/pitchrequest:
+    get:
+      # tags:
+      #   - Pitch Requests Admin has not Viewed
+      summary: Get pitch requests the admin has not viewed
+      description: ''
+      operationId: adminGetPitchReq
+      produces:
+        - 'application/json'
+      parameters:
+        - name: admin_viewed
+          in: query
+          description: a boolean indicating whether admin has viewed pitch request or not in this case not (false)
+          required: true
+          type: boolean
+      responses:
+        '200':
+          description: successful request
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/PitchRequest'
   # /sales/pitchrequest:
   # /admin/getdeal:
   # /sales/deals:
@@ -407,3 +428,31 @@ definitions:
         type: integer
       awarded:
         type: boolean
+  PitchRequest:  # due to poor design, this model is supposed to be same as PitchResp but pitch_request_id and pitch_tag changed
+    type: object
+    properties:
+      pitch_id:
+        type: integer
+      sales_rep_id:
+        type: integer
+      sales_rep_name:
+        type: string
+      status:
+        type: string
+      customer_name:
+        type: string
+      department:
+        type: string
+      customer_request:
+        type: array
+        items: {
+          type: string
+        }
+      request_deadline:
+        type: integer
+      admin_viewed: 
+        type: boolean
+      created_at:
+        type: integer
+      updated_at:
+        type: integer
