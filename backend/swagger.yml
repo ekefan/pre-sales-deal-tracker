@@ -271,7 +271,46 @@ paths:
             type: array
             items:
               $ref: '#/definitions/PitchRequest'
-  # /sales/pitchrequest:
+        '400':
+          description: bad request
+          schema:
+            $ref: '#/definitions/errorResp'
+        '401':
+          description: unauthorized access
+          schema:
+            $ref: '#/definitions/errorResp'
+        '500':
+          description: server error
+          schema:
+            $ref: '#/definitions/errorResp'
+  /sales/pitchrequest:
+    get:
+      # tags:
+      #   - Get Deal with For Sales Rep
+      summary: Get deals by sales rep id
+      description: ''
+      operationId: salesViewPitchRequests
+      produces:
+        - 'application/json'
+      responses:
+        '200':
+          description: successful request
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/PitchRequest'
+        '400':
+          description: bad request
+          schema:
+            $ref: '#/definitions/errorResp'
+        '401':
+          description: unauthorized access
+          schema:
+            $ref: '#/definitions/errorResp'
+        '500':
+          description: server error
+          schema:
+            $ref: '#/definitions/errorResp'
   # /admin/getdeal:
   # /sales/deals:
   # /list-users:
