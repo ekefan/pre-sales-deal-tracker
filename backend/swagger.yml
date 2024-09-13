@@ -45,6 +45,9 @@ paths:
       #   - User Login
       summary: To login user
       description: ''
+      operationId: userLogin
+      produces:
+        - application/json
       parameters:
         - name: LoginReq
           in: body
@@ -75,6 +78,9 @@ paths:
       #   - Create Pitch Request
       summary: Creates a (customer) pitch request
       description: ''
+      operationId: salesCreatePitchReq
+      produces:
+        - application/json
       parameters:
         - name: PitchReq
           in: body
@@ -105,6 +111,9 @@ paths:
       #   - Create a deal
       summary: Creates a deal based on a pitch request
       description: ''
+      operationId: adminCreateDeal
+      produces: 
+        - application/json
       parameters:
         - name: CreateDealReq
           in: body
@@ -129,9 +138,117 @@ paths:
           description: server error
           schema:
             $ref: '#/definitions/errorResp'
-
-
-  # /deals/filtered:
+  /deal/vas:
+    get:
+      # tags:
+      #   - Get Deals with Status:ongoing
+      summary: Get all deals with an ongoing status
+      description: ''
+      operationId: getOngoingDeals
+      produces: 
+        - 'application/json'
+      parameters:
+        - name: status
+          in: query
+          description: current deal status
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successful request
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/CreateDealResp'
+        '400':
+          description: bad request
+          schema:
+            $ref: '#/definitions/errorResp'
+        '401':
+          description: unauthorized access
+          schema:
+            $ref: '#/definitions/errorResp'
+        '500':
+          description: server error
+          schema:
+            $ref: '#/definitions/errorResp'
+  /deals/filtered:
+    get:
+      # tags:
+      #   - Get deals filtered by request
+      summary: Get deals that meet the request filter requirements
+      description: ''
+      operationId: getFilteredDeals
+      produces:
+        - 'application/json'
+      parameters:
+        - name: customer_name
+          in: query
+          description: deals having this customer name
+          required: false
+          type: string
+        - name: service_to_render
+          in: query
+          description: deals having these/this service(s)
+          required: false
+          type: array
+          items: {
+            type: string
+          }
+        - name: status
+          in: query
+          description: deals having this status
+          required: false
+          type: string
+        - name: max_profit
+          in: query
+          description: deals having this max_profit
+          required: false
+          type: string
+        - name: min_profit
+          in: query
+          description: deals having this min_profit
+          required: false
+          type: string
+        - name: awarded
+          in: query
+          description: deals awarded
+          required: false
+          type: boolean
+        - name: sales_rep_name
+          in: query
+          description: deals having this sales_rep_name
+          required: false
+          type: string
+        - name: page_size
+          in: query
+          description: The number of deals to return per page (used for pagination). Defines how many results to display in a single response.
+          required: true
+          type: integer
+        - name: page_id
+          in: query
+          description: The page number or offset from which to start retrieving deals. Determines where the current page of results starts in the overal list.
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: successful request
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/CreateDealResp'
+        '400':
+          description: bad request
+          schema:
+            $ref: '#/definitions/errorResp'
+        '401':
+          description: unauthorized access
+          schema:
+            $ref: '#/definitions/errorResp'
+        '500':
+          description: server error
+          schema:
+            $ref: '#/definitions/errorResp' 
   # /admin/pitchrequest:
   # /sales/pitchrequest:
   # /admin/getdeal:
