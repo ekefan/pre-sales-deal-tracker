@@ -99,7 +99,38 @@ paths:
           description: server error
           schema:
             $ref: '#/definitions/errorResp'
-  # /admin/deals:
+  /admin/deals:
+    post:
+      # tags:
+      #   - Create a deal
+      summary: Creates a deal based on a pitch request
+      description: ''
+      parameters:
+        - name: CreateDealReq
+          in: body
+          description: An object holding the pitch request id from which a deal will be created
+          required: true
+          schema:
+            $ref: '#/definitions/CreateDealReq'
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/successMsg'
+        '400':
+          description: bad request
+          schema:
+            $ref: '#/definitions/errorResp'
+        '401':
+          description: unauthorized operation
+          schema:
+            $ref: '#/definitions/errorResp'
+        '500':
+          description: server error
+          schema:
+            $ref: '#/definitions/errorResp'
+
+
   # /deals/filtered:
   # /admin/pitchrequest:
   # /sales/pitchrequest:
@@ -115,6 +146,16 @@ paths:
   # /admin/deals/delete/:deal_id:
   # /sales/pitchReq/delete/:sales_username:sales_rep_id/:pitch_id:
 definitions:
+  errorResp:
+      type: object
+      properties:
+        error:
+          type: string
+  successMsg:
+    type: object
+    properties:
+      message:
+        type: string
   CreateUsrReq:
     type: object
     properties:
@@ -138,11 +179,6 @@ definitions:
       createdAt:
         type: integer
         description: unix time representation
-  errorResp:
-    type: object
-    properties:
-      error:
-        type: string
   LoginReq:
     type: object
     properties:
@@ -215,3 +251,42 @@ definitions:
         type: integer
       updated_at:
         type: integer
+  CreateDealReq:
+    type: object
+    properties:
+      pitch_id:
+        type: integer
+  CreateDealResp:
+    type: object
+    properties:
+      id:
+        type: integer
+      pitch_id:
+        type: integer
+      sales_rep_name:
+        type: string
+      customer_name:
+        type: string
+      service_to_render:
+        type: array
+        items: {
+          type: string
+        }
+      status:
+        type: string
+      status_tag:
+        type: string
+      current_pitch_request:
+        type: string
+      net_total_cost:
+        type: string
+      profit:
+        type: string
+      created_at:
+        type: integer
+      updated_at:
+        type: integer
+      closed_at:
+        type: integer
+      awarded:
+        type: boolean
