@@ -42,7 +42,7 @@ func (s *Server) SetupRouter() {
 		v.RegisterValidation("valid-role", utils.RoleValidator)
 	}
 	corsConfig := cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000"}, // Allow all origins
+		AllowOrigins:     []string{"*"}, // Allow all origins
 		AllowMethods:     []string{"POST", "GET", "OPTIONS", "PUT", "DELETE"},
 		AllowHeaders:     []string{"Origin", "Authorization", "Content-Type"},
 		ExposeHeaders:    []string{"Content-Length"},

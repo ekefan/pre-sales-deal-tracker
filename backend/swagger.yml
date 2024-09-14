@@ -529,7 +529,7 @@ paths:
           schema:
             $ref: "#/definitions/errorResp"
         "404":
-          description: unauthorized access
+          description: resource doesn't exist in database
           schema:
             $ref: "#/definitions/errorResp"
         "409":
@@ -611,17 +611,172 @@ paths:
           schema:
             $ref: "#/definitions/errorResp"
         "404":
-          description: unauthorized access
+          description: resource doesn't exist in database
           schema:
             $ref: "#/definitions/errorResp"
         "500":
           description: server error
           schema:
             $ref: "#/definitions/errorResp"
-  # /pitchrequest/update:
-  # /users/delete/:id:
-  # /admin/deals/delete/:deal_id:
-  # /sales/pitchReq/delete/:sales_username:sales_rep_id/:pitch_id:
+  /pitchrequest/update:
+    put:
+      # tags:
+      #   - Update pitchRequest
+      summary: Uses data in request to update pitch request
+      description: ""
+      operationId: updatePitchRequest
+      produces:
+        - "application/json" 
+      parameters:
+        - name: UpdatePitchReq
+          in: body
+          description: holds the data need to update a pitch request
+          required: true
+          schema:
+            $ref: '#/definitions/UpdatePitchReq'
+      responses:
+        '200':
+          description: successfull operation
+          schema:
+            $ref: '#/definitions/PitchResp'
+        "400":
+          description: bad request
+          schema:
+            $ref: "#/definitions/errorResp"
+        "401":
+          description: unauthorized access
+          schema:
+            $ref: "#/definitions/errorResp"
+        "404":
+          description: unauthorized access
+          schema:
+            $ref: "#/definitions/errorResp"
+        "409":
+          description: conflict with existing data, the update data already exists in the database
+          schema:
+            $ref: "#/definitions/errorResp"
+        "500":
+          description: server error
+          schema:
+            $ref: "#/definitions/errorResp"
+  /users/delete/{id}:
+      delete:
+        # tags:
+        #   - Delete User
+        summary: Deletes the user with the id provided in the path
+        description: ""
+        operationId: deleteUser
+        produces:
+          - "application/json" 
+        parameters:
+          - name: id
+            in: path
+            description: the id of the user to be deleted
+            required: true
+            type: integer
+        responses:
+          '200':
+            description: successfull operation
+            schema:
+              $ref: '#/definitions/successMsg'
+          "400":
+            description: bad request
+            schema:
+              $ref: "#/definitions/errorResp"
+          "401":
+            description: unauthorized access
+            schema:
+              $ref: "#/definitions/errorResp"
+          "404":
+            description: user with id doesn't exist in database
+            schema:
+              $ref: "#/definitions/errorResp"
+          "500":
+            description: server error
+            schema:
+              $ref: "#/definitions/errorResp"
+  /admin/deals/delete/{deal_id}:
+      delete:
+        # tags:
+        #   - Delete deal
+        summary: Deletes the deal with the id provided in the path
+        description: ""
+        operationId: deleteDeal
+        produces:
+          - "application/json" 
+        parameters:
+          - name: deal_id
+            in: path
+            description: the id of the deal to be deleted
+            required: true
+            type: integer
+        responses:
+          '200':
+            description: successfull operation
+            schema:
+              $ref: '#/definitions/successMsg'
+          "400":
+            description: bad request
+            schema:
+              $ref: "#/definitions/errorResp"
+          "401":
+            description: unauthorized access
+            schema:
+              $ref: "#/definitions/errorResp"
+          "404":
+            description: user with id doesn't exist in database
+            schema:
+              $ref: "#/definitions/errorResp"
+          "500":
+            description: server error
+            schema:
+              $ref: "#/definitions/errorResp"
+  /sales/pitchReq/delete/{sales_username}/{sales_rep_id}/{pitch_id}:
+      delete:
+        # tags:
+        #   - Delete Pitch Request
+        summary: Deletes the pitch request with the pitch id provided in the path
+        description: ""
+        operationId: deletePitchRequest
+        produces:
+          - "application/json" 
+        parameters:
+          - name: pitch_id
+            in: path
+            description: the id of the pitch request to be deleted
+            required: true
+            type: integer
+          - name: sales_rep_id
+            in: path
+            description: the id of the sales rep who created the pitch request
+            required: true
+            type: integer
+          - name: sales_username
+            in: path
+            description: the username of the sales rep who created the pitch request
+            required: true
+            type: string
+        responses:
+          '200':
+            description: successfull operation
+            schema:
+              $ref: '#/definitions/successMsg'
+          "400":
+            description: bad request
+            schema:
+              $ref: "#/definitions/errorResp"
+          "401":
+            description: unauthorized access
+            schema:
+              $ref: "#/definitions/errorResp"
+          "404":
+            description: user with id doesn't exist in database
+            schema:
+              $ref: "#/definitions/errorResp"
+          "500":
+            description: server error
+            schema:
+              $ref: "#/definitions/errorResp"
 definitions:
   errorResp:
     type: object
@@ -880,3 +1035,22 @@ definitions:
         type: string
       user_id:
         type: integer
+  UpdatePitchReq:
+    type: object
+    properties:
+      pitch_request_id:
+        type: integer
+      status:
+        type: string
+      department:
+        type: string
+      customer_requests:
+        type: array
+        items: {
+          type: string
+        }
+      admin_Viewed:
+        type: boolean
+      request_deadlin:
+        type: integer
+        description: a unix time

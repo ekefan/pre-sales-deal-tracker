@@ -59,7 +59,7 @@ func (s *Server) updatePassWordLoggedIn(ctx *gin.Context) {
 }
 
 // resetPasswordReq holds the id of the user whose password should be updated
-type resetPasswordReq struct {
+type ResetPasswordReq struct {
 	UserToUpdateID int64 `json:"user_id" binding:"required,gt=0"`
 }
 
@@ -68,7 +68,7 @@ type resetPasswordReq struct {
 // sends user id from reset password request to perform password reset 
 // transaction returns successful if successful
 func (s *Server) resetPassword(ctx *gin.Context) {
-	var req resetPasswordReq
+	var req ResetPasswordReq
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return

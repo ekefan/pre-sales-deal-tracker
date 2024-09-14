@@ -81,16 +81,16 @@ type AdminUpdateUsrReq struct {
 }
 
 // AdminUpdateUsrResp holds the fields for responding accurately to updating user end-point
-type AdminUpdateUsrResp struct {
-	UserID          int64     `json:"user_id"`
-	Username        string    `json:"username"`
-	Role            string    `json:"role"`
-	Fullname        string    `json:"fullname"`
-	Email           string    `json:"email"`
-	PasswordChanged bool      `json:"password_changed"`
-	UpdatedAt       time.Time `json:"updated_at"`
-	CreatedAt       time.Time `json:"created_at"`
-}
+// type AdminUpdateUsrResp struct {
+// 	UserID          int64     `json:"user_id"`
+// 	Username        string    `json:"username"`
+// 	Role            string    `json:"role"`
+// 	Fullname        string    `json:"fullname"`
+// 	Email           string    `json:"email"`
+// 	PasswordChanged bool      `json:"password_changed"`
+// 	UpdatedAt       time.Time `json:"updated_at"`
+// 	CreatedAt       time.Time `json:"created_at"`
+// }
 
 // adminUpdateUserHandler http handler for the api end point for updating a user
 func (s *Server) adminUpdateUserHandler(ctx *gin.Context) {
@@ -155,11 +155,11 @@ func (s *Server) adminUpdateUserHandler(ctx *gin.Context) {
 			return
 		}
 	}
-	resp := AdminUpdateUsrResp{
-		UserID:          newUsr.ID,
+	resp := db.User{
+		ID:          newUsr.ID,
 		Username:        newUsr.Username,
 		Role:            newUsr.Role,
-		Fullname:        newUsr.FullName,
+		FullName:        newUsr.FullName,
 		Email:           newUsr.Email,
 		UpdatedAt:       newUsr.UpdatedAt,
 		PasswordChanged: newUsr.PasswordChanged,
