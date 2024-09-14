@@ -1,9 +1,9 @@
-swagger: '2.0'
+swagger: "2.0"
 info:
   description: Custom API for pre-sales deal tracker
   version: 1.0.0
   title: API Endpoints for Pre-sales Deal Tracker
-host: 'localhost:8080' #yet to be set or use localhost :)
+host: "localhost:8080" #yet to be set or use localhost :)
 basePath: /
 tags: []
 schemes:
@@ -14,8 +14,8 @@ paths:
     post:
       # tags:
       #   - Create User
-      summary: 'Admin creates a new user'
-      description: ''
+      summary: "Admin creates a new user"
+      description: ""
       operationId: adminCreateUser
       produces:
         - application/json
@@ -25,26 +25,26 @@ paths:
           description: The user object to create
           required: true
           schema:
-            $ref: '#/definitions/CreateUsrReq'
+            $ref: "#/definitions/CreateUsrReq"
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
-            $ref: '#/definitions/CreateUsrResp'
-        '400':
+            $ref: "#/definitions/CreateUsrResp"
+        "400":
           description: bad request
           schema:
-            $ref: '#/definitions/errorResp'
-        '500':
+            $ref: "#/definitions/errorResp"
+        "500":
           description: server error
           schema:
-            $ref: '#/definitions/errorResp'
+            $ref: "#/definitions/errorResp"
   /users/login:
     post:
       # tags:
       #   - User Login
       summary: To login user
-      description: ''
+      description: ""
       operationId: userLogin
       produces:
         - application/json
@@ -54,30 +54,30 @@ paths:
           description: An object holding user's username and password
           required: true
           schema:
-            $ref: '#/definitions/LoginReq'
+            $ref: "#/definitions/LoginReq"
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
-            $ref: '#/definitions/LoginResp'
-        '400':
+            $ref: "#/definitions/LoginResp"
+        "400":
           description: bad request
           schema:
-            $ref: '#/definitions/errorResp'
-        '401':
+            $ref: "#/definitions/errorResp"
+        "401":
           description: unauthorized operation or wrong password
           schema:
-            $ref: '#/definitions/errorResp'
-        '500':
+            $ref: "#/definitions/errorResp"
+        "500":
           description: server error
           schema:
-            $ref: '#/definitions/errorResp'         
+            $ref: "#/definitions/errorResp"
   /sales/pitchReq:
     post:
       # tags:
       #   - Create Pitch Request
       summary: Creates a (customer) pitch request
-      description: ''
+      description: ""
       operationId: salesCreatePitchReq
       produces:
         - application/json
@@ -87,32 +87,32 @@ paths:
           description: An object holding fields needed to create a customer (pitch) request
           required: true
           schema:
-            $ref: '#/definitions/PitchReq'
+            $ref: "#/definitions/PitchReq"
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
-            $ref: '#/definitions/PitchResp'
-        '400':
+            $ref: "#/definitions/PitchResp"
+        "400":
           description: bad request
           schema:
-            $ref: '#/definitions/errorResp'
-        '401':
+            $ref: "#/definitions/errorResp"
+        "401":
           description: unauthorized operation
           schema:
-            $ref: '#/definitions/errorResp'
-        '500':
+            $ref: "#/definitions/errorResp"
+        "500":
           description: server error
           schema:
-            $ref: '#/definitions/errorResp'
+            $ref: "#/definitions/errorResp"
   /admin/deals:
     post:
       # tags:
       #   - Create a deal
       summary: Creates a deal based on a pitch request
-      description: ''
+      description: ""
       operationId: adminCreateDeal
-      produces: 
+      produces:
         - application/json
       parameters:
         - name: CreateDealReq
@@ -120,33 +120,33 @@ paths:
           description: An object holding the pitch request id from which a deal will be created
           required: true
           schema:
-            $ref: '#/definitions/CreateDealReq'
+            $ref: "#/definitions/CreateDealReq"
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
-            $ref: '#/definitions/successMsg'
-        '400':
+            $ref: "#/definitions/successMsg"
+        "400":
           description: bad request
           schema:
-            $ref: '#/definitions/errorResp'
-        '401':
+            $ref: "#/definitions/errorResp"
+        "401":
           description: unauthorized operation
           schema:
-            $ref: '#/definitions/errorResp'
-        '500':
+            $ref: "#/definitions/errorResp"
+        "500":
           description: server error
           schema:
-            $ref: '#/definitions/errorResp'
+            $ref: "#/definitions/errorResp"
   /deal/vas:
     get:
       # tags:
       #   - Get Deals with Status:ongoing
       summary: Get deals with an ongoing status
-      description: ''
+      description: ""
       operationId: getOngoingDeals
-      produces: 
-        - 'application/json'
+      produces:
+        - "application/json"
       parameters:
         - name: status
           in: query
@@ -154,37 +154,37 @@ paths:
           required: true
           type: string
       responses:
-        '200':
+        "200":
           description: successful request
           schema:
             type: array
             items:
-              $ref: '#/definitions/CreateDealResp'
-        '400':
+              $ref: "#/definitions/CreateDealResp"
+        "400":
           description: bad request
           schema:
-            $ref: '#/definitions/errorResp'
-        '401':
+            $ref: "#/definitions/errorResp"
+        "401":
           description: unauthorized access
           schema:
-            $ref: '#/definitions/errorResp'
-        '404':
+            $ref: "#/definitions/errorResp"
+        "404":
           description: unauthorized access
           schema:
-            $ref: '#/definitions/errorResp'
-        '500':
+            $ref: "#/definitions/errorResp"
+        "500":
           description: server error
           schema:
-            $ref: '#/definitions/errorResp'
+            $ref: "#/definitions/errorResp"
   /deals/filtered:
     get:
       # tags:
       #   - Get deals filtered by request
       summary: Get deals that meet the request filter requirements
-      description: ''
+      description: ""
       operationId: getFilteredDeals
       produces:
-        - 'application/json'
+        - "application/json"
       parameters:
         - name: customer_name
           in: query
@@ -196,9 +196,7 @@ paths:
           description: deals having these/this service(s)
           required: false
           type: array
-          items: {
-            type: string
-          }
+          items: { type: string }
         - name: status
           in: query
           description: deals having this status
@@ -235,41 +233,41 @@ paths:
           required: true
           type: integer
       responses:
-        '200':
+        "200":
           description: successful request
           schema:
             type: array
             items:
-              $ref: '#/definitions/CreateDealResp'
-        '400':
+              $ref: "#/definitions/CreateDealResp"
+        "400":
           description: bad request
           schema:
-            $ref: '#/definitions/errorResp'
-        '401':
+            $ref: "#/definitions/errorResp"
+        "401":
           description: unauthorized access
           schema:
-            $ref: '#/definitions/errorResp'
-        '404':
+            $ref: "#/definitions/errorResp"
+        "404":
           description: unauthorized access
           schema:
-            $ref: '#/definitions/errorResp'
-        '409':
+            $ref: "#/definitions/errorResp"
+        "409":
           description: unauthorized access
           schema:
-            $ref: '#/definitions/errorResp'
-        '500':
+            $ref: "#/definitions/errorResp"
+        "500":
           description: server error
           schema:
-            $ref: '#/definitions/errorResp' 
+            $ref: "#/definitions/errorResp"
   /admin/pitchrequest:
     get:
       # tags:
       #   - Pitch Requests Admin has not Viewed
       summary: Get pitch requests the admin has not viewed
-      description: ''
+      description: ""
       operationId: adminGetPitchReq
       produces:
-        - 'application/json'
+        - "application/json"
       parameters:
         - name: admin_viewed
           in: query
@@ -277,33 +275,33 @@ paths:
           required: true
           type: boolean
       responses:
-        '200':
+        "200":
           description: successful request
           schema:
             type: array
             items:
-              $ref: '#/definitions/PitchRequest'
-        '400':
+              $ref: "#/definitions/PitchRequest"
+        "400":
           description: bad request
           schema:
-            $ref: '#/definitions/errorResp'
-        '401':
+            $ref: "#/definitions/errorResp"
+        "401":
           description: unauthorized access
           schema:
-            $ref: '#/definitions/errorResp'
-        '500':
+            $ref: "#/definitions/errorResp"
+        "500":
           description: server error
           schema:
-            $ref: '#/definitions/errorResp'
+            $ref: "#/definitions/errorResp"
   /sales/pitchrequest:
     get:
       # tags:
       #   - Get Deal with For Sales Rep
       summary: Get deals by sales rep id
-      description: ''
+      description: ""
       operationId: salesViewPitchRequests
       produces:
-        - 'application/json'
+        - "application/json"
       parameters:
         - name: sales_rep_id
           in: query
@@ -321,67 +319,227 @@ paths:
           required: true
           type: integer
       responses:
-        '200':
+        "200":
           description: successful request
           schema:
             type: array
             items:
-              $ref: '#/definitions/PitchRequest'
-        '400':
+              $ref: "#/definitions/PitchRequest"
+        "400":
           description: bad request
           schema:
-            $ref: '#/definitions/errorResp'
-        '401':
+            $ref: "#/definitions/errorResp"
+        "401":
           description: unauthorized access
           schema:
-            $ref: '#/definitions/errorResp'
-        '500':
+            $ref: "#/definitions/errorResp"
+        "500":
           description: server error
           schema:
-            $ref: '#/definitions/errorResp'
+            $ref: "#/definitions/errorResp"
   /admin/getdeal:
     get:
       # tags:
       #   - Get Deal by deal_id
       summary: Get deal by it's id
-      description: ''
+      description: ""
       operationId: getDealsById
       produces:
-        - 'application/json'
+        - "application/json"
       parameters:
         - name: deal_id
           in: query
           description: The id of the deal to be retrieved
           type: integer
       responses:
-        '200':
-          description: 'successful request'
+        "200":
+          description: "successful request"
           schema:
-            $ref: '#/definitions/Deal'
-        '400':
+            $ref: "#/definitions/Deal"
+        "400":
           description: bad request
           schema:
-            $ref: '#/definitions/errorResp'
-        '401':
+            $ref: "#/definitions/errorResp"
+        "401":
           description: unauthorized access
           schema:
-            $ref: '#/definitions/errorResp'
-        '404':
+            $ref: "#/definitions/errorResp"
+        "404":
           description: unauthorized access
           schema:
-            $ref: '#/definitions/errorResp'
-        '409':
+            $ref: "#/definitions/errorResp"
+        "409":
           description: unauthorized access
           schema:
-            $ref: '#/definitions/errorResp'
-        '500':
+            $ref: "#/definitions/errorResp"
+        "500":
           description: server error
           schema:
-            $ref: '#/definitions/errorResp'
-  # /sales/deals:
-  # /list-users:
-  # /users/password-reset:
-  # /admin/deal/update:
+            $ref: "#/definitions/errorResp"
+  /sales/deals:
+    get:
+      # tags:
+      #   - Get Deal with For Sales Rep
+      summary: Get deals by sales rep full name
+      description: ""
+      operationId: salesDeals
+      produces:
+        - "application/json"
+      parameters:
+        - name: sales_rep
+          in: query
+          description: The full name of the sales rep linked with the deal
+          required: true
+          type: string
+        - name: page_id
+          in: query
+          description: The page number or offset from which to start retrieving deals. Determines where the current page of results starts in the overall list.
+          required: true
+          type: integer
+        - name: page_size
+          in: query
+          description: The number of deals to return per page (used for pagination). Defines how many results to display in a single response.
+          required: true
+          type: integer
+      responses:
+        "200":
+          description: successful request
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Deal"
+        "400":
+          description: bad request
+          schema:
+            $ref: "#/definitions/errorResp"
+        "401":
+          description: unauthorized access
+          schema:
+            $ref: "#/definitions/errorResp"
+        "404":
+          description: resource not found
+          schema:
+            $ref: "#/definitions/errorResp"
+        "500":
+          description: server error
+          schema:
+            $ref: "#/definitions/errorResp"
+  /list-users:
+    get:
+      # tags:
+      #   - Get Users
+      summary: Gets all user
+      description: ""
+      operationId: listUsers
+      produces:
+        - "application/json"
+      parameters:
+        - name: page_id
+          in: query
+          description: The page number or offset from which to start retrieving Users. Determines where the current page of results starts in the overall list.
+          required: true
+          type: integer
+        - name: page_size
+          in: query
+          description: The number of users to return per page (used for pagination). Defines how many results to display in a single response.
+          required: true
+          type: integer
+      responses:
+        "200":
+          description: successful request
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/User"
+        "400":
+          description: bad request
+          schema:
+            $ref: "#/definitions/errorResp"
+        "401":
+          description: unauthorized access
+          schema:
+            $ref: "#/definitions/errorResp"
+        "500":
+          description: server error
+          schema:
+            $ref: "#/definitions/errorResp"
+  /users/password-reset:
+    put:
+      # tags:
+      #   - Get Users
+      summary: Resets user password the a default password
+      description: ""
+      operationId: passwordReset
+      produces:
+        - "application/json"
+      parameters:
+        - name: ResetPasswordReq
+          in: body
+          description: This endpoint updates the user password after resetting it to the default password
+          required: true
+          schema:
+            type: object
+            properties:
+              user_id:
+                type: integer
+      responses:
+        "200":
+          description: successful operation
+          schema:
+            $ref: "#/definitions/successMsg"
+        "400":
+          description: Bad request
+          schema:
+            $ref: "#/definitions/errorResp"
+        "401":
+          description: unauthorized operation
+          schema:
+            $ref: "#/definitions/errorResp"
+        "500":
+          description: server error
+          schema:
+            $ref: "#/definitions/errorResp"
+  /admin/deal/update:
+    put:
+      # tags:
+      #   - Update Deal
+      summary: Uses data in request to update deal
+      description: ""
+      operationId: adminUpdateDeal
+      produces:
+        - "application/json" 
+      parameters:
+        - name: UpdateDealReq
+          in: body
+          description: update deal reqs holds data need to update a deal
+          required: true
+          schema:
+            $ref: "#/definitions/UpdateDealReq"
+      responses:
+        '200':
+          description: successfull request
+          schema:
+            $ref: '#/definitions/CreateDealResp'
+        "400":
+          description: bad request
+          schema:
+            $ref: "#/definitions/errorResp"
+        "401":
+          description: unauthorized access
+          schema:
+            $ref: "#/definitions/errorResp"
+        "404":
+          description: unauthorized access
+          schema:
+            $ref: "#/definitions/errorResp"
+        "409":
+          description: unauthorized access
+          schema:
+            $ref: "#/definitions/errorResp"
+        "500":
+          description: server error
+          schema:
+            $ref: "#/definitions/errorResp"
   # /users/update:
   # /users/password:
   # /pitchrequest/update:
@@ -390,10 +548,10 @@ paths:
   # /sales/pitchReq/delete/:sales_username:sales_rep_id/:pitch_id:
 definitions:
   errorResp:
-      type: object
-      properties:
-        error:
-          type: string
+    type: object
+    properties:
+      error:
+        type: string
   successMsg:
     type: object
     properties:
@@ -461,9 +619,7 @@ definitions:
         type: string
       customer_requests:
         type: array
-        items: {
-          type: string
-        }       
+        items: { type: string }
       request_deadline:
         type: integer
   PitchResp:
@@ -483,12 +639,10 @@ definitions:
         type: string
       customer_requests:
         type: array
-        items: {
-          type: string
-        }
+        items: { type: string }
       request_deadline:
         type: integer
-      admin_viewed: 
+      admin_viewed:
         type: boolean
       created_at:
         type: integer
@@ -512,9 +666,7 @@ definitions:
         type: string
       service_to_render:
         type: array
-        items: {
-          type: string
-        }
+        items: { type: string }
       status:
         type: string
       status_tag:
@@ -533,7 +685,7 @@ definitions:
         type: integer
       awarded:
         type: boolean
-  PitchRequest:  # due to poor design, this model is supposed to be same as PitchResp but pitch_request_id and pitch_tag changed
+  PitchRequest: # due to poor design, this model is supposed to be same as PitchResp but pitch_request_id and pitch_tag changed
     type: object
     properties:
       pitch_id:
@@ -550,17 +702,15 @@ definitions:
         type: string
       customer_request:
         type: array
-        items: {
-          type: string
-        }
+        items: { type: string }
       request_deadline:
         type: integer
-      admin_viewed: 
+      admin_viewed:
         type: boolean
       created_at:
-        type: integer
+        type: string
       updated_at:
-        type: integer
+        type: string
   Deal:
     type: object
     properties:
@@ -574,9 +724,7 @@ definitions:
         type: string
       services_to_render:
         type: array
-        items: {
-          type: string
-        }
+        items: { type: string }
       deal_status:
         type: string
       department:
@@ -588,10 +736,51 @@ definitions:
       profit:
         type: string
       created_at:
-        type: integer
+        type: string
       updated_at:
-        type: integer
+        type: string
       closed_at:
+        type: string
+      awarded:
+        type: boolean
+  User:
+    type: object
+    properties:
+      user_id:
+        type: integer
+      username:
+        type: string
+      role:
+        type: string
+      fullname:
+        type: string
+      email:
+        type: string
+      password:
+        type: string
+      password_changed:
+        type: boolean
+      updated_at:
+        type: string
+      created_at:
+        type: string
+  UpdateDealReq:
+    type: object
+    properties:
+      id:
+        type: integer
+      services_to_render:
+        type: array
+        items: {
+          type: string
+        }
+      department:
+        type: string
+      current_pitch_request:
+        type: string
+      net_total_cost:
+        type: integer
+      profit:
         type: integer
       awarded:
         type: boolean
