@@ -252,7 +252,7 @@ paths:
           schema:
             $ref: "#/definitions/errorResp"
         "409":
-          description: unauthorized access
+          description: conflict with existing data, the update data already exists in the database
           schema:
             $ref: "#/definitions/errorResp"
         "500":
@@ -504,17 +504,17 @@ paths:
       # tags:
       #   - Update Deal
       summary: Uses data in request to update deal
-      description: ""
+      description: ''
       operationId: adminUpdateDeal
       produces:
-        - "application/json" 
+        - 'application/json'
       parameters:
         - name: UpdateDealReq
           in: body
-          description: update deal reqs holds data need to update a deal
+          description: holds data needed to update a deal
           required: true
           schema:
-            $ref: "#/definitions/UpdateDealReq"
+            $ref: '#/definitions/UpdateDealReq'
       responses:
         '200':
           description: successfull request
@@ -533,6 +533,84 @@ paths:
           schema:
             $ref: "#/definitions/errorResp"
         "409":
+          description: conflict with existing data, the update data already exists in the database
+          schema:
+            $ref: "#/definitions/errorResp"
+        "500":
+          description: server error
+          schema:
+            $ref: "#/definitions/errorResp"
+  /users/update:
+    put:
+      # tags:
+      #   - Update User
+      summary: Uses data in request to update deal
+      description: ""
+      operationId: adminUpdateUsr
+      produces:
+        - "application/json" 
+      parameters:
+        - name: AdminUpdateUsrReq
+          in: body
+          description: holds the data needed to update a user
+          required: true
+          schema:
+            $ref: '#/definitions/AdminUpdateUsrReq'
+      responses:
+        '200':
+          description: successfull operation
+          schema:
+            $ref: '#/definitions/User'
+        "400":
+          description: bad request
+          schema:
+            $ref: "#/definitions/errorResp"
+        "401":
+          description: unauthorized access
+          schema:
+            $ref: "#/definitions/errorResp"
+        "404":
+          description: unauthorized access
+          schema:
+            $ref: "#/definitions/errorResp"
+        "409":
+          description: conflict with existing data, the update data already exists in the database
+          schema:
+            $ref: "#/definitions/errorResp"
+        "500":
+          description: server error
+          schema:
+            $ref: "#/definitions/errorResp"
+  /users/password:
+    put:
+      # tags:
+      #   - Update password
+      summary: Uses data in request to update user password
+      description: ""
+      operationId: updatePassword
+      produces:
+        - "application/json" 
+      parameters:
+        - name: UpdatePasswordReq
+          in: body
+          description: holds the data need to update a users password
+          required: true
+          schema:
+            $ref: '#/definitions/UpdatePasswordReq'
+      responses:
+        '200':
+          description: successfull operation
+          schema:
+            $ref: '#/definitions/successMsg'
+        "400":
+          description: bad request
+          schema:
+            $ref: "#/definitions/errorResp"
+        "401":
+          description: unauthorized access
+          schema:
+            $ref: "#/definitions/errorResp"
+        "404":
           description: unauthorized access
           schema:
             $ref: "#/definitions/errorResp"
@@ -540,8 +618,6 @@ paths:
           description: server error
           schema:
             $ref: "#/definitions/errorResp"
-  # /users/update:
-  # /users/password:
   # /pitchrequest/update:
   # /users/delete/:id:
   # /admin/deals/delete/:deal_id:
@@ -784,3 +860,23 @@ definitions:
         type: integer
       awarded:
         type: boolean
+  AdminUpdateUsrReq:
+    type: object
+    properties:
+      user_id:
+        type: integer
+      username:
+        type: string
+      fullname:
+        type: string
+      email:
+        type: string
+  UpdatePasswordReq:
+    type: object
+    properties:
+      old_password:
+        type: string
+      password_update:
+        type: string
+      user_id:
+        type: integer
