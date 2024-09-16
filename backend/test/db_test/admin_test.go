@@ -1,3 +1,5 @@
+// TODO: this "test" folder should be reserved for End2End tests (AKA System Tests).
+// Unit Tests, Integration Tests, and so on should live close to the source code. For example, this one should be placed in the directory /internal/db/sqlc with the name/package you used.
 package db_test
 
 import (
@@ -52,7 +54,6 @@ type UsrRole struct {
 }
 
 func TestCreateNewUser(t *testing.T) {
-
 	createUsers := []UsrRole{
 		{role: "admin"},
 		{role: "manager"},
@@ -64,15 +65,15 @@ func TestCreateNewUser(t *testing.T) {
 }
 
 func TestCreateDeal(t *testing.T) {
-	//create a randomUser with role sales_rep
+	// create a randomUser with role sales_rep
 	salesRep := createNewUser(t, []UsrRole{
 		{role: "sales"},
 	})[0]
 	require.NotEmpty(t, salesRep)
-	//create a new pitchrequest with the sales_rep id
+	// create a new pitchrequest with the sales_rep id
 	pitchReq := createPitch(t, salesRep.ID, salesRep.FullName)
 	require.NotEmpty(t, pitchReq)
-	//Create a deal based on the pitch request and sales_rep
+	// Create a deal based on the pitch request and sales_rep
 	args := db.CreateDealParams{
 		PitchID:             db.SetNullPitchID(pitchReq.ID),
 		SalesRepName:        salesRep.FullName,

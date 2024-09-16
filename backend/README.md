@@ -1,3 +1,6 @@
+<!-- TODO: there are some warnings about the Markdown syntax violations. -->
+<!-- Consider installing a Markdown linter. -->
+## Pre-sales Deal Tracker
 ## README
 
 ### Prerequisite to run the server on your local computer
@@ -13,6 +16,8 @@
     make createdb
     ```
     4. Migrate db schema to database: to create tables in the database
+    <!-- FIXME: this is not working. "migrate" might not be installed on the machine.-->
+    <!-- Mention it and link a webpage to download it. -->
     ```bash
     make migrateup1
     ```
