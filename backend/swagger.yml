@@ -1,9 +1,9 @@
-swagger: "2.0"
+swagger: '2.0'
 info:
   description: Custom API for pre-sales deal tracker
   version: 1.0.0
   title: API Endpoints for Pre-sales Deal Tracker
-host: "localhost:8080" #yet to be set or use localhost :)
+host: 'localhost:8080' #yet to be set or use localhost :)
 basePath: /
 tags: []
 schemes:
@@ -14,8 +14,8 @@ paths:
     post:
       # tags:
       #   - Create User
-      summary: "Admin creates a new user"
-      description: ""
+      summary: 'Admin creates a new user'
+      description: ''
       operationId: adminCreateUser
       produces:
         - application/json
@@ -25,26 +25,30 @@ paths:
           description: The user object to create
           required: true
           schema:
-            $ref: "#/definitions/CreateUsrReq"
+            $ref: '#/definitions/CreateUsrReq'
       responses:
-        "200":
+        '200':
           description: successful operation
           schema:
-            $ref: "#/definitions/CreateUsrResp"
-        "400":
+            $ref: '#/definitions/CreateUsrResp'
+        '400':
           description: bad request
           schema:
-            $ref: "#/definitions/errorResp"
-        "500":
+            $ref: '#/definitions/errorResp'
+        '409':
+          description: user with details already exist in database
+          schema:
+            $ref: '#/definitions/errorResp'
+        '500':
           description: server error
           schema:
-            $ref: "#/definitions/errorResp"
+            $ref: '#/definitions/errorResp'
   /users/login:
     post:
       # tags:
       #   - User Login
       summary: To login user
-      description: ""
+      description: ''
       operationId: userLogin
       produces:
         - application/json
@@ -54,30 +58,30 @@ paths:
           description: An object holding user's username and password
           required: true
           schema:
-            $ref: "#/definitions/LoginReq"
+            $ref: '#/definitions/LoginReq'
       responses:
-        "200":
+        '200':
           description: successful operation
           schema:
-            $ref: "#/definitions/LoginResp"
-        "400":
+            $ref: '#/definitions/LoginResp'
+        '400':
           description: bad request
           schema:
-            $ref: "#/definitions/errorResp"
-        "401":
+            $ref: '#/definitions/errorResp'
+        '401':
           description: unauthorized operation or wrong password
           schema:
-            $ref: "#/definitions/errorResp"
-        "500":
+            $ref: '#/definitions/errorResp'
+        '500':
           description: server error
           schema:
-            $ref: "#/definitions/errorResp"
+            $ref: '#/definitions/errorResp'
   /sales/pitchReq:
     post:
       # tags:
       #   - Create Pitch Request
       summary: Creates a (customer) pitch request
-      description: ""
+      description: ''
       operationId: salesCreatePitchReq
       produces:
         - application/json
@@ -87,30 +91,30 @@ paths:
           description: An object holding fields needed to create a customer (pitch) request
           required: true
           schema:
-            $ref: "#/definitions/PitchReq"
+            $ref: '#/definitions/PitchReq'
       responses:
-        "200":
+        '200':
           description: successful operation
           schema:
-            $ref: "#/definitions/PitchResp"
-        "400":
+            $ref: '#/definitions/PitchResp'
+        '400':
           description: bad request
           schema:
-            $ref: "#/definitions/errorResp"
-        "401":
+            $ref: '#/definitions/errorResp'
+        '401':
           description: unauthorized operation
           schema:
-            $ref: "#/definitions/errorResp"
-        "500":
+            $ref: '#/definitions/errorResp'
+        '500':
           description: server error
           schema:
-            $ref: "#/definitions/errorResp"
+            $ref: '#/definitions/errorResp'
   /admin/deals:
     post:
       # tags:
       #   - Create a deal
       summary: Creates a deal based on a pitch request
-      description: ""
+      description: ''
       operationId: adminCreateDeal
       produces:
         - application/json
@@ -120,33 +124,33 @@ paths:
           description: An object holding the pitch request id from which a deal will be created
           required: true
           schema:
-            $ref: "#/definitions/CreateDealReq"
+            $ref: '#/definitions/CreateDealReq'
       responses:
-        "200":
+        '200':
           description: successful operation
           schema:
-            $ref: "#/definitions/successMsg"
-        "400":
+            $ref: '#/definitions/successMsg'
+        '400':
           description: bad request
           schema:
-            $ref: "#/definitions/errorResp"
-        "401":
+            $ref: '#/definitions/errorResp'
+        '401':
           description: unauthorized operation
           schema:
-            $ref: "#/definitions/errorResp"
-        "500":
+            $ref: '#/definitions/errorResp'
+        '500':
           description: server error
           schema:
-            $ref: "#/definitions/errorResp"
+            $ref: '#/definitions/errorResp'
   /deal/vas:
     get:
       # tags:
       #   - Get Deals with Status:ongoing
       summary: Get deals with an ongoing status
-      description: ""
+      description: ''
       operationId: getOngoingDeals
       produces:
-        - "application/json"
+        - 'application/json'
       parameters:
         - name: status
           in: query
@@ -154,37 +158,37 @@ paths:
           required: true
           type: string
       responses:
-        "200":
+        '200':
           description: successful request
           schema:
             type: array
             items:
-              $ref: "#/definitions/CreateDealResp"
-        "400":
+              $ref: '#/definitions/CreateDealResp'
+        '400':
           description: bad request
           schema:
-            $ref: "#/definitions/errorResp"
-        "401":
+            $ref: '#/definitions/errorResp'
+        '401':
           description: unauthorized access
           schema:
-            $ref: "#/definitions/errorResp"
-        "404":
-          description: unauthorized access
+            $ref: '#/definitions/errorResp'
+        '404':
+          description: resource doesn't exist in database
           schema:
-            $ref: "#/definitions/errorResp"
-        "500":
+            $ref: '#/definitions/errorResp'
+        '500':
           description: server error
           schema:
-            $ref: "#/definitions/errorResp"
+            $ref: '#/definitions/errorResp'
   /deals/filtered:
     get:
       # tags:
       #   - Get deals filtered by request
       summary: Get deals that meet the request filter requirements
-      description: ""
+      description: ''
       operationId: getFilteredDeals
       produces:
-        - "application/json"
+        - 'application/json'
       parameters:
         - name: customer_name
           in: query
@@ -233,41 +237,41 @@ paths:
           required: true
           type: integer
       responses:
-        "200":
+        '200':
           description: successful request
           schema:
             type: array
             items:
-              $ref: "#/definitions/CreateDealResp"
-        "400":
+              $ref: '#/definitions/CreateDealResp'
+        '400':
           description: bad request
           schema:
-            $ref: "#/definitions/errorResp"
-        "401":
+            $ref: '#/definitions/errorResp'
+        '401':
           description: unauthorized access
           schema:
-            $ref: "#/definitions/errorResp"
-        "404":
-          description: unauthorized access
+            $ref: '#/definitions/errorResp'
+        '404':
+          description: resource doesn't exist in the database
           schema:
-            $ref: "#/definitions/errorResp"
-        "409":
+            $ref: '#/definitions/errorResp'
+        '409':
           description: conflict with existing data, the update data already exists in the database
           schema:
-            $ref: "#/definitions/errorResp"
-        "500":
+            $ref: '#/definitions/errorResp'
+        '500':
           description: server error
           schema:
-            $ref: "#/definitions/errorResp"
+            $ref: '#/definitions/errorResp'
   /admin/pitchrequest:
     get:
       # tags:
       #   - Pitch Requests Admin has not Viewed
       summary: Get pitch requests the admin has not viewed
-      description: ""
+      description: ''
       operationId: adminGetPitchReq
       produces:
-        - "application/json"
+        - 'application/json'
       parameters:
         - name: admin_viewed
           in: query
@@ -275,33 +279,33 @@ paths:
           required: true
           type: boolean
       responses:
-        "200":
+        '200':
           description: successful request
           schema:
             type: array
             items:
-              $ref: "#/definitions/PitchRequest"
-        "400":
+              $ref: '#/definitions/PitchRequest'
+        '400':
           description: bad request
           schema:
-            $ref: "#/definitions/errorResp"
-        "401":
+            $ref: '#/definitions/errorResp'
+        '401':
           description: unauthorized access
           schema:
-            $ref: "#/definitions/errorResp"
-        "500":
+            $ref: '#/definitions/errorResp'
+        '500':
           description: server error
           schema:
-            $ref: "#/definitions/errorResp"
+            $ref: '#/definitions/errorResp'
   /sales/pitchrequest:
     get:
       # tags:
       #   - Get Deal with For Sales Rep
       summary: Get deals by sales rep id
-      description: ""
+      description: ''
       operationId: salesViewPitchRequests
       produces:
-        - "application/json"
+        - 'application/json'
       parameters:
         - name: sales_rep_id
           in: query
@@ -319,72 +323,72 @@ paths:
           required: true
           type: integer
       responses:
-        "200":
+        '200':
           description: successful request
           schema:
             type: array
             items:
-              $ref: "#/definitions/PitchRequest"
-        "400":
+              $ref: '#/definitions/PitchRequest'
+        '400':
           description: bad request
           schema:
-            $ref: "#/definitions/errorResp"
-        "401":
+            $ref: '#/definitions/errorResp'
+        '401':
           description: unauthorized access
           schema:
-            $ref: "#/definitions/errorResp"
-        "500":
+            $ref: '#/definitions/errorResp'
+        '500':
           description: server error
           schema:
-            $ref: "#/definitions/errorResp"
+            $ref: '#/definitions/errorResp'
   /admin/getdeal:
     get:
       # tags:
       #   - Get Deal by deal_id
       summary: Get deal by it's id
-      description: ""
+      description: ''
       operationId: getDealsById
       produces:
-        - "application/json"
+        - 'application/json'
       parameters:
         - name: deal_id
           in: query
           description: The id of the deal to be retrieved
           type: integer
       responses:
-        "200":
-          description: "successful request"
+        '200':
+          description: 'successful request'
           schema:
-            $ref: "#/definitions/Deal"
-        "400":
+            $ref: '#/definitions/Deal'
+        '400':
           description: bad request
           schema:
-            $ref: "#/definitions/errorResp"
-        "401":
+            $ref: '#/definitions/errorResp'
+        '401':
           description: unauthorized access
           schema:
-            $ref: "#/definitions/errorResp"
-        "404":
-          description: unauthorized access
+            $ref: '#/definitions/errorResp'
+        '404':
+          description: deal doesn't exist in the database
           schema:
-            $ref: "#/definitions/errorResp"
-        "409":
-          description: unauthorized access
+            $ref: '#/definitions/errorResp'
+        '409':
+          description: database conflict
           schema:
-            $ref: "#/definitions/errorResp"
-        "500":
+            $ref: '#/definitions/errorResp'
+        '500':
           description: server error
           schema:
-            $ref: "#/definitions/errorResp"
+            $ref: '#/definitions/errorResp'
   /sales/deals:
     get:
       # tags:
       #   - Get Deal with For Sales Rep
       summary: Get deals by sales rep full name
-      description: ""
+      description: ''
       operationId: salesDeals
       produces:
-        - "application/json"
+        - 'application/json'
       parameters:
         - name: sales_rep
           in: query
@@ -402,37 +406,37 @@ paths:
           required: true
           type: integer
       responses:
-        "200":
+        '200':
           description: successful request
           schema:
             type: array
             items:
-              $ref: "#/definitions/Deal"
-        "400":
+              $ref: '#/definitions/Deal'
+        '400':
           description: bad request
           schema:
-            $ref: "#/definitions/errorResp"
-        "401":
+            $ref: '#/definitions/errorResp'
+        '401':
           description: unauthorized access
           schema:
-            $ref: "#/definitions/errorResp"
-        "404":
-          description: resource not found
+            $ref: '#/definitions/errorResp'
+        '404':
+          description: resource not doesn't exist in the database
           schema:
-            $ref: "#/definitions/errorResp"
-        "500":
+            $ref: '#/definitions/errorResp'
+        '500':
           description: server error
           schema:
-            $ref: "#/definitions/errorResp"
+            $ref: '#/definitions/errorResp'
   /list-users:
     get:
       # tags:
       #   - Get Users
       summary: Gets all user
-      description: ""
+      description: ''
       operationId: listUsers
       produces:
-        - "application/json"
+        - 'application/json'
       parameters:
         - name: page_id
           in: query
@@ -445,33 +449,33 @@ paths:
           required: true
           type: integer
       responses:
-        "200":
+        '200':
           description: successful request
           schema:
             type: array
             items:
-              $ref: "#/definitions/User"
-        "400":
+              $ref: '#/definitions/User'
+        '400':
           description: bad request
           schema:
-            $ref: "#/definitions/errorResp"
-        "401":
+            $ref: '#/definitions/errorResp'
+        '401':
           description: unauthorized access
           schema:
-            $ref: "#/definitions/errorResp"
-        "500":
+            $ref: '#/definitions/errorResp'
+        '500':
           description: server error
           schema:
-            $ref: "#/definitions/errorResp"
+            $ref: '#/definitions/errorResp'
   /users/password-reset:
     put:
       # tags:
       #   - Get Users
       summary: Resets user password the a default password
-      description: ""
+      description: ''
       operationId: passwordReset
       produces:
-        - "application/json"
+        - 'application/json'
       parameters:
         - name: ResetPasswordReq
           in: body
@@ -483,22 +487,22 @@ paths:
               user_id:
                 type: integer
       responses:
-        "200":
+        '200':
           description: successful operation
           schema:
-            $ref: "#/definitions/successMsg"
-        "400":
+            $ref: '#/definitions/successMsg'
+        '400':
           description: Bad request
           schema:
-            $ref: "#/definitions/errorResp"
-        "401":
+            $ref: '#/definitions/errorResp'
+        '401':
           description: unauthorized operation
           schema:
-            $ref: "#/definitions/errorResp"
-        "500":
+            $ref: '#/definitions/errorResp'
+        '500':
           description: server error
           schema:
-            $ref: "#/definitions/errorResp"
+            $ref: '#/definitions/errorResp'
   /admin/deal/update:
     put:
       # tags:
@@ -520,35 +524,35 @@ paths:
           description: successfull request
           schema:
             $ref: '#/definitions/CreateDealResp'
-        "400":
+        '400':
           description: bad request
           schema:
-            $ref: "#/definitions/errorResp"
-        "401":
+            $ref: '#/definitions/errorResp'
+        '401':
           description: unauthorized access
           schema:
-            $ref: "#/definitions/errorResp"
-        "404":
+            $ref: '#/definitions/errorResp'
+        '404':
           description: resource doesn't exist in database
           schema:
-            $ref: "#/definitions/errorResp"
-        "409":
+            $ref: '#/definitions/errorResp'
+        '409':
           description: conflict with existing data, the update data already exists in the database
           schema:
-            $ref: "#/definitions/errorResp"
-        "500":
+            $ref: '#/definitions/errorResp'
+        '500':
           description: server error
           schema:
-            $ref: "#/definitions/errorResp"
+            $ref: '#/definitions/errorResp'
   /users/update:
     put:
       # tags:
       #   - Update User
       summary: Uses data in request to update deal
-      description: ""
+      description: ''
       operationId: adminUpdateUsr
       produces:
-        - "application/json" 
+        - 'application/json' 
       parameters:
         - name: AdminUpdateUsrReq
           in: body
@@ -561,35 +565,35 @@ paths:
           description: successfull operation
           schema:
             $ref: '#/definitions/User'
-        "400":
+        '400':
           description: bad request
           schema:
-            $ref: "#/definitions/errorResp"
-        "401":
+            $ref: '#/definitions/errorResp'
+        '401':
           description: unauthorized access
           schema:
-            $ref: "#/definitions/errorResp"
-        "404":
-          description: unauthorized access
+            $ref: '#/definitions/errorResp'
+        '404':
+          description: user doesn't exist in the database
           schema:
-            $ref: "#/definitions/errorResp"
-        "409":
+            $ref: '#/definitions/errorResp'
+        '409':
           description: conflict with existing data, the update data already exists in the database
           schema:
-            $ref: "#/definitions/errorResp"
-        "500":
+            $ref: '#/definitions/errorResp'
+        '500':
           description: server error
           schema:
-            $ref: "#/definitions/errorResp"
+            $ref: '#/definitions/errorResp'
   /users/password:
     put:
       # tags:
       #   - Update password
       summary: Uses data in request to update user password
-      description: ""
+      description: ''
       operationId: updatePassword
       produces:
-        - "application/json" 
+        - 'application/json' 
       parameters:
         - name: UpdatePasswordReq
           in: body
@@ -602,31 +606,31 @@ paths:
           description: successfull operation
           schema:
             $ref: '#/definitions/successMsg'
-        "400":
+        '400':
           description: bad request
           schema:
-            $ref: "#/definitions/errorResp"
-        "401":
+            $ref: '#/definitions/errorResp'
+        '401':
           description: unauthorized access
           schema:
-            $ref: "#/definitions/errorResp"
-        "404":
+            $ref: '#/definitions/errorResp'
+        '404':
           description: resource doesn't exist in database
           schema:
-            $ref: "#/definitions/errorResp"
-        "500":
+            $ref: '#/definitions/errorResp'
+        '500':
           description: server error
           schema:
-            $ref: "#/definitions/errorResp"
+            $ref: '#/definitions/errorResp'
   /pitchrequest/update:
     put:
       # tags:
       #   - Update pitchRequest
       summary: Uses data in request to update pitch request
-      description: ""
+      description: ''
       operationId: updatePitchRequest
       produces:
-        - "application/json" 
+        - 'application/json' 
       parameters:
         - name: UpdatePitchReq
           in: body
@@ -639,35 +643,35 @@ paths:
           description: successfull operation
           schema:
             $ref: '#/definitions/PitchResp'
-        "400":
+        '400':
           description: bad request
           schema:
-            $ref: "#/definitions/errorResp"
-        "401":
+            $ref: '#/definitions/errorResp'
+        '401':
           description: unauthorized access
           schema:
-            $ref: "#/definitions/errorResp"
-        "404":
-          description: unauthorized access
+            $ref: '#/definitions/errorResp'
+        '404':
+          description: pitch request to update doesn't exist in the database
           schema:
-            $ref: "#/definitions/errorResp"
-        "409":
+            $ref: '#/definitions/errorResp'
+        '409':
           description: conflict with existing data, the update data already exists in the database
           schema:
-            $ref: "#/definitions/errorResp"
-        "500":
+            $ref: '#/definitions/errorResp'
+        '500':
           description: server error
           schema:
-            $ref: "#/definitions/errorResp"
+            $ref: '#/definitions/errorResp'
   /users/delete/{id}:
       delete:
         # tags:
         #   - Delete User
         summary: Deletes the user with the id provided in the path
-        description: ""
+        description: ''
         operationId: deleteUser
         produces:
-          - "application/json" 
+          - 'application/json' 
         parameters:
           - name: id
             in: path
@@ -679,31 +683,31 @@ paths:
             description: successfull operation
             schema:
               $ref: '#/definitions/successMsg'
-          "400":
+          '400':
             description: bad request
             schema:
-              $ref: "#/definitions/errorResp"
-          "401":
+              $ref: '#/definitions/errorResp'
+          '401':
             description: unauthorized access
             schema:
-              $ref: "#/definitions/errorResp"
-          "404":
+              $ref: '#/definitions/errorResp'
+          '404':
             description: user with id doesn't exist in database
             schema:
-              $ref: "#/definitions/errorResp"
-          "500":
+              $ref: '#/definitions/errorResp'
+          '500':
             description: server error
             schema:
-              $ref: "#/definitions/errorResp"
+              $ref: '#/definitions/errorResp'
   /admin/deals/delete/{deal_id}:
       delete:
         # tags:
         #   - Delete deal
         summary: Deletes the deal with the id provided in the path
-        description: ""
+        description: ''
         operationId: deleteDeal
         produces:
-          - "application/json" 
+          - 'application/json' 
         parameters:
           - name: deal_id
             in: path
@@ -715,31 +719,31 @@ paths:
             description: successfull operation
             schema:
               $ref: '#/definitions/successMsg'
-          "400":
+          '400':
             description: bad request
             schema:
-              $ref: "#/definitions/errorResp"
-          "401":
+              $ref: '#/definitions/errorResp'
+          '401':
             description: unauthorized access
             schema:
-              $ref: "#/definitions/errorResp"
-          "404":
+              $ref: '#/definitions/errorResp'
+          '404':
             description: user with id doesn't exist in database
             schema:
-              $ref: "#/definitions/errorResp"
-          "500":
+              $ref: '#/definitions/errorResp'
+          '500':
             description: server error
             schema:
-              $ref: "#/definitions/errorResp"
+              $ref: '#/definitions/errorResp'
   /sales/pitchReq/delete/{sales_username}/{sales_rep_id}/{pitch_id}:
       delete:
         # tags:
         #   - Delete Pitch Request
         summary: Deletes the pitch request with the pitch id provided in the path
-        description: ""
+        description: ''
         operationId: deletePitchRequest
         produces:
-          - "application/json" 
+          - 'application/json' 
         parameters:
           - name: pitch_id
             in: path
@@ -761,22 +765,22 @@ paths:
             description: successfull operation
             schema:
               $ref: '#/definitions/successMsg'
-          "400":
+          '400':
             description: bad request
             schema:
-              $ref: "#/definitions/errorResp"
-          "401":
+              $ref: '#/definitions/errorResp'
+          '401':
             description: unauthorized access
             schema:
-              $ref: "#/definitions/errorResp"
-          "404":
+              $ref: '#/definitions/errorResp'
+          '404':
             description: user with id doesn't exist in database
             schema:
-              $ref: "#/definitions/errorResp"
-          "500":
+              $ref: '#/definitions/errorResp'
+          '500':
             description: server error
             schema:
-              $ref: "#/definitions/errorResp"
+              $ref: '#/definitions/errorResp'
 definitions:
   errorResp:
     type: object
