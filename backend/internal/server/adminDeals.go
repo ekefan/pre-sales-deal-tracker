@@ -18,7 +18,7 @@ import (
 
 // CreateDealReq holds fields needed to create a new deal
 type CreateDealReq struct {
-	PitchID int64 	`json:"pitch_id" binding:"required,gt=0"`
+	PitchID int64 `json:"pitch_id" binding:"required,gt=0"`
 }
 
 type CreateDealResp struct {
@@ -40,18 +40,18 @@ type CreateDealResp struct {
 
 // adminCreateDealHandler http handler for the api end point for creating a new deal
 func (s *Server) adminCreateDealHandler(ctx *gin.Context) {
-	//validate json-req and unmarshall it to the req
+	// validate json-req and unmarshall it to the req
 	var req CreateDealReq
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	//find a way to perform authorization
+	// find a way to perform authorization
 	if !authAccess(ctx, utils.AdminRole) {
 		return
 	}
 
-	//make call to database
+	// make call to database
 	success := s.Store.CreateDealTxn(ctx, db.CreateDealTxnArgs{
 		PitchID: req.PitchID,
 	})
@@ -88,7 +88,7 @@ func (s *Server) adminUpdateDealHandler(ctx *gin.Context) {
 		return
 	}
 
-	//verify that the resouces is accessed by the admin only, check for role in
+	// verify that the resouces is accessed by the admin only, check for role in
 	// authorization payload
 	if !authAccess(ctx, utils.AdminRole) {
 		return
@@ -119,11 +119,10 @@ func (s *Server) adminUpdateDealHandler(ctx *gin.Context) {
 		CurrentPitchRequest: req.CurrentPitchRequest,
 		UpdatedAt:           time.Now(),
 		ClosedAt:            closedAt,
-		Awarded: req.Awarded,
-		NetTotalCost: netTotal,
-		Profit: profit,
+		Awarded:             req.Awarded,
+		NetTotalCost:        netTotal,
+		Profit:              profit,
 	})
-
 	if err != nil {
 		if pqErrHandler(ctx, "deals", err) {
 			return
@@ -164,7 +163,7 @@ func (s *Server) adminDeleteDealHandler(ctx *gin.Context) {
 		return
 	}
 
-	//get payload and check the for user.role
+	// get payload and check the for user.role
 	if !authAccess(ctx, utils.AdminRole) {
 		return
 	}
@@ -189,9 +188,13 @@ type ListUsersReq struct {
 	PageSize int32 `form:"page_size" binding:"required,min=5,max=10"`
 }
 
+// FIXME: this has nothing to do with the Deals resource. Should be put in the adminUser.go
+// Also you should clarify the "admin" prefix meaning. Are those endpoints restricted? Or what's else?
 // listUsershandler http handler for the api end point for getting list of users currently
 func (s *Server) listUsersHandler(ctx *gin.Context) {
 	var req ListUsersReq
+	// FIXME: if I set page_id = 0 (or outside of the allowed boundaries), please adjust it to be a default value. page_id might also start from '0'. In case you go away from conventions, you need to be declarative and put it in the documentation.
+	// "(Required) The page number or offset from which to start retrieving Users. Determines where the current page of results starts in the overall list." => doesn't state the range of allowed values
 	if err := ctx.ShouldBindQuery(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
@@ -200,6 +203,7 @@ func (s *Server) listUsersHandler(ctx *gin.Context) {
 	if !multipleAuthAccess(ctx, []string{utils.AdminRole, utils.ManagerRole}) {
 		return
 	}
+	// FIXME: if you're accepting pagination info, you should return a paginated result, not only the collection of resources.
 	args := db.AdminViewUsersParams{
 		Limit:  req.PageSize,
 		Offset: (req.PageID - 1) * req.PageSize,
@@ -211,7 +215,6 @@ func (s *Server) listUsersHandler(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, users)
 }
-
 
 type AdminPitchReq struct {
 	Admin_viewed bool `form:"admin_viewed" binding:"boolean"`
@@ -234,9 +237,7 @@ func (s *Server) adminGetPitchRequests(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, pitchRequests)
-
 }
-
 
 // ===== TODO =====
 ///////////////////////////

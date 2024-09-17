@@ -30,9 +30,13 @@ type CreateUsrResp struct {
 // must receive a CreateUserReq with username, role fullname, email and password
 // on update to the handler, default password would be used so there wouldn't be a need
 // to provide password in request
+// FIXME: in the swagger.yml this is placed in the wrong section.
+// FIXME: I can see from the endpoint address that you're not adhering to the REST-API standard.
+// You may want to try to follow this resource:
+// - https://stackoverflow.blog/2020/03/02/best-practices-for-rest-api-design/
 func (s *Server) adminCreateUserHandler(ctx *gin.Context) {
 	var req CreateUsrReq
-	//validate and bind request
+	// validate and bind request
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
@@ -66,6 +70,7 @@ func (s *Server) adminCreateUserHandler(ctx *gin.Context) {
 		Username:  user.Username,
 		CreatedAt: user.CreatedAt.Unix(),
 	}
+	// FIXME: this is not compliant to REST standard. For example, return http.StatusCreated with the id of the resource created. Some framework (like Gin maybe) should also set the Location Response Header with the URI of the newly added resource.
 	ctx.JSON(http.StatusOK, resp)
 }
 
@@ -80,6 +85,7 @@ type AdminUpdateUsrReq struct {
 	Username string `json:"username" binding:"required,alphanum"`
 }
 
+// FIXME: do not leave commented out code around.
 // AdminUpdateUsrResp holds the fields for responding accurately to updating user end-point
 // type AdminUpdateUsrResp struct {
 // 	UserID          int64     `json:"user_id"`
@@ -93,16 +99,17 @@ type AdminUpdateUsrReq struct {
 // }
 
 // adminUpdateUserHandler http handler for the api end point for updating a user
+// FIXME: the PUT should entirely replace the resource. => PUT /users/1 + the request payload.
 func (s *Server) adminUpdateUserHandler(ctx *gin.Context) {
 	var (
-		req AdminUpdateUsrReq
+		req    AdminUpdateUsrReq
 		newUsr db.User
 	)
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	//get access token
+	// get access token
 	if !authAccess(ctx, utils.AdminRole) {
 		return
 	}
@@ -122,7 +129,7 @@ func (s *Server) adminUpdateUserHandler(ctx *gin.Context) {
 		Username:  req.Username,
 		UpdatedAt: time.Now(),
 	}
-	
+
 	if usr.Role != utils.SalesRole {
 		newUsr, err = s.Store.AdminUpdateUser(ctx, args)
 		if err != nil {
@@ -156,7 +163,7 @@ func (s *Server) adminUpdateUserHandler(ctx *gin.Context) {
 		}
 	}
 	resp := db.User{
-		ID:          newUsr.ID,
+		ID:              newUsr.ID,
 		Username:        newUsr.Username,
 		Role:            newUsr.Role,
 		FullName:        newUsr.FullName,
@@ -175,6 +182,8 @@ type AdminDeleteUserReq struct {
 }
 
 // adminDeleteUserhandler http handler for the api end point for Deleting a user
+// FIXME: DELETE /users/1.
+// FIXME: return 204 NoContent.
 func (s *Server) adminDeleteUserHandler(ctx *gin.Context) {
 	var req AdminDeleteUserReq
 	if err := ctx.ShouldBindUri(&req); err != nil {
