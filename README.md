@@ -11,7 +11,7 @@ The entire application revolves around the pre-sales engineer (the admin). But t
 - A manager's role is to view/monitor deals and check through deals based on certain predefined queries.
 - A sales rep can view deals and pitch requests for which sales rep_id or name is the same.
 
-For proper API documentation, check [here](/backend/swagger.yml).
+For proper API documentation, check [here](/backend/swagger.yml), and use [Swagger Editor](https://editor.swagger.io/) to view the documentation with a good UI.
 
 ### Architecture
 
