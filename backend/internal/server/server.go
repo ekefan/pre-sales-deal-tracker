@@ -15,9 +15,9 @@ import (
 
 // Server contains fields required by a server instance
 type Server struct {
-	Router     *gin.Engine //Router an instance of gin.Engine
-	Store      db.Store    //Store the database interface for interacting with the db
-	EnvVar     Config      //EnvVar holds the environment variables loaded into the server instance
+	Router     *gin.Engine      // Router an instance of gin.Engine
+	Store      db.Store         // Store the database interface for interacting with the db
+	EnvVar     Config           // EnvVar holds the environment variables loaded into the server instance
 	TokenMaker token.TokenMaker // interface for creating and managing tokens
 }
 
@@ -63,6 +63,7 @@ func (s *Server) SetupRouter() {
 	authRoute.GET("/sales/pitchrequest", s.salesViewPitchRequests)
 	authRoute.GET("/admin/getdeal", s.getDealsById)
 	authRoute.GET("/sales/deals", s.getSalesDeals)
+	// FIXME: not complain with REST-API standards => GET /users
 	authRoute.GET("/list-users", s.listUsersHandler)
 	authRoute.PUT("/users/password-reset", s.resetPassword)
 	authRoute.PUT("/admin/deals/update", s.adminUpdateDealHandler)
