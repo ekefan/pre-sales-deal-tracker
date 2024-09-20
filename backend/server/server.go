@@ -43,8 +43,8 @@ func (s *Server) SetupRouter() {
 	}
 	corsConfig := cors.Config{
 		AllowOrigins:     []string{"*"}, // Allow all origins
-		AllowMethods:     []string{"POST", "GET", "OPTIONS", "PUT", "DELETE"},
-		AllowHeaders:     []string{"Origin", "Authorization", "Content-Type"},
+		AllowMethods:     []string{"POST", "GET", "OPTIONS", "PATCH", "DELETE"},
+		AllowHeaders:     []string{"Origin", "Authorization", "Content-Type", "Location"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
@@ -55,24 +55,30 @@ func (s *Server) SetupRouter() {
 
 	router.POST("/users", s.adminCreateUserHandler)
 	router.POST("/users/login", s.userLogin)
-	authRoute.POST("/sales/pitchReq", s.salesCreatePitchReqHandler)
+
+	authRoute.POST("/sales/pitch-requests", s.salesCreatePitchReqHandler)
 	authRoute.POST("/admin/deals", s.adminCreateDealHandler)
-	authRoute.GET("/deals/vas", s.getOngoingDeals)
-	authRoute.GET("/deals/filtered", s.getFilteredDeals)
-	authRoute.GET("/admin/pitchrequest", s.adminGetPitchRequests)
-	authRoute.GET("/sales/pitchrequest", s.salesViewPitchRequests)
-	authRoute.GET("/admin/getdeal", s.getDealsById)
+	authRoute.GET("/deals", s.getOngoingDeals)
+	authRoute.GET("/admin/deals", s.getFilteredDeals)
+	authRoute.GET("/admin/pitch-requests", s.adminGetPitchRequests)
+	authRoute.GET("/sales/pitch-requests", s.salesViewPitchRequests)
+	authRoute.GET("/admin/deals/:deal_id", s.getDealsById)
 	authRoute.GET("/sales/deals", s.getSalesDeals)
 	// FIXME: not complain with REST-API standards => GET /users
-	authRoute.GET("/list-users", s.listUsersHandler)
-	authRoute.PUT("/users/password-reset", s.resetPassword)
-	authRoute.PUT("/admin/deals/update", s.adminUpdateDealHandler)
-	authRoute.PUT("/users/update", s.adminUpdateUserHandler)
-	authRoute.PUT("/users/password", s.updatePassWordLoggedIn)
-	authRoute.PUT("/pitchrequest/update", s.updatePitchReqHandler)
-	authRoute.DELETE("/users/delete/:id", s.adminDeleteUserHandler)
-	authRoute.DELETE("/admin/deals/delete/:deal_id", s.adminDeleteDealHandler)
-	authRoute.DELETE("/sales/pitchReq/delete/:sales_username/:sales_rep_id/:pitch_id", s.salesDeletePitchReqHandler)
+	// DONE: using REST-API standards
+	authRoute.GET("/admin/users", s.listUsersHandler)
+
+	// I may not have gotten the desing right from the beginning, but I think from what I've done,
+	// password is a sub resource from the user... Can I explain in our next f
+	authRoute.PATCH("/admin/users/passwordresets", s.resetPassword)
+	authRoute.PATCH("/admin/deals", s.adminUpdateDealHandler)
+	authRoute.PATCH("/admin/users", s.adminUpdateUserHandler)
+	authRoute.PATCH("/users/passwords", s.updatePassWordLoggedIn)
+	authRoute.PATCH("/sales/pitch-requests", s.updatePitchReqHandler)
+	// DONE: changed /user/delete/:id to /admin/users/:id
+	authRoute.DELETE("admin/users/:id", s.adminDeleteUserHandler)
+	authRoute.DELETE("/admin/deals/:deal_id", s.adminDeleteDealHandler)
+	authRoute.DELETE("/sales/pitch-requests/:sales_username/:sales_rep_id/:pitch_id", s.salesDeletePitchReqHandler)
 
 	s.Router = router
 }

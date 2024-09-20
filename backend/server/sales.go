@@ -65,7 +65,10 @@ func (s *Server) salesCreatePitchReqHandler(ctx *gin.Context) {
 		CreatedAt:       pitchRequest.CreatedAt.Unix(),
 		UpdatedAt:       pitchRequest.UpdatedAt.Unix(),
 	}
-	ctx.JSON(http.StatusOK, resp)
+
+	// I am susppoed to return the resource Location in the header of the response, 
+	// I haven't learned that and I will adhere in all REST projects from now on.
+	ctx.JSON(http.StatusCreated, resp)
 }
 
 type ViewPitchReq struct {
@@ -93,6 +96,10 @@ func (s *Server) salesViewPitchRequests(ctx *gin.Context) {
 
 	requests, err := s.Store.ViewPitchRequests(ctx, args)
 	if err != nil {
+		if sqlNoRowsHandler(ctx, err) {
+			return
+		}
+
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
@@ -146,7 +153,7 @@ func (s *Server) salesDeletePitchReqHandler(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
+	ctx.JSON(http.StatusNoContent, gin.H{
 		"message": "successful",
 	})
 }

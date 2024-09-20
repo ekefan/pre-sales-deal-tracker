@@ -57,13 +57,14 @@ func (s *Server) adminCreateDealHandler(ctx *gin.Context) {
 	})
 
 	if success != nil {
-		if pqErrHandler(ctx, "deal", success) {
-			return
-		}
+		// Going through I didn't see the need for this check here
+		// if pqErrHandler(ctx, "deal", success) {
+		// 	return
+		// }
 		ctx.JSON(http.StatusInternalServerError, errorResponse(success))
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{
+	ctx.JSON(http.StatusCreated, gin.H{
 		"mesaage": "succesful",
 	})
 }
@@ -178,42 +179,9 @@ func (s *Server) adminDeleteDealHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(fmt.Errorf("couldn't delete deal: %v", err)))
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{
+	ctx.JSON(http.StatusNoContent, gin.H{
 		"message": "successful",
 	})
-}
-
-type ListUsersReq struct {
-	PageID   int32 `form:"page_id" binding:"required,min=1"`
-	PageSize int32 `form:"page_size" binding:"required,min=5,max=10"`
-}
-
-// FIXME: this has nothing to do with the Deals resource. Should be put in the adminUser.go
-// Also you should clarify the "admin" prefix meaning. Are those endpoints restricted? Or what's else?
-// listUsershandler http handler for the api end point for getting list of users currently
-func (s *Server) listUsersHandler(ctx *gin.Context) {
-	var req ListUsersReq
-	// FIXME: if I set page_id = 0 (or outside of the allowed boundaries), please adjust it to be a default value. page_id might also start from '0'. In case you go away from conventions, you need to be declarative and put it in the documentation.
-	// "(Required) The page number or offset from which to start retrieving Users. Determines where the current page of results starts in the overall list." => doesn't state the range of allowed values
-	if err := ctx.ShouldBindQuery(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-		return
-	}
-
-	if !multipleAuthAccess(ctx, []string{utils.AdminRole, utils.ManagerRole}) {
-		return
-	}
-	// FIXME: if you're accepting pagination info, you should return a paginated result, not only the collection of resources.
-	args := db.AdminViewUsersParams{
-		Limit:  req.PageSize,
-		Offset: (req.PageID - 1) * req.PageSize,
-	}
-	users, err := s.Store.AdminViewUsers(ctx, args)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(fmt.Errorf("i don't know")))
-		return
-	}
-	ctx.JSON(http.StatusOK, users)
 }
 
 type AdminPitchReq struct {
@@ -233,12 +201,11 @@ func (s *Server) adminGetPitchRequests(ctx *gin.Context) {
 	}
 	pitchRequests, err := s.Store.AdminGetPitchRequest(ctx, req.Admin_viewed)
 	if err != nil {
+		if sqlNoRowsHandler(ctx, err) {
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(fmt.Errorf("admin getting pitch requests I haven't fixed this yet %s", err)))
 		return
 	}
 	ctx.JSON(http.StatusOK, pitchRequests)
 }
-
-// ===== TODO =====
-///////////////////////////
-// implement Handling user sessions

@@ -14,11 +14,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-const (
-	MinNumPass = 123456
-	MaxNumPass = 999999
-)
-
 // Custom type for Unix timestamp
 type UnixTime struct {
 	Time  time.Time

@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"net/http"
 
 	db "github.com/ekefan/deal-tracker/internal/db/sqlc"
@@ -19,7 +18,6 @@ type OngoingDealsReq struct {
 func (s *Server) getOngoingDeals(ctx *gin.Context) {
 	var req OngoingDealsReq
 	if err := ctx.ShouldBindQuery(&req); err != nil {
-		fmt.Println("bad request", err, ctx.Request.Body)
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
@@ -54,6 +52,7 @@ type FilterDealReq struct {
 
 // getFilteredDeals returns deals filtered by the request fields
 // all users if authorized can filter deals
+// QUESTION: can I have different bindings in the same request object
 func (s *Server) getFilteredDeals(ctx *gin.Context) {
 	var req FilterDealReq
 	if err := ctx.ShouldBindQuery(&req); err != nil {
@@ -78,12 +77,6 @@ func (s *Server) getFilteredDeals(ctx *gin.Context) {
 
 	deals, err := s.Store.FilterDeals(ctx, args)
 	if err != nil {
-		if sqlNoRowsHandler(ctx, err) {
-			return
-		}
-		if pqErrHandler(ctx, "deals", err) {
-			return
-		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
@@ -93,13 +86,13 @@ func (s *Server) getFilteredDeals(ctx *gin.Context) {
 
 // GetDealReq holds the field required to get the deal whose id is sames as deal_id
 type GetDealReq struct {
-	Deal_Id int64 `form:"deal_id" binding:"required"`
+	Deal_Id int64 `uri:"deal_id" binding:"required,gte=1"`
 }
 
 // getDealsById api endpoint for getting a deal by it's id
 func (s *Server) getDealsById(ctx *gin.Context) {
 	var req GetDealReq
-	if err := ctx.ShouldBindQuery(&req); err != nil {
+	if err := ctx.ShouldBindUri(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
@@ -113,10 +106,6 @@ func (s *Server) getDealsById(ctx *gin.Context) {
 		if sqlNoRowsHandler(ctx, err) {
 			return
 		}
-		if pqErrHandler(ctx, "deals", err) {
-			return
-		}
-
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}

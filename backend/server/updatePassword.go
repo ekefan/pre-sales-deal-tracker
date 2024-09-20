@@ -19,6 +19,7 @@ type UpdatePasswordReq struct {
 
 // updatePassWordLoggedIn takes the current password then updates the user password
 // FIXME: try mergin these endpoint with the password reset one. Maybe, you can do the following: keep a single endpoint that provide users with the ability to change the password. Have something that mark as expired passwords older than x days. We can discuss this as well.
+// DONE: Yes let's discuss it... Just for some context, the reset password is an admin authorized endpoint and it's for when users forget their own password, not that it can't be merged with this but I just did it that way... when I discuss with you I will have a different view. :)
 func (s *Server) updatePassWordLoggedIn(ctx *gin.Context) {
 	var req UpdatePasswordReq
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -54,7 +55,7 @@ func (s *Server) updatePassWordLoggedIn(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{
+	ctx.JSON(http.StatusNoContent, gin.H{
 		"mesaage": "succesful",
 	})
 }
@@ -69,6 +70,7 @@ type ResetPasswordReq struct {
 // transaction returns successful if successful
 // FIXME: the password should be a subresource of the user resource.
 // since it's not common to handle the credential in your web server, try do come up with a valuable solution and let's have a discussion around.
+// DONE: Yes please, I am anticipating that discussion
 func (s *Server) resetPassword(ctx *gin.Context) {
 	var req ResetPasswordReq
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -90,7 +92,7 @@ func (s *Server) resetPassword(ctx *gin.Context) {
 	}
 
 	// send user the newPassword to their email....
-	ctx.JSON(http.StatusOK, gin.H{
+	ctx.JSON(http.StatusNoContent, gin.H{
 		"mesaage": "succesful",
 	})
 }

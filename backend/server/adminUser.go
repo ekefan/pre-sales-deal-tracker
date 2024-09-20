@@ -31,7 +31,11 @@ type CreateUsrResp struct {
 // on update to the handler, default password would be used so there wouldn't be a need
 // to provide password in request
 // FIXME: in the swagger.yml this is placed in the wrong section.
+// DONE: You said I can ignore this comment
 // FIXME: I can see from the endpoint address that you're not adhering to the REST-API standard.
+// DONE: I have tried to adhere to the REST-API standard, this is really new to me
+// If I miss anyone during this review can we talk about it, the more I write API's and read those guideline the better I will get at it
+// QUESTION: How do you get information you need from long texts? Does it take long, what method do you use?
 // You may want to try to follow this resource:
 // - https://stackoverflow.blog/2020/03/02/best-practices-for-rest-api-design/
 func (s *Server) adminCreateUserHandler(ctx *gin.Context) {
@@ -71,7 +75,12 @@ func (s *Server) adminCreateUserHandler(ctx *gin.Context) {
 		CreatedAt: user.CreatedAt.Unix(),
 	}
 	// FIXME: this is not compliant to REST standard. For example, return http.StatusCreated with the id of the resource created. Some framework (like Gin maybe) should also set the Location Response Header with the URI of the newly added resource.
-	ctx.JSON(http.StatusOK, resp)
+	// DONE: I am now returning a StatusCreated code
+
+	// We can talk about this, and I will adhere to a better design next time...
+	// resourceLocation := fmt.Sprintf("/users/%s", user.Username)
+	// ctx.Header("Location", resourceLocation)
+	ctx.JSON(http.StatusCreated, resp)
 }
 
 // AdminUpdateUsrReq holds the field - ID to unmarshall json requests
@@ -86,20 +95,11 @@ type AdminUpdateUsrReq struct {
 }
 
 // FIXME: do not leave commented out code around.
-// AdminUpdateUsrResp holds the fields for responding accurately to updating user end-point
-// type AdminUpdateUsrResp struct {
-// 	UserID          int64     `json:"user_id"`
-// 	Username        string    `json:"username"`
-// 	Role            string    `json:"role"`
-// 	Fullname        string    `json:"fullname"`
-// 	Email           string    `json:"email"`
-// 	PasswordChanged bool      `json:"password_changed"`
-// 	UpdatedAt       time.Time `json:"updated_at"`
-// 	CreatedAt       time.Time `json:"created_at"`
-// }
+// DONE: removed commented code
 
 // adminUpdateUserHandler http handler for the api end point for updating a user
 // FIXME: the PUT should entirely replace the resource. => PUT /users/1 + the request payload.
+// DONE: Using PATCH as the endpoint handler doesn't update the entire user resource
 func (s *Server) adminUpdateUserHandler(ctx *gin.Context) {
 	var (
 		req    AdminUpdateUsrReq
@@ -183,7 +183,9 @@ type AdminDeleteUserReq struct {
 
 // adminDeleteUserhandler http handler for the api end point for Deleting a user
 // FIXME: DELETE /users/1.
+// DONE: using DELETE admin/users/1
 // FIXME: return 204 NoContent.
+// DONE: returning the correct response for a deleted resource 204
 func (s *Server) adminDeleteUserHandler(ctx *gin.Context) {
 	var req AdminDeleteUserReq
 	if err := ctx.ShouldBindUri(&req); err != nil {
@@ -209,7 +211,47 @@ func (s *Server) adminDeleteUserHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{
+	ctx.JSON(http.StatusNoContent, gin.H{
 		"message": "successful",
 	})
+}
+
+
+type ListUsersReq struct {
+	PageID   int32 `form:"page_id" binding:"required,min=1"`
+	PageSize int32 `form:"page_size" binding:"required,min=5,max=10"`
+}
+
+// FIXME: this has nothing to do with the Deals resource. Should be put in the adminUser.go
+// Also you should clarify the "admin" prefix meaning. Are those endpoints restricted? Or what's else?
+// listUsershandler http handler for the api end point for getting list of users currently
+// DONE: moved the listUsersHandler from adminUser.go file
+func (s *Server) listUsersHandler(ctx *gin.Context) {
+	var req ListUsersReq
+	// FIXME: if I set page_id = 0 (or outside of the allowed boundaries), please adjust it to be a default value. page_id might also start from '0'. In case you go away from conventions, you need to be declarative and put it in the documentation.
+	// "(Required) The page number or offset from which to start retrieving Users. Determines where the current page of results starts in the overall list." => doesn't state the range of allowed values
+	// DONE: I have put that in the documentation now...
+	// For the pagination, this is a huge design issue for me and I got it wrong, lets talk about it during a session
+
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	if !multipleAuthAccess(ctx, []string{utils.AdminRole, utils.ManagerRole}) {
+		return
+	}
+	// FIXME: if you're accepting pagination info, you should return a paginated result, not only the collection of resources.
+	// DONE: still related to my poor design...
+	// I wanted to use pagination, but the organisation is small, currently there are only 10 full time employees management inclusive
+	args := db.AdminViewUsersParams{
+		Limit:  req.PageSize,
+		Offset: (req.PageID - 1) * req.PageSize,
+	}
+	users, err := s.Store.AdminViewUsers(ctx, args)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(fmt.Errorf("i don't know")))
+		return
+	}
+	ctx.JSON(http.StatusOK, users)
 }
