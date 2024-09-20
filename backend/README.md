@@ -4,10 +4,10 @@
 
 - For this application, an admin creates a user with a sales role.
 - The sales user can submit pitch (customer) requests to the admin,
-- The pitch requests contains mainly of a list of services the customer is requesting for, the task the sales users is asking of the pres-sales-team to meet up with the customer request, the id of the sales user, the deadline for the pre-sales engineer to work on the task.
-- The admin, when he views the pitch request, can add a reminder to his calender basd on the pitch request dead, can create a deal based on this pitch request, then updated its status as the deal progress.
-- When needed, the admin can delete users, and deals
-- The sales user can delete pitch requests associated with their id.
+- The pitch requests consist mainly of a list of services the customer is requesting for, the task the sales users is asking of the pres-sales team to meet up with the customer's request, the id of the sales user, the deadline for the pre-sales engineer to work on the task.
+- The admin, when he views the pitch request, can add a reminder to his calender based on the pitch request deadline, can create a deal based on this pitch request, then updated its status as the deal progresses or customer requests are modified.
+- When needed, the admin can delete users, and closed deals.
+- And the sales user can delete pitch requests associated with their id.
 
 ## Prerequisites to Run the Server on Your Local Computer
 
