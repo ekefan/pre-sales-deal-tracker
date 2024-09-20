@@ -30,8 +30,6 @@ type CreateUsrResp struct {
 // must receive a CreateUserReq with username, role fullname, email and password
 // on update to the handler, default password would be used so there wouldn't be a need
 // to provide password in request
-// FIXME: in the swagger.yml this is placed in the wrong section.
-// DONE: You said I can ignore this comment
 // FIXME: I can see from the endpoint address that you're not adhering to the REST-API standard.
 // DONE: I have tried to adhere to the REST-API standard, this is really new to me
 // If I miss anyone during this review can we talk about it, the more I write API's and read those guideline the better I will get at it
@@ -74,9 +72,8 @@ func (s *Server) adminCreateUserHandler(ctx *gin.Context) {
 		Username:  user.Username,
 		CreatedAt: user.CreatedAt.Unix(),
 	}
-	// FIXME: this is not compliant to REST standard. For example, return http.StatusCreated with the id of the resource created. Some framework (like Gin maybe) should also set the Location Response Header with the URI of the newly added resource.
-	// DONE: I am now returning a StatusCreated code
 
+	// FIXME: the response payload is still the same as before. Use something like '{"id": 2}'
 	// We can talk about this, and I will adhere to a better design next time...
 	// resourceLocation := fmt.Sprintf("/users/%s", user.Username)
 	// ctx.Header("Location", resourceLocation)
@@ -94,12 +91,11 @@ type AdminUpdateUsrReq struct {
 	Username string `json:"username" binding:"required,alphanum"`
 }
 
-// FIXME: do not leave commented out code around.
-// DONE: removed commented code
-
 // adminUpdateUserHandler http handler for the api end point for updating a user
 // FIXME: the PUT should entirely replace the resource. => PUT /users/1 + the request payload.
 // DONE: Using PATCH as the endpoint handler doesn't update the entire user resource
+// FIXME: that's not what I was meaning. There must be some PUT routes somewhere. Usually, there's the PUT route. The PATCH is more difficult to find.
+// Try thinking to this use case: in a website, before you edit a resource, the client retrieves it by ID. Then, you're presented with all the fields and you change the relevant ones. Everything is sent in a PUT request to the server. The server can either decide to replace the full resource or edit only the changed fields (but it's something done on the server).
 func (s *Server) adminUpdateUserHandler(ctx *gin.Context) {
 	var (
 		req    AdminUpdateUsrReq
@@ -181,11 +177,6 @@ type AdminDeleteUserReq struct {
 	// AdminRole string `uri:"admin_role" binding:"required"`
 }
 
-// adminDeleteUserhandler http handler for the api end point for Deleting a user
-// FIXME: DELETE /users/1.
-// DONE: using DELETE admin/users/1
-// FIXME: return 204 NoContent.
-// DONE: returning the correct response for a deleted resource 204
 func (s *Server) adminDeleteUserHandler(ctx *gin.Context) {
 	var req AdminDeleteUserReq
 	if err := ctx.ShouldBindUri(&req); err != nil {
@@ -216,16 +207,11 @@ func (s *Server) adminDeleteUserHandler(ctx *gin.Context) {
 	})
 }
 
-
 type ListUsersReq struct {
 	PageID   int32 `form:"page_id" binding:"required,min=1"`
 	PageSize int32 `form:"page_size" binding:"required,min=5,max=10"`
 }
 
-// FIXME: this has nothing to do with the Deals resource. Should be put in the adminUser.go
-// Also you should clarify the "admin" prefix meaning. Are those endpoints restricted? Or what's else?
-// listUsershandler http handler for the api end point for getting list of users currently
-// DONE: moved the listUsersHandler from adminUser.go file
 func (s *Server) listUsersHandler(ctx *gin.Context) {
 	var req ListUsersReq
 	// FIXME: if I set page_id = 0 (or outside of the allowed boundaries), please adjust it to be a default value. page_id might also start from '0'. In case you go away from conventions, you need to be declarative and put it in the documentation.

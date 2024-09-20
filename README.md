@@ -1,5 +1,3 @@
-<!-- TODO: there are some errors in the Markdown syntax. Please fix them. Maybe you can also install a Markdown linter to help you catching issues. -->
-<!-- DONE: I didn't edit this file after the first review, but I have fixed the errors in the markdown now -->
 # Pre-sales Deal Tracker
 
 **Pre-sales Deal Tracker** is a web application designed to assist the pre-sales engineering team at Vas Technologies (a small networking company where I am a network intern) in managing deal processes efficiently. The application features a monolithic architecture based on a client-server model and communicates using RESTful APIs.

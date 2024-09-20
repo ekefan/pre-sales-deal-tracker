@@ -53,6 +53,11 @@ func (s *Server) SetupRouter() {
 	router.Use(cors.New(corsConfig))
 	authRoute := router.Group("/").Use(authMiddleware(s.TokenMaker))
 
+	// FIXME: we've to discern about the "users" resource. We have three options:
+	// 1. "users" are only used to keep track of logins. Stick to addresses like "/register", "login", "logout", "password-reset", and so on.
+	// 2. "users" are part of the domain of our application. In this case use "GET /users", "POST /users", "PUT /users/:id", and so on.
+	// 3. Mix & Match: clearly separate those endpoints: the one used for signing-up, login, logout, ecc. from the ones used as domain in our application. Potentially, we could also have separated table.
+
 	router.POST("/users", s.adminCreateUserHandler)
 	router.POST("/users/login", s.userLogin)
 
@@ -64,8 +69,6 @@ func (s *Server) SetupRouter() {
 	authRoute.GET("/sales/pitch-requests", s.salesViewPitchRequests)
 	authRoute.GET("/admin/deals/:deal_id", s.getDealsById)
 	authRoute.GET("/sales/deals", s.getSalesDeals)
-	// FIXME: not complain with REST-API standards => GET /users
-	// DONE: using REST-API standards
 	authRoute.GET("/admin/users", s.listUsersHandler)
 
 	// I may not have gotten the desing right from the beginning, but I think from what I've done,
