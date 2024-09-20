@@ -26,6 +26,8 @@
 
 To spin up the server along with the Postgres database server, use Docker Compose to build and start the server's containers:
 
+<!-- FIXME: you can use the old images. Try to provide a command which doesn't rely on cached images. -->
+
 ```bash
 docker-compose up
 ```
