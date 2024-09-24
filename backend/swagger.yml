@@ -4,7 +4,7 @@ info:
     Custom API for pre-sales deal tracker
     All end points require and produce application/json
     - a user can have either an admin or a sales role
-    - auth end points require that the client requests are from an admin user
+    - all auth end points are associated with authentication and authorization management
   version: 1.0.0
   title: API Endpoints for Pre-sales Deal Tracker
 host: "localhost:8080" #yet to be set or use localhost :)
@@ -14,41 +14,7 @@ schemes:
   - http
   - https
 paths:
-    /auth/register:
-      post:
-        summary: creates a new user
-        description: This end point creates a new user with a default password.
-        parameters:
-          - name: createUserReq
-            in: body
-            description: |
-              holds the data - username, fullname, email and role, needed to create a user. 
-            required: true
-            schema:
-              $ref: '#/definitions/createUserReq'
-        responses:
-          201:
-            description: user was successfully created, response body holds the user_id which is never less than 1 and in the header, the location to get the resource
-            schema:
-              $ref: '#/definitions/createUserResp'
-          400:
-            description: bad request, the request body has invalid fields for creating a user
-            schema:
-              $ref: '#/definitions/errorResp'
-          401:
-            description: unauthorized, the user with an invalid access token accessed the end point
-            schema:
-              $ref: '#/definitions/errorResp'
-            
-          409:
-            description: a user with already exists with similar req details
-            schema:
-              $ref: '#/definitions/errorResp'
-          500:
-            description: server error
-            schema:
-              $ref: '#/definitions/errorResp'
-    /login:
+    /auth/login:
       post:
         summary: logs users into the application
         description: This end point is used to login a user
@@ -84,7 +50,162 @@ paths:
             schema:
               $ref:
                 '#/definitions/errorResp'
+    /users:
+      post:
+        summary: creates a new user
+        description: This end point creates a new user with a default password, request is restricted to users with admin role.
+        parameters:
+          - name: createUserReq
+            in: body
+            description: |
+              holds the data - username, fullname, email and role, needed to create a user. 
+            required: true
+            schema:
+              $ref: '#/definitions/createUserReq'
+        responses:
+          201:
+            description: user was successfully created, response body holds username and in the header the location to get the resource
+            schema:
+              $ref: '#/definitions/createUserResp'
+          400:
+            description: bad request, the request body has invalid fields for creating a user
+            schema:
+              $ref: '#/definitions/errorResp'
+          401:
+            description: unauthorized, the user with an invalid access token accessed the end point
+            schema:
+              $ref: '#/definitions/errorResp'
+            
+          409:
+            description: a user with already exists with similar req details
+            schema:
+              $ref: '#/definitions/errorResp'
+          500:
+            description: server error
+            schema:
+              $ref: '#/definitions/errorResp'
+      get:
+        summary: get all users
+        description: |
+          The end point allows only an admin to retrieve all users.
+          If no other user exist an array of user_data is returned.
+          The least page_id is 1, and page_size is should always be 10
+        parameters:
+          - name: page_id
+            in: query
+            description: the pagination offset, identifies sequentially the page to get
+            required: true
+            type: integer
+            default: 1
+          - name: page_size
+            in: query
+            description: the pagination limit, identifies the number of resources in one page
+            required: true
+            type: integer
+            default: 10
+        responses:
+          200:
+            description: successfull request
+            schema:
+              type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/definitions/user_data'
+                pagination:
+                  $ref: '#/definitions/pagination'
+          400:
+            description: invalid request parameters
+            schema:
+              $ref: '#/definitions/errorResp'
+          401:
+            description: unauthorized access, request from a user who's role is not admin
+            schema:
+              $ref: '#/definitions/errorResp'
+          500:
+            description: server error
+            schema:
+              $ref: '#/definitions/errorResp'
+    /users/{user_id}:
+      get:
+        summary: get user by user_id
+        description: 'user_id is always greater than 0'
+        parameters:
+          - name: user_id
+            in: path
+            required: true
+            default: 2
+            type: integer
+        responses:
+          200:
+            description: request succesful
+            schema:
+              $ref: '#/definitions/user_data'
+          400:
+            description: invalid request parameters
+            schema:
+              $ref: '#/definitions/errorResp'
+          404:
+            description: resource with user_id not found
+            schema:
+              $ref: '#/definitions/errorResp'
+          500:
+            description: server error
+            schema:
+              $ref: '#/definitions/errorResp'
+      put:
+        summary: updates a user
+        description: |
+          for updating users, user_id is always greater than 0
+          this end point is restricted to admins only
+        parameters:
+          - name: user_id
+            in: path
+            type: integer
+            required: true
+            default: 2
+          - name: updateUserReq
+            in: body
+            required: true
+            schema:
+              $ref: '#/definitions/updateUserReq'
+        responses:
+          204:
+            description: update was successful
+            schema:
+              $ref: '#/definitions/successMessage'
+          400:
+            description: invalid request parameters
+            schema:
+              $ref: '#/definitions/errorResp'
+          401:
+            description: unauthorized access, request from a user who's role is not admin
+            schema:
+              $ref:
+                '#/definitions/errorResp'
+          404:
+            description: resource not found
+            schema:
+              $ref: '#/definitions/errorResp'
+          409:
+            description: user already exist with similar details
+            schema:
+              $ref:
+                '#/definitions/errorResp'
+          500:
+            description: server error
+            schema:
+              $ref: '#/definitions/errorResp'
+      # delete:
+      
 definitions:
+  successMessage:
+    type: object
+    properties:
+      message:
+        type: string
+        default: successful
   createUserReq:
     type: object
     properties:
@@ -105,7 +226,7 @@ definitions:
     properties:
       user_id:
         type: integer
-        default: 1
+        default: 2
         description: must not be less than 1
   errorResp:
     type: object
@@ -118,7 +239,7 @@ definitions:
     properties:
       user_id:
         type: integer
-        default: 1
+        default: 2
       username:
         type: string
         default: lily
@@ -154,7 +275,38 @@ definitions:
         default: "alongrandomstringofrandomcharactersusedastheaccesstoken"
       user_data:
         $ref: '#/definitions/user_data'
-        
-        
+  pagination:
+    type: object
+    properties:
+      total_records:
+        type: integer
+        default: 20
+      current_page:
+        type: integer
+        default: 1
+      total_pages:
+        type: integer
+        default: 2
+      has_next:
+        type: boolean
+        default: true
+      has_previous:
+        type: boolean
+        default: false
+  updateUserReq:
+    type: object
+    properties:
+      username:
+        type: string
+        default: lily
+      fullname:
+        type: string
+        default: Lily Foe
+      role:
+        type: string
+        default: admin
+      email:
+        type: string
+        default: lily@gmail.com
         
             
