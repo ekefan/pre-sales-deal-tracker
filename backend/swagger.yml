@@ -53,7 +53,7 @@ paths:
     /users:
       post:
         summary: creates a new user
-        description: This end point creates a new user with a default password, request is restricted to users with admin role.
+        description: This end point creates a new user with a default password, request is restricted to admins.
         parameters:
           - name: createUserReq
             in: body
@@ -87,9 +87,9 @@ paths:
       get:
         summary: get all users
         description: |
-          The end point allows only an admin to retrieve all users.
-          If no other user exist an array of user_data is returned.
+          If no other user exist an empty array of user_data is returned.
           The least page_id is 1, and page_size is should always be 10
+          This end point is restricted to admins
         parameters:
           - name: page_id
             in: query
@@ -304,7 +304,7 @@ definitions:
         default: Lily Foe
       role:
         type: string
-        default: admin
+        default: sales
       email:
         type: string
         default: lily@gmail.com
