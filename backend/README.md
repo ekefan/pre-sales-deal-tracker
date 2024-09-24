@@ -1,41 +1,6 @@
 # API for Pre-sales Deal Tracker
 
-## BRIEF SUMMARY FOR API CONCEPT
+## A refix is going on
 
-- For this application, an admin creates a user with a sales role.
-- The sales user can submit pitch (customer) requests to the admin,
-- The pitch requests consist mainly of a list of services the customer is requesting for, the task the sales users is asking of the pres-sales team to meet up with the customer's request, the id of the sales user, the deadline for the pre-sales engineer to work on the task.
-- The admin, when he views the pitch request, can add a reminder to his calender based on the pitch request deadline, can create a deal based on this pitch request, then updated its status as the deal progresses or customer requests are modified.
-- When needed, the admin can delete users, and closed deals.
-- And the sales user can delete pitch requests associated with their id.
-
-## Prerequisites to Run the Server on Your Local Computer
-
-1. **Install Docker**  
-   Visit [Docker Docs](https://docs.docker.com/engine/install/) for clear instructions on how to install Docker.
-
-2. **Clone the repository**  
-   Clone this repo to your local computer, `cd` into the project directory, then `cd` into the backend folder.
-
-   ```bash
-   git clone https://github.com/ekefan/pre-sales-deal-tracker.git
-   cd pre-sales-deal-tracker/backend
-   ```
-
-### Starting the Server
-
-To spin up the server along with the Postgres database server, use Docker Compose to build and start the server's containers:
-
-<!-- FIXME: you can use the old images. Try to provide a command which doesn't rely on cached images. -->
-
-```bash
-docker-compose up
-```
-
-### API Documentation (Swagger)
-
-The API is documented using **Swagger**. You can use the Swagger file by:
-
-- Uploading the `Swagger.yml` file located in the backend folder to the [Swagger Editor](https://editor.swagger.io/).  
-This will allow you to view the API specification in a user-friendly interface and test the API endpoints using the interactive UI.
-**The server's containers must be running to be able to test the endpoints on swagger**
+The entire api is being re-written again to tackle massive flaws of RESTful best practices
+Check out the swagger documentation (the swagger file in this folder) as it is being designed
