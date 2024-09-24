@@ -2,19 +2,9 @@ swagger: "2.0"
 info:
   description: |
     Custom API for pre-sales deal tracker
-
-    The api has been designed arround three major resources: users, deals, and pitch requests
-    Being the first version, designed by a junior, the api has room for improvements and best practices
-
-    Route Specifications:
-    - routes with admin are restricted for users with an admin role
-    - routes with sales are restricted for users with a sales role
-    - routes with no admin or sales are open endpoints for users with either role
-
-    passwords can be refered to as a sub-resource in this version, because the passwords can be controlled by
-    every user but also the admin has authority to reset every users password incase of a password loss.
-
-    Setting default values for the requests objects can be tricky because of the flow of the poor design
+    All end points require and produce application/json
+    - a user can have either an admin or a sales role
+    - auth end points require that the client requests are from an admin user
   version: 1.0.0
   title: API Endpoints for Pre-sales Deal Tracker
 host: "localhost:8080" #yet to be set or use localhost :)
@@ -24,1032 +14,147 @@ schemes:
   - http
   - https
 paths:
-  /users:
-    post:
-      # tags:
-      #   - Create User
-      summary: Creates a new user
-      description: ""
-      operationId: adminCreateUser
-      produces:
-        - application/json
-      parameters:
-        - name: CreateUsrReq
-          in: body
-          description: |
-            This end point creates a user resource, it requires a username, fullname, password, email, and a role which must one of admin, sales or manager
-          required: true
-          schema:
-            $ref: "#/definitions/CreateUsrReq"
-      responses:
-        "201":
-          description: successfully created a new user
-          schema:
-            $ref: "#/definitions/CreateUsrResp"
-        "400":
-          description: Wrong request params
-          schema:
-            $ref: "#/definitions/errorResp"
-        "409":
-          description: user with details already exist in database
-          schema:
-            $ref: "#/definitions/errorResp"
-        "500":
-          description: server error
-          schema:
-            $ref: "#/definitions/errorResp"
-  /users/login:
-    post:
-      # tags:
-      #   - User Login
-      summary: To login user
-      description: ""
-      operationId: userLogin
-      produces:
-        - application/json
-      parameters:
-        - name: LoginReq
-          in: body
-          description: |
-            End point to get login details, it requires the username and the password
-            On a successful login, the user resource is returned with an access token
-          required: true
-          schema:
-            $ref: "#/definitions/LoginReq"
-      responses:
-        "200":
-          description: successful operation
-          schema:
-            $ref: "#/definitions/LoginResponse"
-        "400":
-          description: bad request
-          schema:
-            $ref: "#/definitions/errorResp"
-        "401":
-          description: unauthorized operation or wrong password
-          schema:
-            $ref: "#/definitions/errorResp"
-        "404":
-          description: user with requested username doesn't exist
-          schema:
-            $ref: "#/definitions/errorResp"
-        "500":
-          description: server error
-          schema:
-            $ref: "#/definitions/errorResp"
-  /sales/pitch-requests:
-    post:
-      # tags:
-      #   - Create Pitch Request
-      summary: Creates a (customer) pitch request
-      description: "Used by a user with a sales role to create a pitch request"
-      operationId: salesCreatePitchReq
-      produces:
-        - application/json
-      parameters:
-        - name: PitchReq
-          in: body
-          description: |
-            An object holding fields needed to create a customer (pitch) request
-            For the user id, you'll have to create a user with sales role.
-          required: true
-          schema:
-            $ref: "#/definitions/PitchReq"
-      responses:
-        "201":
-          description: successful created a pitch request
-          schema:
-            $ref: "#/definitions/PitchResp"
-        "400":
-          description: bad request, client sent invalid request payload
-          schema:
-            $ref: "#/definitions/errorResp"
-        "401":
-          description: unauthorized operation, client request is not from a sales user
-          schema:
-            $ref: "#/definitions/errorResp"
-        "500":
-          description: server error
-          schema:
-            $ref: "#/definitions/errorResp"
-    get:
-      # tags:
-      #   - Get pitch requests with For Sales Rep
-      summary: Get pitch requests by sales rep id
-      description: ""
-      operationId: salesViewPitchRequests
-      produces:
-        - "application/json"
-      parameters:
-        - name: sales_rep_id
-          in: query
-          description: The id of the sales rep that created the pitch request
-          required: true
-          type: integer
-        - name: page_id
-          in: query
-          description: The page number or offset from which to start retrieving pitch requests. Determines where the current page of results starts in the overall list.
-          required: true
-          type: integer
-        - name: page_size
-          in: query
-          description: The number of pitch requests to return per page (used for pagination). Defines how many results to display in a single response.
-          required: true
-          type: integer
-      responses:
-        "200":
-          description: successful request
-          schema:
-            type: array
-            items:
-              $ref: "#/definitions/PitchRequest"
-        "400":
-          description: bad request
-          schema:
-            $ref: "#/definitions/errorResp"
-        "401":
-          description: unauthorized access
-          schema:
-            $ref: "#/definitions/errorResp"
-        "404":
-          description: resource not found
-          schema:
-            $ref: "#/definitions/errorResp"
-        "500":
-          description: server error
-          schema:
-            $ref: "#/definitions/errorResp"
-    patch:
-      # tags:
-      #   - Update pitchRequest
-      summary: Updates pitch requests if clients requests is by a sales user
-      description: ""
-      operationId: updatePitchRequest
-      produces:
-        - "application/json"
-      parameters:
-        - name: UpdatePitchReq
-          in: body
-          description: holds the data need to update a pitch request
-          required: true
-          schema:
-            $ref: "#/definitions/UpdatePitchReq"
-      responses:
-        "200":
-          description: successfull operation the updated deal is returned
-          schema:
-            $ref: "#/definitions/PitchResp"
-        "400":
-          description: bad request
-          schema:
-            $ref: "#/definitions/errorResp"
-        "401":
-          description: unauthorized access
-          schema:
-            $ref: "#/definitions/errorResp"
-        "404":
-          description: pitch request to update doesn't exist in the database
-          schema:
-            $ref: "#/definitions/errorResp"
-        "409":
-          description: conflict with existing data, the update data already exists in the database
-          schema:
-            $ref: "#/definitions/errorResp"
-        "500":
-          description: server error
-          schema:
-            $ref: "#/definitions/errorResp"
-  /admin/deals:
-    post:
-      # tags:
-      #   - Create a deal
-      summary: Creates a deal based on a pitch request, client request must be from an admin user
-      description: ""
-      operationId: adminCreateDeal
-      produces:
-        - application/json
-      parameters:
-        - name: CreateDealReq
-          in: body
-          description: holds payload needed to create a deal
-          required: true
-          schema:
-            $ref: "#/definitions/CreateDealReq"
-      responses:
-        "201":
-          description: successful operation
-          schema:
-            $ref: "#/definitions/successMsg"
-        "400":
-          description: bad request
-          schema:
-            $ref: "#/definitions/errorResp"
-        "401":
-          description: unauthorized operation
-          schema:
-            $ref: "#/definitions/errorResp"
-        "500":
-          description: server error
-          schema:
-            $ref: "#/definitions/errorResp"
-    get:
-      # tags:
-      #   - Get deals filtered by request
-      summary: Filters deals
-      description: |
-        This End point returns deals filtered by the request
-        the client request must be from an admin user. if no filter
-      operationId: getFilteredDeals
-      produces:
-        - "application/json"
-      parameters:
-        - name: customer_name
-          in: query
-          description: deals having this customer name
-          required: false
-          type: string
-        - name: service_to_render
-          in: query
-          description: deals having these/this service(s)
-          required: false
-          type: array
-          items: { type: string }
-        - name: status
-          in: query
-          description: deals having this status
-          required: false
-          type: string
-        - name: max_profit
-          in: query
-          description: deals having this max_profit
-          required: false
-          type: string
-        - name: min_profit
-          in: query
-          description: deals having this min_profit
-          required: false
-          type: string
-        - name: awarded
-          in: query
-          description: deals awarded
-          required: false
-          type: boolean
-        - name: sales_rep_name
-          in: query
-          description: deals having this sales_rep_name
-          required: false
-          type: string
-        - name: page_size
-          in: query
-          description: The number of deals to return per page (used for pagination). Defines how many results to display in a single response.
-          required: true
-          type: integer
-        - name: page_id
-          in: query
-          description: The page number or offset from which to start retrieving deals. Determines where the current page of results starts in the overal list.
-          required: true
-          type: integer
-      responses:
-        "200":
-          description: successful request
-          schema:
-            type: array
-            items:
-              $ref: "#/definitions/CreateDealResp"
-        "400":
-          description: bad request
-          schema:
-            $ref: "#/definitions/errorResp"
-        "401":
-          description: unauthorized access
-          schema:
-            $ref: "#/definitions/errorResp"
-        "500":
-          description: server error
-          schema:
-            $ref: "#/definitions/errorResp"
-    patch:
-      # tags:
-      #   - Update Deal
-      summary: Uses data in request to update deal
-      description: ""
-      operationId: adminUpdateDeal
-      produces:
-        - "application/json"
-      parameters:
-        - name: UpdateDealReq
-          in: body
-          description: holds data needed to update a deal
-          required: true
-          schema:
-            $ref: "#/definitions/UpdateDealReq"
-      responses:
-        "200":
-          description: successfull request
-          schema:
-            $ref: "#/definitions/CreateDealResp"
-        "400":
-          description: bad request
-          schema:
-            $ref: "#/definitions/errorResp"
-        "401":
-          description: unauthorized access
-          schema:
-            $ref: "#/definitions/errorResp"
-        "404":
-          description: resource doesn't exist in database
-          schema:
-            $ref: "#/definitions/errorResp"
-        "409":
-          description: conflict with existing data, the update data already exists in the database
-          schema:
-            $ref: "#/definitions/errorResp"
-        "500":
-          description: server error
-          schema:
-            $ref: "#/definitions/errorResp"
-  /deals:
-    get:
-      # tags:
-      #   - Get Deals with Status:ongoing
-      summary: |
-        Get deals with where the status is ongoing, to be used on login to app dashboad
-        Resource is accessible by all users using this endpoint
-      description: ""
-      operationId: getOngoingDeals
-      produces:
-        - "application/json"
-      parameters:
-        - name: status
-          in: query
-          description: current deal status
-          required: true
-          type: string
-          default: ongoing
-      responses:
-        "200":
-          description: successful request
-          schema:
-            type: array
-            items:
-              $ref: "#/definitions/CreateDealResp"
-        "400":
-          description: bad request
-          schema:
-            $ref: "#/definitions/errorResp"
-        "401":
-          description: unauthorized access
-          schema:
-            $ref: "#/definitions/errorResp"
-        "404":
-          description: resource doesn't exist
-          schema:
-            $ref: "#/definitions/errorResp"
-        "500":
-          description: server error
-          schema:
-            $ref: "#/definitions/errorResp"
-  /admin/pitchrequest:
-    get:
-      # tags:
-      #   - Pitch Requests Admin has not Viewed
-      summary: Get pitch requests the admin has not viewed
-      description: ""
-      operationId: adminGetPitchReq
-      produces:
-        - "application/json"
-      parameters:
-        - name: admin_viewed
-          in: query
-          description: a boolean indicating whether admin has viewed pitch request or not in this case not (false)
-          required: true
-          type: boolean
-      responses:
-        "200":
-          description: successful request
-          schema:
-            type: array
-            items:
-              $ref: "#/definitions/PitchRequest"
-        "400":
-          description: bad request
-          schema:
-            $ref: "#/definitions/errorResp"
-        "401":
-          description: unauthorized access
-          schema:
-            $ref: "#/definitions/errorResp"
-        "404":
-          description: resource not found
-          schema:
-            $ref: "#/definitions/errorResp"
-        "500":
-          description: server error
-          schema:
-            $ref: "#/definitions/errorResp"
-  /admin/deals/{deal_id}:
-    get:
-      # tags:
-      #   - Get Deal by deal_id
-      summary: Get deal by it's id
-      description: "This end point is accessed by a admin user to get the deal with deal_id"
-      operationId: getDealsById
-      produces:
-        - "application/json"
-      parameters:
-        - name: deal_id
-          in: path
-          description: The id of the deal to be retrieved
-          type: integer
-          required: true
-      responses:
-        "200":
-          description: "successful request"
-          schema:
-            $ref: "#/definitions/Deal"
-        "400":
-          description: bad request
-          schema:
-            $ref: "#/definitions/errorResp"
-        "401":
-          description: unauthorized access
-          schema:
-            $ref: "#/definitions/errorResp"
-        "404":
-          description: deal not found
-          schema:
-            $ref: "#/definitions/errorResp"
-        "500":
-          description: server error
-          schema:
-            $ref: "#/definitions/errorResp"
-  /sales/deals:
-    get:
-      # tags:
-      #   - Get Deal with For Sales Rep
-      summary: Get deals by sales rep full name
-      description: ""
-      operationId: salesDeals
-      produces:
-        - "application/json"
-      parameters:
-        - name: sales_rep
-          in: query
-          description: The full name of the sales rep linked with the deal
-          required: true
-          type: string
-        - name: page_id
-          in: query
-          description: The page number or offset from which to start retrieving deals. Determines where the current page of results starts in the overall list.
-          required: true
-          type: integer
-        - name: page_size
-          in: query
-          description: The number of deals to return per page (used for pagination). Defines how many results to display in a single response.
-          required: true
-          type: integer
-      responses:
-        "200":
-          description: successful request
-          schema:
-            type: array
-            items:
-              $ref: "#/definitions/Deal"
-        "400":
-          description: bad request
-          schema:
-            $ref: "#/definitions/errorResp"
-        "401":
-          description: unauthorized access
-          schema:
-            $ref: "#/definitions/errorResp"
-        "404":
-          description: resource not doesn't exist in the database
-          schema:
-            $ref: "#/definitions/errorResp"
-        "500":
-          description: server error
-          schema:
-            $ref: "#/definitions/errorResp"
-  /admin/users:
-    get:
-      # tags:
-      #   - Get Users
-      summary: Get all user
-      description: "This endpoint allows the client to get all users when request is sent by an admin user"
-      operationId: listUsers
-      produces:
-        - "application/json"
-      parameters:
-        - name: page_id
-          in: query
-          description: The page number or offset from which to start retrieving Users. Determines where the current page of results starts in the overall list.
-          required: true
-          type: integer
-        - name: page_size
-          in: query
-          description: The number of users to return per page (used for pagination). Defines how many results to display in a single response.
-          required: true
-          type: integer
-      responses:
-        "200":
-          description: successful request
-          schema:
-            type: array
-            items:
-              $ref: "#/definitions/User"
-        "400":
-          description: bad request
-          schema:
-            $ref: "#/definitions/errorResp"
-        "401":
-          description: unauthorized access
-          schema:
-            $ref: "#/definitions/errorResp"
-        "500":
-          description: server error
-          schema:
-            $ref: "#/definitions/errorResp"
-  /admin/users/passwordresets:
-    patch:
-      # tags:
-      #   - Get Users
-      summary: Resets user password the a default password
-      description: ""
-      operationId: passwordReset
-      produces:
-        - "application/json"
-      parameters:
-        - name: ResetPasswordReq
-          in: body
-          description: This endpoint updates the user password after resetting it to the default password
-          required: true
-          schema:
-            type: object
-            properties:
-              user_id:
-                type: integer
-      responses:
-        "204":
-          description: successful operation but no resource is returned
-          schema:
-            $ref: "#/definitions/successMsg"
-        "400":
-          description: Bad request
-          schema:
-            $ref: "#/definitions/errorResp"
-        "401":
-          description: unauthorized operation
-          schema:
-            $ref: "#/definitions/errorResp"
-        "500":
-          description: server error
-          schema:
-            $ref: "#/definitions/errorResp"
-  /users/passwords:
-    patch:
-      # tags:
-      #   - Update password
-      summary: Uses data in request to update user password
-      description: "Every user can update their passwords with this endpoint"
-      operationId: updatePassword
-      produces:
-        - "application/json"
-      parameters:
-        - name: UpdatePasswordReq
-          in: body
-          description: holds the data need to update a users password
-          required: true
-          schema:
-            $ref: "#/definitions/UpdatePasswordReq"
-      responses:
-        "204":
-          description: successfull operation but updated resource is not returned
-          schema:
-            $ref: "#/definitions/successMsg"
-        "400":
-          description: bad request
-          schema:
-            $ref: "#/definitions/errorResp"
-        "401":
-          description: unauthorized access
-          schema:
-            $ref: "#/definitions/errorResp"
-        "404":
-          description: resource doesn't exist in database
-          schema:
-            $ref: "#/definitions/errorResp"
-        "500":
-          description: server error
-          schema:
-            $ref: "#/definitions/errorResp"
-  /admin/users/{id}:
-    delete:
-      # tags:
-      #   - Delete User
-      summary: Deletes the user with the id provided in the path
-      description: ""
-      operationId: deleteUser
-      produces:
-        - "application/json"
-      parameters:
-        - name: id
-          in: path
-          description: the id of the user to be deleted
-          required: true
-          type: integer
-      responses:
-        "204":
-          description: resource deleted successfully
-          schema:
-            $ref: "#/definitions/successMsg"
-        "400":
-          description: bad request
-          schema:
-            $ref: "#/definitions/errorResp"
-        "401":
-          description: unauthorized access
-          schema:
-            $ref: "#/definitions/errorResp"
-        "404":
-          description: user with id doesn't exist in database
-          schema:
-            $ref: "#/definitions/errorResp"
-        "500":
-          description: server error
-          schema:
-            $ref: "#/definitions/errorResp"
-  /admin/deals/delete/{deal_id}:
-    delete:
-      # tags:
-      #   - Delete deal
-      summary: Deletes the deal with the id provided in the path
-      description: ""
-      operationId: deleteDeal
-      produces:
-        - "application/json"
-      parameters:
-        - name: deal_id
-          in: path
-          description: the id of the deal to be deleted
-          required: true
-          type: integer
-      responses:
-        "204":
-          description: resource removed successfully
-          schema:
-            $ref: "#/definitions/successMsg"
-        "400":
-          description: bad request
-          schema:
-            $ref: "#/definitions/errorResp"
-        "401":
-          description: unauthorized access
-          schema:
-            $ref: "#/definitions/errorResp"
-        "404":
-          description: user with id doesn't exist in database
-          schema:
-            $ref: "#/definitions/errorResp"
-        "500":
-          description: server error
-          schema:
-            $ref: "#/definitions/errorResp"
-  /sales/pitchReq/delete/{sales_username}/{sales_rep_id}/{pitch_id}:
-    delete:
-      # tags:
-      #   - Delete Pitch Request
-      summary: Deletes the pitch request with the pitch id provided in the path
-      description: ""
-      operationId: deletePitchRequest
-      produces:
-        - "application/json"
-      parameters:
-        - name: pitch_id
-          in: path
-          description: the id of the pitch request to be deleted
-          required: true
-          type: integer
-        - name: sales_rep_id
-          in: path
-          description: the id of the sales rep who created the pitch request
-          required: true
-          type: integer
-        - name: sales_username
-          in: path
-          description: the username of the sales rep who created the pitch request
-          required: true
-          type: string
-      responses:
-        "204":
-          description: successfull operation
-          schema:
-            $ref: "#/definitions/successMsg"
-        "400":
-          description: bad request
-          schema:
-            $ref: "#/definitions/errorResp"
-        "401":
-          description: unauthorized access
-          schema:
-            $ref: "#/definitions/errorResp"
-        "404":
-          description: user with id doesn't exist in database
-          schema:
-            $ref: "#/definitions/errorResp"
-        "500":
-          description: server error
-          schema:
-            $ref: "#/definitions/errorResp"
+    /auth/register:
+      post:
+        summary: creates a new user
+        description: This end point creates a new user with a default password.
+        parameters:
+          - name: createUserReq
+            in: body
+            description: |
+              holds the data - username, fullname, email and role, needed to create a user. 
+            required: true
+            schema:
+              $ref: '#/definitions/createUserReq'
+        responses:
+          201:
+            description: user was successfully created, response body holds the user_id which is never less than 1 and in the header, the location to get the resource
+            schema:
+              $ref: '#/definitions/createUserResp'
+          400:
+            description: bad request, the request body has invalid fields for creating a user
+            schema:
+              $ref: '#/definitions/errorResp'
+          401:
+            description: unauthorized, the user with an invalid access token accessed the end point
+            schema:
+              $ref: '#/definitions/errorResp'
+            
+          409:
+            description: a user with already exists with similar req details
+            schema:
+              $ref: '#/definitions/errorResp'
+          500:
+            description: server error
+            schema:
+              $ref: '#/definitions/errorResp'
+    /login:
+      post:
+        summary: logs users into the application
+        description: This end point is used to login a user
+        parameters:
+          - name: loginReq
+            in: body
+            description: | 
+              holds the login details of the user
+            required: true
+            schema:
+              $ref: '#/definitions/loginReq'
+        responses:
+          200:
+            description: user was successfully logged in
+            schema:
+              $ref: '#/definitions/loginResp'
+          400:
+            description: bad request, the request body has invalid fields for creating a user
+            schema:
+              $ref: '#/definitions/errorResp'
+          401:
+            description: unauthorized, invalid password
+            schema:
+              $ref:
+                '#/definitions/errorResp'
+          404:
+            description: user with username doesn't exist
+            schema:
+              $ref:
+                '#/definitions/errorResp'
+          500:
+            description: server error
+            schema:
+              $ref:
+                '#/definitions/errorResp'
 definitions:
+  createUserReq:
+    type: object
+    properties:
+      username:
+        type: string
+        default: lily
+      fullname:
+        type: string
+        default: Lily Wise
+      email:
+        type: string
+        default: lily@gmail.com
+      role:
+        type: string
+        default: sales
+  createUserResp:
+    type: object
+    properties:
+      user_id:
+        type: integer
+        default: 1
+        description: must not be less than 1
   errorResp:
     type: object
     properties:
       error:
         type: string
-  successMsg:
+        default: the defined error
+  user_data:
     type: object
     properties:
-      message:
-        type: string
-  CreateUsrReq:
-    type: object
-    properties:
+      user_id:
+        type: integer
+        default: 1
       username:
         type: string
-        default: eben
-      role:
-        type: string
-        default: admin
+        default: lily
       fullname:
         type: string
-        default: Emmanuel Ebenezer
-      email:
-        type: string
-        default: ebenezer@gmail.com
-      password:
-        type: string
-        default: ebensPassword
-  CreateUsrResp:
-    type: object
-    properties:
-      username:
-        type: string
+        default: Lily Wise
       role:
         type: string
-      createdAt:
-        type: integer
-        description: unix time representation
-  LoginReq:
+        default: sales
+      email:
+        type: string
+        default: lily@gmail.com
+      password_changed:
+        type: boolean
+        default: false
+      updated_at:
+        type: string
+        default: 2024-09-09 04:05:09
+  loginReq:
     type: object
     properties:
       username:
         type: string
-        default: eben
+        default: lily
       password:
         type: string
-        default: ebensPassword
-  LoginResponse:
+        default: vasDeal45
+  loginResp:
     type: object
     properties:
       access_token:
         type: string
-      user:
-        type: object
-        properties:
-          user_id:
-            type: integer
-          username:
-            type: string
-          role:
-            type: string
-          fullname:
-            type: string
-          email:
-            type: string
-          updated_at:
-            type: integer
-          created_at:
-            type: integer
-  PitchReq:
-    type: object
-    properties:
-      sales_rep_id:
-        type: integer
-      sales_rep_name:
-        type: string
-        default: Lily Joseph
-      status:
-        type: string
-        default: ongoing
-      customer_name:
-        type: string
-        default: NNPC
-      pitch_tag:
-        type: string
-        default: pre-sales
-      customer_requests:
-        type: array
-        items:
-          type: string
-        default: ["Video Conferencing", "EDMS"]
-      request_deadline:
-        type: integer
-        default: 23/9/2024
-  PitchResp:
-    type: object
-    properties:
-      pitch_request_id:
-        type: integer
-      sales_rep_id:
-        type: integer
-      sales_rep_name:
-        type: string
-      status:
-        type: string
-      customer_name:
-        type: string
-      pitch_tag:
-        type: string
-      customer_requests:
-        type: array
-        items: { type: string }
-      request_deadline:
-        type: integer
-      admin_viewed:
-        type: boolean
-      created_at:
-        type: integer
-      updated_at:
-        type: integer
-  CreateDealReq:
-    type: object
-    properties:
-      pitch_id:
-        type: integer
-  CreateDealResp:
-    type: object
-    properties:
-      id:
-        type: integer
-      pitch_id:
-        type: integer
-      sales_rep_name:
-        type: string
-      customer_name:
-        type: string
-      service_to_render:
-        type: array
-        items: { type: string }
-      status:
-        type: string
-      status_tag:
-        type: string
-      current_pitch_request:
-        type: string
-      net_total_cost:
-        type: string
-      profit:
-        type: string
-      created_at:
-        type: integer
-      updated_at:
-        type: integer
-      closed_at:
-        type: integer
-      awarded:
-        type: boolean
-  PitchRequest: # due to poor design, this model is supposed to be same as PitchResp but pitch_request_id and pitch_tag changed
-    type: object
-    properties:
-      pitch_id:
-        type: integer
-      sales_rep_id:
-        type: integer
-      sales_rep_name:
-        type: string
-      status:
-        type: string
-      customer_name:
-        type: string
-      department:
-        type: string
-      customer_request:
-        type: array
-        items: { type: string }
-      request_deadline:
-        type: integer
-      admin_viewed:
-        type: boolean
-      created_at:
-        type: string
-      updated_at:
-        type: string
-  Deal:
-    type: object
-    properties:
-      deal_id:
-        type: integer
-      pitch_id:
-        type: integer
-      sales_rep_name:
-        type: string
-      customer_name:
-        type: string
-      services_to_render:
-        type: array
-        items: { type: string }
-      deal_status:
-        type: string
-      department:
-        type: string
-      current_pitch_request:
-        type: string
-      net_total_cost:
-        type: string
-      profit:
-        type: string
-      created_at:
-        type: string
-      updated_at:
-        type: string
-      closed_at:
-        type: string
-      awarded:
-        type: boolean
-  User:
-    type: object
-    properties:
-      user_id:
-        type: integer
-      username:
-        type: string
-      role:
-        type: string
-      fullname:
-        type: string
-      email:
-        type: string
-      password:
-        type: string
-      password_changed:
-        type: boolean
-      updated_at:
-        type: string
-      created_at:
-        type: string
-  UpdateDealReq:
-    type: object
-    properties:
-      id:
-        type: integer
-      services_to_render:
-        type: array
-        items: { type: string }
-      department:
-        type: string
-      current_pitch_request:
-        type: string
-      net_total_cost:
-        type: integer
-      profit:
-        type: integer
-      awarded:
-        type: boolean
-  AdminUpdateUsrReq:
-    type: object
-    properties:
-      user_id:
-        type: integer
-      username:
-        type: string
-      fullname:
-        type: string
-      email:
-        type: string
-  UpdatePasswordReq:
-    type: object
-    properties:
-      old_password:
-        type: string
-      password_update:
-        type: string
-      user_id:
-        type: integer
-  UpdatePitchReq:
-    type: object
-    properties:
-      pitch_request_id:
-        type: integer
-      status:
-        type: string
-      department:
-        type: string
-      customer_requests:
-        type: array
-        items: { type: string }
-      admin_Viewed:
-        type: boolean
-      request_deadlin:
-        type: integer
-        description: a unix time
+        default: "alongrandomstringofrandomcharactersusedastheaccesstoken"
+      user_data:
+        $ref: '#/definitions/user_data'
+        
+        
+        
+            
