@@ -31,9 +31,6 @@ type CreateUsrResp struct {
 // on update to the handler, default password would be used so there wouldn't be a need
 // to provide password in request
 // FIXME: I can see from the endpoint address that you're not adhering to the REST-API standard.
-// DONE: I have tried to adhere to the REST-API standard, this is really new to me
-// If I miss anyone during this review can we talk about it, the more I write API's and read those guideline the better I will get at it
-// QUESTION: How do you get information you need from long texts? Does it take long, what method do you use?
 // You may want to try to follow this resource:
 // - https://stackoverflow.blog/2020/03/02/best-practices-for-rest-api-design/
 func (s *Server) adminCreateUserHandler(ctx *gin.Context) {
@@ -93,7 +90,6 @@ type AdminUpdateUsrReq struct {
 
 // adminUpdateUserHandler http handler for the api end point for updating a user
 // FIXME: the PUT should entirely replace the resource. => PUT /users/1 + the request payload.
-// DONE: Using PATCH as the endpoint handler doesn't update the entire user resource
 // FIXME: that's not what I was meaning. There must be some PUT routes somewhere. Usually, there's the PUT route. The PATCH is more difficult to find.
 // Try thinking to this use case: in a website, before you edit a resource, the client retrieves it by ID. Then, you're presented with all the fields and you change the relevant ones. Everything is sent in a PUT request to the server. The server can either decide to replace the full resource or edit only the changed fields (but it's something done on the server).
 func (s *Server) adminUpdateUserHandler(ctx *gin.Context) {
@@ -216,8 +212,6 @@ func (s *Server) listUsersHandler(ctx *gin.Context) {
 	var req ListUsersReq
 	// FIXME: if I set page_id = 0 (or outside of the allowed boundaries), please adjust it to be a default value. page_id might also start from '0'. In case you go away from conventions, you need to be declarative and put it in the documentation.
 	// "(Required) The page number or offset from which to start retrieving Users. Determines where the current page of results starts in the overall list." => doesn't state the range of allowed values
-	// DONE: I have put that in the documentation now...
-	// For the pagination, this is a huge design issue for me and I got it wrong, lets talk about it during a session
 
 	if err := ctx.ShouldBindQuery(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
@@ -228,8 +222,6 @@ func (s *Server) listUsersHandler(ctx *gin.Context) {
 		return
 	}
 	// FIXME: if you're accepting pagination info, you should return a paginated result, not only the collection of resources.
-	// DONE: still related to my poor design...
-	// I wanted to use pagination, but the organisation is small, currently there are only 10 full time employees management inclusive
 	args := db.AdminViewUsersParams{
 		Limit:  req.PageSize,
 		Offset: (req.PageID - 1) * req.PageSize,

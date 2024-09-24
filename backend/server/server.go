@@ -78,7 +78,6 @@ func (s *Server) SetupRouter() {
 	authRoute.PATCH("/admin/users", s.adminUpdateUserHandler)
 	authRoute.PATCH("/users/passwords", s.updatePassWordLoggedIn)
 	authRoute.PATCH("/sales/pitch-requests", s.updatePitchReqHandler)
-	// DONE: changed /user/delete/:id to /admin/users/:id
 	authRoute.DELETE("admin/users/:id", s.adminDeleteUserHandler)
 	authRoute.DELETE("/admin/deals/:deal_id", s.adminDeleteDealHandler)
 	authRoute.DELETE("/sales/pitch-requests/:sales_username/:sales_rep_id/:pitch_id", s.salesDeletePitchReqHandler)
