@@ -5,6 +5,7 @@ info:
     All end points require and produce application/json
     - a user can have either an admin or a sales role
     - all auth end points are associated with authentication and authorization management
+    - All end points except /auth/login require an authorization header with a bearer token
   version: 1.0.0
   title: API Endpoints for Pre-sales Deal Tracker
 host: "localhost:8080" #yet to be set or use localhost :)
@@ -16,6 +17,7 @@ schemes:
 paths:
     /auth/login:
       post:
+        tags: [auth]
         summary: logs users into the application
         description: This end point is used to login a user
         parameters:
@@ -52,6 +54,7 @@ paths:
                 '#/definitions/errorResp'
     /users:
       post:
+        tags: [users]
         summary: creates a new user
         description: This end point creates a new user with a default password, request is restricted to admins.
         parameters:
@@ -85,10 +88,11 @@ paths:
             schema:
               $ref: '#/definitions/errorResp'
       get:
+        tags: [users]
         summary: get all users
         description: |
           If no other user exist an empty array of user_data is returned.
-          The least page_id is 1, and page_size is should always be 10
+          The least page_id is 1, and page_size should be 10
           This end point is restricted to admins
         parameters:
           - name: page_id
@@ -116,7 +120,9 @@ paths:
                 pagination:
                   $ref: '#/definitions/pagination'
           400:
-            description: invalid request parameters
+            description: |
+              invalid request parameters, use integers greater than zero
+              page_id is at least 1, and page_size should be 10
             schema:
               $ref: '#/definitions/errorResp'
           401:
@@ -129,6 +135,7 @@ paths:
               $ref: '#/definitions/errorResp'
     /users/{user_id}:
       get:
+        tags: [users]
         summary: get user by user_id
         description: 'user_id is always greater than 0'
         parameters:
@@ -143,7 +150,7 @@ paths:
             schema:
               $ref: '#/definitions/user_data'
           400:
-            description: invalid request parameters
+            description: invalid request parameter, user an integer greater than zero
             schema:
               $ref: '#/definitions/errorResp'
           404:
@@ -155,10 +162,11 @@ paths:
             schema:
               $ref: '#/definitions/errorResp'
       put:
+        tags: [users]
         summary: updates a user
         description: |
-          for updating users, user_id is always greater than 0
-          this end point is restricted to admins only
+          For updating users, user_id is always greater than 0
+          this end point is restricted to admins only.
         parameters:
           - name: user_id
             in: path
@@ -176,7 +184,7 @@ paths:
             schema:
               $ref: '#/definitions/successMessage'
           400:
-            description: invalid request parameters
+            description: invalid request parameter, user an integer greater than zero
             schema:
               $ref: '#/definitions/errorResp'
           401:
@@ -197,7 +205,105 @@ paths:
             description: server error
             schema:
               $ref: '#/definitions/errorResp'
-      # delete:
+      delete:
+        tags: [users]
+        summary: deletes a user
+        description: |
+          For deleting users, this end point is restricted to admins only
+          user_id is always greater than 0
+        parameters:
+          - name: user_id
+            in: path
+            type: integer
+            required: true
+            default: 2
+        responses:
+          204:
+            description: delete was successful
+            schema:
+              $ref: '#/definitions/successMessage'
+          400:
+            description: invalid request parameter, user an integer greater than zero
+            schema:
+              $ref: '#/definitions/errorResp'
+          404:
+            description: resource doesn't exist
+            schema:
+              $ref: '#/definitions/errorResp'
+          500:
+            description: server error
+            schema:
+              $ref: '#/definitions/errorResp'
+    /users/{user_id}/password/reset:
+      patch:
+        tags: [users]
+        summary: resets a user's password
+        description: |
+          Allows the admin to reset a user's password to default, this end point is restricted to admins only
+          user_id is always greater than 0.
+        parameters:
+          - name: user_id
+            in: path
+            type: integer
+            required: true
+            default: 2
+        responses:
+          204:
+            description: password reset was successful
+            schema:
+              $ref: '#/definitions/successMessage'
+          400:
+            description: invalid request parameter, user an integer greater than zero
+            schema:
+              $ref: '#/definitions/errorResp'
+          401:
+            description: unauthorized
+            schema:
+              $ref: '#/definitions/errorResp'
+          404:
+            description: resource doesn't exist
+            schema: 
+              $ref: '#/definitions/errorResp'
+          500:
+            description: server error
+            schema:
+              $ref: '#/definitions/errorResp'
+    /users/{user_id}/password:
+      patch:
+        tags: [users]
+        summary: change a user's password
+        description: |
+          Allows all users to update their password, user_id is always greater than 0
+        parameters:
+          - name: user_id
+            in: path
+            type: integer
+            required: true
+            default: 2
+          - name: updatePasswordReq
+            in: body
+            required: true
+            schema:
+              $ref: '#/definitions/updatePasswordReq'
+        responses:
+          204:
+            description: password update was successful
+            schema:
+              $ref: '#/definitions/successMessage'
+          400:
+            description: |
+              Invalid request parameters:
+                - user_id: Must be an integer greater than 0
+                - old_password: A string representing the user's current password
+                - new_password: A string representing the password user wants to change to
+          404:
+            description: resource not found
+            schema:
+              $ref: '#/definitions/errorResp'
+          500:
+            description: server error
+            schema:
+              $ref: '#/definitions/errorResp'
       
 definitions:
   successMessage:
@@ -308,5 +414,13 @@ definitions:
       email:
         type: string
         default: lily@gmail.com
-        
+  updatePasswordReq:
+    type: object
+    properties:
+      old_password:
+        type: string
+        default: vasDeal45
+      new_password:
+        type: string
+        default: newP@ssword123
             
