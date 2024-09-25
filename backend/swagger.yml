@@ -304,7 +304,163 @@ paths:
             description: server error
             schema:
               $ref: '#/definitions/errorResp'
-      
+    /pitch_requests:
+      post:
+        tags: [pitch_requests]
+        summary: creates a pitch request
+        description: |
+          This end point is used to create a pitch request
+          Restricted to sales user only
+        parameters:
+          - name: createPitchReq
+            in: body
+            required: true
+            schema:
+              $ref: '#/definitions/createPitchReq'
+        responses:
+          201:
+            description: resource created
+            schema:
+              $ref: '#/definitions/createPitchResp'
+          400:
+            description: invalid request paramters
+            schema:
+              $ref: '#/definitions/errorResp'
+          401:
+            description: unauthorize, auth token invalid or not provided
+            schema:
+              $ref: '#/definitions/errorResp'
+          500:
+            description: server error
+            schema:
+              $ref: '#/definitions/errorResp'
+      get:
+        tags: [pitch_requests]
+        summary: gets all pitch request
+        description: |
+          This end point returns all the pitch requests belonging to the user who makes the request.
+          End point is restricted to sales users only
+        parameters:
+          - name: page_id
+            in: query
+            required: true
+            type: integer
+            minimum: 1
+            default: 1
+          - name: page_size
+            in: query
+            required: true
+            type: integer
+            description: should be 10
+            default: 10
+        responses:
+          200:
+            description: successful request
+            schema:
+              type: object
+              properties:
+                pitch_data:
+                  type: array
+                  items:
+                    $ref: '#/definitions/pitch_data'
+                pagination:
+                  $ref: '#/definitions/pagination'
+          400:
+            description: |
+              Invalid parameters
+              - page_id: integer greater than 1
+              - page_size: integer, should be 10
+            schema:
+              $ref: '#/definitions/errorResp'
+          401:
+            description: unauthorize, auth token invalid or not provided
+            schema:
+              $ref: '#/definitions/errorResp'
+          500:
+            description: server error
+            schema:
+              $ref: '#/definitions/errorResp'
+    /pitch_requests/{pitch_id}:
+      patch:
+        tags: [pitch_requests]
+        summary: updates a pitch request
+        description: | 
+          This endpoint updates a pitch request
+          This end point is not open to admins and sales users
+        parameters:
+          - name: pitch_id
+            in: path
+            required: true
+            type: integer
+            minimum: 1
+            default: 1
+          - name: updatePitchReq
+            in: body
+            required: true
+            description: |
+              a null customer request should be used when the admin is updating the pitch request.
+              when a sales user is updating the pitch requests the customer request is an array with at least one array item.
+              Eample: customer_request: ["EDMS"]
+            schema:
+              $ref: '#/definitions/updatePitchReq'
+        responses:
+          204:
+            description: resource successfully updated
+            schema:
+              $ref: '#/definitions/successMessage'
+          400:
+            description: |
+              Invalid parameter
+              - pitch_id: integer greater than 1
+            schema:
+              $ref: '#/definitions/errorResp'
+          401:
+            description: unauthorize, auth token invalid or not provided
+            schema:
+              $ref: '#/definitions/errorResp'
+          404: 
+            description: resource not found
+            schema:
+              $ref: '#/definitions/errorResp'
+          500:
+            description: server error
+            schema:
+              $ref: '#/definitions/errorResp'
+      delete:
+        tags: [pitch_requests]
+        summary: deletes a pitch request
+        description: |
+          A sales user deletes only pitch requests associated with them
+        parameters:
+          - name: pitch_id
+            in: path
+            required: true
+            type: integer
+            minimum: 1
+            default: 1
+        responses:
+          204:
+            description: resource successfully updated
+            schema:
+              $ref: '#/definitions/successMessage'
+          400:
+            description: |
+              Invalid parameter
+              - pitch_id: integer greater than 1
+            schema:
+              $ref: '#/definitions/errorResp'
+          401:
+            description: unauthorize, auth token invalid or not provided
+            schema:
+              $ref: '#/definitions/errorResp'
+          404: 
+            description: resource not found
+            schema:
+              $ref: '#/definitions/errorResp'
+          500:
+            description: server error
+            schema:
+              $ref: '#/definitions/errorResp'
 definitions:
   successMessage:
     type: object
@@ -423,4 +579,91 @@ definitions:
       new_password:
         type: string
         default: newP@ssword123
-            
+  updatePitchReq:
+    type: object
+    properties:
+      admin_viewed:
+        type: boolean
+        default: false
+      customer_request:
+        type: array
+        items:
+          type: string
+        minItems: 0
+        default:
+
+  createPitchReq:
+    type: object
+    properties:
+      user_id:
+        type: integer
+        minimum: 1
+        default: 2
+      customer_name:
+        type: string
+        default: Ministry of Women Affairs
+      customer_request:
+        type: array
+        items:
+          type: string
+        minItems: 1
+        default:
+          - EDMS
+          - IP Video Conferencing
+          - Fiber Internet
+      admin_task:
+        type: string
+        default: costing
+      admin_deadline:
+        type: string
+        default: 2024-09-29 09:06:09
+        description: datetime
+      admin_viewed:
+        type: boolean
+        default: false
+  createPitchResp:
+    type: object
+    properties:
+      pitch_id:
+        type: integer
+        minimum: 1
+        default: 1
+  pitch_data:
+    type: object
+    properties:
+      pitch_id:
+        type: integer
+        minimum: 1
+        default: 1
+      user_id:
+        type: integer
+        minimum: 1
+        default: 2
+      customer_name:
+        type: string
+        default: Ministry of Women Affairs
+      customer_request:
+        type: array
+        items:
+          type: string
+        minItems: 1
+        default:
+          - EDMS
+          - IP Video Conferencing
+          - Fiber Internet
+      admin_task:
+        type: string
+        default: costing
+      admin_deadline:
+        type: string
+        default: 2024-09-29 09:06:09
+        description: datetime
+      admin_viewed:
+        type: boolean
+        default: false
+      updated_at:
+        type: string
+        default: 2024-09-29 09:06:09
+      created_at:
+        type: string
+        default: 2024-09-28 09:06:09
