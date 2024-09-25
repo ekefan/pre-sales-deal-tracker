@@ -101,12 +101,14 @@ paths:
             required: true
             type: integer
             default: 1
+            minimum: 1
           - name: page_size
             in: query
             description: the pagination limit, identifies the number of resources in one page
             required: true
             type: integer
             default: 10
+            minimum: 5
         responses:
           200:
             description: successfull request
@@ -144,6 +146,7 @@ paths:
             required: true
             default: 2
             type: integer
+            minimum: 1
         responses:
           200:
             description: request succesful
@@ -173,6 +176,7 @@ paths:
             type: integer
             required: true
             default: 2
+            minimum: 1
           - name: updateUserReq
             in: body
             required: true
@@ -217,6 +221,7 @@ paths:
             type: integer
             required: true
             default: 2
+            minimum: 1
         responses:
           204:
             description: delete was successful
@@ -247,6 +252,7 @@ paths:
             type: integer
             required: true
             default: 2
+            minimum: 1
         responses:
           204:
             description: password reset was successful
@@ -280,6 +286,7 @@ paths:
             type: integer
             required: true
             default: 2
+            minimum: 1
           - name: updatePasswordReq
             in: body
             required: true
@@ -295,7 +302,7 @@ paths:
               Invalid request parameters:
                 - user_id: Must be an integer greater than 0
                 - old_password: A string representing the user's current password
-                - new_password: A string representing the password user wants to change to
+                - new_password: A string representing the password the user wants to change to
           404:
             description: resource not found
             schema:
@@ -461,6 +468,167 @@ paths:
             description: server error
             schema:
               $ref: '#/definitions/errorResp'
+    /deals:
+      post:
+        tags: [deals]
+        summary: creates a deal
+        description: |
+          An admin creates a deal with this end point
+          This end point is restricted to admins only
+        parameters:
+          - name: createDealReq
+            in: body
+            required: true
+            schema:
+              $ref: '#/definitions/createDealReq'
+        responses:
+          201:
+            description: resource created
+            schema: 
+              $ref: '#/definitions/createDealResp'
+          400:
+            description: invalid request parameters
+            schema: 
+              $ref: '#/definitions/errorResp'
+          401:
+            description: unauthorized, access_token is invalid or not provided
+          404:
+            description: resource not found
+            schema:
+              $ref: '#/definitions/errorResp'
+          500:
+            description: '#/definitions/errorResp'
+            schema:
+              $ref: '#/definitions/errorResp'
+      get:
+        tags: [deals]
+        summary: gets  deals
+        description: |
+          returns a list of deals based on the query filter
+          This end point is open to all users
+        parameters:
+          - name: status
+            in: query
+            type: string
+            required: false
+          - name: awarded
+            in: query
+            type: boolean
+            required: false
+            default:
+          - name: page_id
+            in: query
+            type: integer
+            required: true
+            default: 1
+            minimum: 1
+          - name: page_size
+            in: query
+            type: integer
+            required: true
+            default: 10
+            description: should be 10
+        responses:
+          200:
+            description: request successful
+            schema:
+              type: object
+              properties:
+                deals_data:
+                  type: array
+                  items:
+                    $ref: '#/definitions/deals_data'
+                pagination:
+                  $ref: '#/definitions/pagination'
+          400:
+            description: invalid request parameters
+            schema:
+              $ref: '#/definitions/errorResp'
+          401:
+            description: unauthorized, auth token invalid or not provided
+            schema:
+              $ref: '#/definitions/errorResp'
+          500:
+            description: server error
+            schema:
+              $ref: '#/definitions/errorResp'
+    /deals/{deal_id}:
+      patch:
+        tags: [deals]
+        summary: updates a deal 
+        description: |
+          An admin updates a deal to keep the current progress, also to close the deal
+        parameters:
+          - name: deal_id
+            in: path
+            required: true
+            default: 1
+            type: integer
+            minimum: 1
+          - name: updateDealReq
+            in: body
+            required: false
+            schema:
+              $ref: '#/definitions/updateDealsReq'
+        responses:
+          204:
+            description: resource successfully updated
+            schema:
+              $ref: '#/definitions/successMessage'
+          400:
+            description: |
+              Invalid parameter
+              - pitch_id: integer greater than 1
+            schema:
+              $ref: '#/definitions/errorResp'
+          401:
+            description: unauthorized, auth token invalid or not provided
+            schema:
+              $ref: '#/definitions/errorResp'
+          404: 
+            description: resource not found
+            schema:
+              $ref: '#/definitions/errorResp'
+          500:
+            description: server error
+            schema:
+              $ref: '#/definitions/errorResp'
+      delete:
+        tags: [deals]
+        summary: deletes a deal
+        description: | 
+          Restricted to admins only
+        parameters:
+          - name: deal_id
+            in: path
+            required: true
+            default: 1
+            type: integer
+            minimum: 1
+        responses:
+          204:
+            description: resource was removed successfully
+          400:
+            description: |
+              Invalid parameter
+              - pitch_id: integer greater than 1
+            schema:
+              $ref: '#/definitions/errorResp'
+          401:
+            description: unauthorized, auth token invalid or not provided
+            schema:
+              $ref: '#/definitions/errorResp'
+          404: 
+            description: resource not found
+            schema:
+              $ref: '#/definitions/errorResp'
+          500:
+            description: server error
+            schema:
+              $ref: '#/definitions/errorResp'
+            
+          
+      
 definitions:
   successMessage:
     type: object
@@ -489,6 +657,7 @@ definitions:
       user_id:
         type: integer
         default: 2
+        minimum: 1
         description: must not be less than 1
   errorResp:
     type: object
@@ -502,6 +671,7 @@ definitions:
       user_id:
         type: integer
         default: 2
+        minimum: 1
       username:
         type: string
         default: lily
@@ -543,12 +713,15 @@ definitions:
       total_records:
         type: integer
         default: 20
+        minimum: 1
       current_page:
         type: integer
         default: 1
+        minimum: 1
       total_pages:
         type: integer
         default: 2
+        minimum: 1
       has_next:
         type: boolean
         default: true
@@ -591,7 +764,6 @@ definitions:
           type: string
         minItems: 0
         default:
-
   createPitchReq:
     type: object
     properties:
@@ -667,3 +839,90 @@ definitions:
       created_at:
         type: string
         default: 2024-09-28 09:06:09
+  createDealReq:
+    type: object
+    properties:
+      pitch_id:
+        type: integer
+        minimum: 1
+        default: 1
+  createDealResp:
+    type: object
+    properties:
+      deal_id:
+        type: integer
+        default: 1
+        minimum: 1
+  deals_data:
+    type: object
+    properties:
+      deal_id:
+        type: integer
+        default: 1
+      pitch_id:
+        type: integer
+        default: 1
+      sales_rep_name:
+        type: string
+        default: Lily Wise
+      customer_name:
+        type: string
+        default: Ministry of Women Affairs
+      services_to_render:
+        type: array
+        items:
+          type: string
+          default:
+            - EDMS
+            - IP Video Conferencing
+            - Fiber Internet
+      status:
+        type: string
+        default: ongoing
+      department:
+        type: string
+        default: pre-sales
+        description: there are thre major departments, sales, pre-sales and project-manager
+      net_total_cost:
+        type: integer
+        default: 10000.00
+      profit:
+        type: integer
+        default: 1000.00
+      awarded:
+        type: boolean
+        default: false
+      created_at:
+        type: string
+        default: 2024-09-05 09:08:05
+      updated_at:
+        type: string
+        default: 2024-09-06 10:08:05
+  updateDealsReq:
+    type: object
+    properties:
+      sales_rep_name:
+        type: string
+        default: Lily Foe
+      services_to_render:
+        type: array
+        items:
+          type: string
+          default: EDMS
+      status:
+        type: string
+        default: closed
+      department:
+        type: string
+        default: sales
+      net_total_cost:
+        type: integer
+        default: 80000.00
+      profit:
+        type: integer
+        default: 2000.00
+      awarded:
+        type: boolean
+        default: true
+          
+        
