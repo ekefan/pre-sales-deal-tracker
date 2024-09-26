@@ -11,6 +11,12 @@ info:
 host: "localhost:8080" #yet to be set or use localhost :)
 basePath: /
 tags: []
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
+    description: Add Authorization to the request header with a value of 'Bearer <token>'
 schemes:
   - http
   - https
@@ -54,6 +60,8 @@ paths:
                 '#/definitions/errorResp'
     /users:
       post:
+        security:
+          - Bearer: []
         tags: [users]
         summary: creates a new user
         description: This end point creates a new user with a default password, request is restricted to admins.
@@ -88,6 +96,8 @@ paths:
             schema:
               $ref: '#/definitions/errorResp'
       get:
+        security:
+          - Bearer: []
         tags: [users]
         summary: get all users
         description: |
@@ -137,6 +147,8 @@ paths:
               $ref: '#/definitions/errorResp'
     /users/{user_id}:
       get:
+        security:
+          - Bearer: []
         tags: [users]
         summary: get user by user_id
         description: 'user_id is always greater than 0'
@@ -165,6 +177,8 @@ paths:
             schema:
               $ref: '#/definitions/errorResp'
       put:
+        security:
+          - Bearer: []
         tags: [users]
         summary: updates a user
         description: |
@@ -210,6 +224,8 @@ paths:
             schema:
               $ref: '#/definitions/errorResp'
       delete:
+        security:
+          - Bearer: []
         tags: [users]
         summary: deletes a user
         description: |
@@ -241,6 +257,8 @@ paths:
               $ref: '#/definitions/errorResp'
     /users/{user_id}/password/reset:
       patch:
+        security:
+          - Bearer: []
         tags: [users]
         summary: resets a user's password
         description: |
@@ -276,6 +294,8 @@ paths:
               $ref: '#/definitions/errorResp'
     /users/{user_id}/password:
       patch:
+        security:
+          - Bearer: []
         tags: [users]
         summary: change a user's password
         description: |
@@ -313,6 +333,8 @@ paths:
               $ref: '#/definitions/errorResp'
     /pitch_requests:
       post:
+        security:
+          - Bearer: []
         tags: [pitch_requests]
         summary: creates a pitch request
         description: |
@@ -342,6 +364,8 @@ paths:
             schema:
               $ref: '#/definitions/errorResp'
       get:
+        security:
+          - Bearer: []
         tags: [pitch_requests]
         summary: gets all pitch request
         description: |
@@ -388,12 +412,14 @@ paths:
             schema:
               $ref: '#/definitions/errorResp'
     /pitch_requests/{pitch_id}:
-      patch:
+      put:
+        security:
+          - Bearer: []
         tags: [pitch_requests]
         summary: updates a pitch request
         description: | 
           This endpoint updates a pitch request
-          This end point is not open to admins and sales users
+          This end point is open to admins and sales users
         parameters:
           - name: pitch_id
             in: path
@@ -434,6 +460,8 @@ paths:
             schema:
               $ref: '#/definitions/errorResp'
       delete:
+        security:
+          - Bearer: []
         tags: [pitch_requests]
         summary: deletes a pitch request
         description: |
@@ -470,6 +498,8 @@ paths:
               $ref: '#/definitions/errorResp'
     /deals:
       post:
+        security:
+          - Bearer: []
         tags: [deals]
         summary: creates a deal
         description: |
@@ -501,6 +531,8 @@ paths:
             schema:
               $ref: '#/definitions/errorResp'
       get:
+        security:
+          - Bearer: []
         tags: [deals]
         summary: gets  deals
         description: |
@@ -553,7 +585,9 @@ paths:
             schema:
               $ref: '#/definitions/errorResp'
     /deals/{deal_id}:
-      patch:
+      put:
+        security:
+          - Bearer: []
         tags: [deals]
         summary: updates a deal 
         description: |
@@ -594,6 +628,8 @@ paths:
             schema:
               $ref: '#/definitions/errorResp'
       delete:
+        security:
+          - Bearer: []
         tags: [deals]
         summary: deletes a deal
         description: | 
@@ -651,6 +687,11 @@ definitions:
       role:
         type: string
         default: sales
+    required:
+      - username
+      - fullname
+      - email
+      - role
   createUserResp:
     type: object
     properties:
@@ -662,9 +703,13 @@ definitions:
   errorResp:
     type: object
     properties:
+      code:
+        type: string
+        description: Error code for client login (e.g, NOT_FOUND, VALIDATION, NETWORK_CONECTION)
+        default: SENTINEL_ERROR
       error:
         type: string
-        default: the defined error
+        default: the defined error, aa human readable error message
   user_data:
     type: object
     properties:
@@ -699,6 +744,9 @@ definitions:
       password:
         type: string
         default: vasDeal45
+    required:
+      - username
+      - password
   loginResp:
     type: object
     properties:
@@ -743,6 +791,11 @@ definitions:
       email:
         type: string
         default: lily@gmail.com
+    required:
+      - username
+      - fullname
+      - role
+      - email
   updatePasswordReq:
     type: object
     properties:
@@ -752,6 +805,9 @@ definitions:
       new_password:
         type: string
         default: newP@ssword123
+    required:
+      - old_password
+      - new_password
   updatePitchReq:
     type: object
     properties:
@@ -761,9 +817,14 @@ definitions:
       customer_request:
         type: array
         items:
-          type: string
+          type:
+            string
         minItems: 0
         default:
+        x-nullable: true
+    required:
+      - admin_viewed
+      - customer_request
   createPitchReq:
     type: object
     properties:
@@ -793,6 +854,13 @@ definitions:
       admin_viewed:
         type: boolean
         default: false
+    required:
+      - user_id
+      - customer_name
+      - customer_request
+      - admin_task
+      - admin_deadline
+      - admin_viewed
   createPitchResp:
     type: object
     properties:
@@ -846,6 +914,8 @@ definitions:
         type: integer
         minimum: 1
         default: 1
+    required:
+      - pitch_id
   createDealResp:
     type: object
     properties:
@@ -924,5 +994,13 @@ definitions:
       awarded:
         type: boolean
         default: true
+    required:
+      - sales_rep_name
+      - services_to_render
+      - status
+      - department
+      - net__total
+      - profit
+      - awarded
           
         

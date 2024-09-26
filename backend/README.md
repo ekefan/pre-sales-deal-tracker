@@ -18,7 +18,8 @@ API end points have been designed in the swagger documentation, view it on swagg
 All end points require an Authorization header with BearerAuth tokens except the /auth/login end point from which the auth tokens are generated.
 
 <!-- # FIXME: -->
-
+<!-- Done.... -->
+<!-- And for the last statment, I get you man 100 -->
 - The swagger UI should show a padlock close to the restricted routes. I don't remember how to do it but I know you can 😄
 - In the request `models` you can mark the required fields as required. They will have a red star close to them
 - The `pitch_requests` endpoint exposes a `PATCH` but should be a `PUT` since you're accepting the whole resource.
