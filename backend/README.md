@@ -17,8 +17,11 @@ API end points have been designed in the swagger documentation, view it on swagg
 
 All end points require an Authorization header with BearerAuth tokens except the /auth/login end point from which the auth tokens are generated.
 
-<!-- IVAN: What do you think of the the endpoints now???  -->
-<!-- // FIXME: we've to discern about the "users" resource. We have three options: -->
-<!-- // 1. "users" are only used to keep track of logins. Stick to addresses like "/register", "login", "logout", "password-reset", and so on. -->
-<!-- // 2. "users" are part of the domain of our application. In this case use "GET /users", "POST /users", "PUT /users/:id", and so on. -->
-<!-- // 3. Mix & Match: clearly separate those endpoints: the one used for signing-up, login, logout, ecc. from the ones used as domain in our application. Potentially, we could also have separated table. -->
+<!-- # FIXME: -->
+
+- The swagger UI should show a padlock close to the restricted routes. I don't remember how to do it but I know you can 😄
+- In the request `models` you can mark the required fields as required. They will have a red star close to them
+- The `pitch_requests` endpoint exposes a `PATCH` but should be a `PUT` since you're accepting the whole resource.
+- The same as before applies for the `deals` endpoint
+- The `error` response should have a `code` string field that is like a sentinel errors. Sentinel errors are the ones we're expecting to happen such as `NOT_FOUND`, `VALIDATION`, `NETWORK_CONNECTION`. Potentially, they could be shared with the client that relies logic against
+- Keep this in mind, the `swagger.yml` is a contract we share with the FE team but it's not something written on the stones. It should seldomnly change.
