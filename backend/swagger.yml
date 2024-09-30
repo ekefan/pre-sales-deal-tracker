@@ -21,650 +21,656 @@ schemes:
   - http
   - https
 paths:
-    /auth/login:
-      post:
-        tags: [auth]
-        summary: logs users into the application
-        description: This end point is used to login a user
-        parameters:
-          - name: loginReq
-            in: body
-            description: | 
-              holds the login details of the user
-            required: true
-            schema:
-              $ref: '#/definitions/loginReq'
-        responses:
-          200:
-            description: user was successfully logged in
-            schema:
-              $ref: '#/definitions/loginResp'
-          400:
-            description: bad request, the request body has invalid fields for creating a user
-            schema:
-              $ref: '#/definitions/errorResp'
-          401:
-            description: unauthorized, invalid password
-            schema:
-              $ref:
-                '#/definitions/errorResp'
-          404:
-            description: user with username doesn't exist
-            schema:
-              $ref:
-                '#/definitions/errorResp'
-          500:
-            description: server error
-            schema:
-              $ref:
-                '#/definitions/errorResp'
-    /users:
-      post:
-        security:
-          - Bearer: []
-        tags: [users]
-        summary: creates a new user
-        description: This end point creates a new user with a default password, request is restricted to admins.
-        parameters:
-          - name: createUserReq
-            in: body
-            description: |
-              holds the data - username, fullname, email and role, needed to create a user. 
-            required: true
-            schema:
-              $ref: '#/definitions/createUserReq'
-        responses:
-          201:
-            description: user was successfully created, response body holds username and in the header the location to get the resource
-            schema:
-              $ref: '#/definitions/createUserResp'
-          400:
-            description: bad request, the request body has invalid fields for creating a user
-            schema:
-              $ref: '#/definitions/errorResp'
-          401:
-            description: unauthorized, the user with an invalid access token accessed the end point
-            schema:
-              $ref: '#/definitions/errorResp'
-            
-          409:
-            description: a user with already exists with similar req details
-            schema:
-              $ref: '#/definitions/errorResp'
-          500:
-            description: server error
-            schema:
-              $ref: '#/definitions/errorResp'
-      get:
-        security:
-          - Bearer: []
-        tags: [users]
-        summary: get all users
-        description: |
-          If no other user exist an empty array of user_data is returned.
-          The least page_id is 1, and page_size should be 10
-          This end point is restricted to admins
-        parameters:
-          - name: page_id
-            in: query
-            description: the pagination offset, identifies sequentially the page to get
-            required: true
-            type: integer
-            default: 1
-            minimum: 1
-          - name: page_size
-            in: query
-            description: the pagination limit, identifies the number of resources in one page
-            required: true
-            type: integer
-            default: 10
-            minimum: 5
-        responses:
-          200:
-            description: successfull request
-            schema:
-              type: object
-              properties:
-                data:
-                  type: array
-                  items:
-                    $ref: '#/definitions/user_data'
-                pagination:
-                  $ref: '#/definitions/pagination'
-          400:
-            description: |
-              invalid request parameters, use integers greater than zero
-              page_id is at least 1, and page_size should be 10
-            schema:
-              $ref: '#/definitions/errorResp'
-          401:
-            description: unauthorized access, request from a user who's role is not admin
-            schema:
-              $ref: '#/definitions/errorResp'
-          500:
-            description: server error
-            schema:
-              $ref: '#/definitions/errorResp'
-    /users/{user_id}:
-      get:
-        security:
-          - Bearer: []
-        tags: [users]
-        summary: get user by user_id
-        description: 'user_id is always greater than 0'
-        parameters:
-          - name: user_id
-            in: path
-            required: true
-            default: 2
-            type: integer
-            minimum: 1
-        responses:
-          200:
-            description: request succesful
-            schema:
-              $ref: '#/definitions/user_data'
-          400:
-            description: invalid request parameter, user an integer greater than zero
-            schema:
-              $ref: '#/definitions/errorResp'
-          404:
-            description: resource with user_id not found
-            schema:
-              $ref: '#/definitions/errorResp'
-          500:
-            description: server error
-            schema:
-              $ref: '#/definitions/errorResp'
-      put:
-        security:
-          - Bearer: []
-        tags: [users]
-        summary: updates a user
-        description: |
-          For updating users, user_id is always greater than 0
-          this end point is restricted to admins only.
-        parameters:
-          - name: user_id
-            in: path
-            type: integer
-            required: true
-            default: 2
-            minimum: 1
-          - name: updateUserReq
-            in: body
-            required: true
-            schema:
-              $ref: '#/definitions/updateUserReq'
-        responses:
-          204:
-            description: update was successful
-            schema:
-              $ref: '#/definitions/successMessage'
-          400:
-            description: invalid request parameter, user an integer greater than zero
-            schema:
-              $ref: '#/definitions/errorResp'
-          401:
-            description: unauthorized access, request from a user who's role is not admin
-            schema:
-              $ref:
-                '#/definitions/errorResp'
-          404:
-            description: resource not found
-            schema:
-              $ref: '#/definitions/errorResp'
-          409:
-            description: user already exist with similar details
-            schema:
-              $ref:
-                '#/definitions/errorResp'
-          500:
-            description: server error
-            schema:
-              $ref: '#/definitions/errorResp'
-      delete:
-        security:
-          - Bearer: []
-        tags: [users]
-        summary: deletes a user
-        description: |
-          For deleting users, this end point is restricted to admins only
-          user_id is always greater than 0
-        parameters:
-          - name: user_id
-            in: path
-            type: integer
-            required: true
-            default: 2
-            minimum: 1
-        responses:
-          204:
-            description: delete was successful
-            schema:
-              $ref: '#/definitions/successMessage'
-          400:
-            description: invalid request parameter, user an integer greater than zero
-            schema:
-              $ref: '#/definitions/errorResp'
-          404:
-            description: resource doesn't exist
-            schema:
-              $ref: '#/definitions/errorResp'
-          500:
-            description: server error
-            schema:
-              $ref: '#/definitions/errorResp'
-    /users/{user_id}/password/reset:
-      patch:
-        security:
-          - Bearer: []
-        tags: [users]
-        summary: resets a user's password
-        description: |
-          Allows the admin to reset a user's password to default, this end point is restricted to admins only
-          user_id is always greater than 0.
-        parameters:
-          - name: user_id
-            in: path
-            type: integer
-            required: true
-            default: 2
-            minimum: 1
-        responses:
-          204:
-            description: password reset was successful
-            schema:
-              $ref: '#/definitions/successMessage'
-          400:
-            description: invalid request parameter, user an integer greater than zero
-            schema:
-              $ref: '#/definitions/errorResp'
-          401:
-            description: unauthorized
-            schema:
-              $ref: '#/definitions/errorResp'
-          404:
-            description: resource doesn't exist
-            schema: 
-              $ref: '#/definitions/errorResp'
-          500:
-            description: server error
-            schema:
-              $ref: '#/definitions/errorResp'
-    /users/{user_id}/password:
-      patch:
-        security:
-          - Bearer: []
-        tags: [users]
-        summary: change a user's password
-        description: |
-          Allows all users to update their password, user_id is always greater than 0
-        parameters:
-          - name: user_id
-            in: path
-            type: integer
-            required: true
-            default: 2
-            minimum: 1
-          - name: updatePasswordReq
-            in: body
-            required: true
-            schema:
-              $ref: '#/definitions/updatePasswordReq'
-        responses:
-          204:
-            description: password update was successful
-            schema:
-              $ref: '#/definitions/successMessage'
-          400:
-            description: |
-              Invalid request parameters:
-                - user_id: Must be an integer greater than 0
-                - old_password: A string representing the user's current password
-                - new_password: A string representing the password the user wants to change to
-          404:
-            description: resource not found
-            schema:
-              $ref: '#/definitions/errorResp'
-          500:
-            description: server error
-            schema:
-              $ref: '#/definitions/errorResp'
-    /pitch_requests:
-      post:
-        security:
-          - Bearer: []
-        tags: [pitch_requests]
-        summary: creates a pitch request
-        description: |
-          This end point is used to create a pitch request
-          Restricted to sales user only
-        parameters:
-          - name: createPitchReq
-            in: body
-            required: true
-            schema:
-              $ref: '#/definitions/createPitchReq'
-        responses:
-          201:
-            description: resource created
-            schema:
-              $ref: '#/definitions/createPitchResp'
-          400:
-            description: invalid request paramters
-            schema:
-              $ref: '#/definitions/errorResp'
-          401:
-            description: unauthorize, auth token invalid or not provided
-            schema:
-              $ref: '#/definitions/errorResp'
-          500:
-            description: server error
-            schema:
-              $ref: '#/definitions/errorResp'
-      get:
-        security:
-          - Bearer: []
-        tags: [pitch_requests]
-        summary: gets all pitch request
-        description: |
-          This end point returns all the pitch requests belonging to the user who makes the request.
-          End point is restricted to sales users only
-        parameters:
-          - name: page_id
-            in: query
-            required: true
-            type: integer
-            minimum: 1
-            default: 1
-          - name: page_size
-            in: query
-            required: true
-            type: integer
-            description: should be 10
-            default: 10
-        responses:
-          200:
-            description: successful request
-            schema:
-              type: object
-              properties:
-                pitch_data:
-                  type: array
-                  items:
-                    $ref: '#/definitions/pitch_data'
-                pagination:
-                  $ref: '#/definitions/pagination'
-          400:
-            description: |
-              Invalid parameters
-              - page_id: integer greater than 1
-              - page_size: integer, should be 10
-            schema:
-              $ref: '#/definitions/errorResp'
-          401:
-            description: unauthorize, auth token invalid or not provided
-            schema:
-              $ref: '#/definitions/errorResp'
-          500:
-            description: server error
-            schema:
-              $ref: '#/definitions/errorResp'
-    /pitch_requests/{pitch_id}:
-      put:
-        security:
-          - Bearer: []
-        tags: [pitch_requests]
-        summary: updates a pitch request
-        description: | 
-          This endpoint updates a pitch request
-          This end point is open to admins and sales users
-        parameters:
-          - name: pitch_id
-            in: path
-            required: true
-            type: integer
-            minimum: 1
-            default: 1
-          - name: updatePitchReq
-            in: body
-            required: true
-            description: |
-              a null customer request should be used when the admin is updating the pitch request.
-              when a sales user is updating the pitch requests the customer request is an array with at least one array item.
-              Eample: customer_request: ["EDMS"]
-            schema:
-              $ref: '#/definitions/updatePitchReq'
-        responses:
-          204:
-            description: resource successfully updated
-            schema:
-              $ref: '#/definitions/successMessage'
-          400:
-            description: |
-              Invalid parameter
-              - pitch_id: integer greater than 1
-            schema:
-              $ref: '#/definitions/errorResp'
-          401:
-            description: unauthorize, auth token invalid or not provided
-            schema:
-              $ref: '#/definitions/errorResp'
-          404: 
-            description: resource not found
-            schema:
-              $ref: '#/definitions/errorResp'
-          500:
-            description: server error
-            schema:
-              $ref: '#/definitions/errorResp'
-      delete:
-        security:
-          - Bearer: []
-        tags: [pitch_requests]
-        summary: deletes a pitch request
-        description: |
-          A sales user deletes only pitch requests associated with them
-        parameters:
-          - name: pitch_id
-            in: path
-            required: true
-            type: integer
-            minimum: 1
-            default: 1
-        responses:
-          204:
-            description: resource successfully updated
-            schema:
-              $ref: '#/definitions/successMessage'
-          400:
-            description: |
-              Invalid parameter
-              - pitch_id: integer greater than 1
-            schema:
-              $ref: '#/definitions/errorResp'
-          401:
-            description: unauthorize, auth token invalid or not provided
-            schema:
-              $ref: '#/definitions/errorResp'
-          404: 
-            description: resource not found
-            schema:
-              $ref: '#/definitions/errorResp'
-          500:
-            description: server error
-            schema:
-              $ref: '#/definitions/errorResp'
-    /deals:
-      post:
-        security:
-          - Bearer: []
-        tags: [deals]
-        summary: creates a deal
-        description: |
-          An admin creates a deal with this end point
-          This end point is restricted to admins only
-        parameters:
-          - name: createDealReq
-            in: body
-            required: true
-            schema:
-              $ref: '#/definitions/createDealReq'
-        responses:
-          201:
-            description: resource created
-            schema: 
-              $ref: '#/definitions/createDealResp'
-          400:
-            description: invalid request parameters
-            schema: 
-              $ref: '#/definitions/errorResp'
-          401:
-            description: unauthorized, access_token is invalid or not provided
-          404:
-            description: resource not found
-            schema:
-              $ref: '#/definitions/errorResp'
-          500:
-            description: '#/definitions/errorResp'
-            schema:
-              $ref: '#/definitions/errorResp'
-      get:
-        security:
-          - Bearer: []
-        tags: [deals]
-        summary: gets  deals
-        description: |
-          returns a list of deals based on the query filter
-          This end point is open to all users
-        parameters:
-          - name: status
-            in: query
-            type: string
-            required: false
-          - name: awarded
-            in: query
-            type: boolean
-            required: false
-            default:
-          - name: page_id
-            in: query
-            type: integer
-            required: true
-            default: 1
-            minimum: 1
-          - name: page_size
-            in: query
-            type: integer
-            required: true
-            default: 10
-            description: should be 10
-        responses:
-          200:
-            description: request successful
-            schema:
-              type: object
-              properties:
-                deals_data:
-                  type: array
-                  items:
-                    $ref: '#/definitions/deals_data'
-                pagination:
-                  $ref: '#/definitions/pagination'
-          400:
-            description: invalid request parameters
-            schema:
-              $ref: '#/definitions/errorResp'
-          401:
-            description: unauthorized, auth token invalid or not provided
-            schema:
-              $ref: '#/definitions/errorResp'
-          500:
-            description: server error
-            schema:
-              $ref: '#/definitions/errorResp'
-    /deals/{deal_id}:
-      put:
-        security:
-          - Bearer: []
-        tags: [deals]
-        summary: updates a deal 
-        description: |
-          An admin updates a deal to keep the current progress, also to close the deal
-        parameters:
-          - name: deal_id
-            in: path
-            required: true
-            default: 1
-            type: integer
-            minimum: 1
-          - name: updateDealReq
-            in: body
-            required: false
-            schema:
-              $ref: '#/definitions/updateDealsReq'
-        responses:
-          204:
-            description: resource successfully updated
-            schema:
-              $ref: '#/definitions/successMessage'
-          400:
-            description: |
-              Invalid parameter
-              - pitch_id: integer greater than 1
-            schema:
-              $ref: '#/definitions/errorResp'
-          401:
-            description: unauthorized, auth token invalid or not provided
-            schema:
-              $ref: '#/definitions/errorResp'
-          404: 
-            description: resource not found
-            schema:
-              $ref: '#/definitions/errorResp'
-          500:
-            description: server error
-            schema:
-              $ref: '#/definitions/errorResp'
-      delete:
-        security:
-          - Bearer: []
-        tags: [deals]
-        summary: deletes a deal
-        description: | 
-          Restricted to admins only
-        parameters:
-          - name: deal_id
-            in: path
-            required: true
-            default: 1
-            type: integer
-            minimum: 1
-        responses:
-          204:
-            description: resource was removed successfully
-          400:
-            description: |
-              Invalid parameter
-              - pitch_id: integer greater than 1
-            schema:
-              $ref: '#/definitions/errorResp'
-          401:
-            description: unauthorized, auth token invalid or not provided
-            schema:
-              $ref: '#/definitions/errorResp'
-          404: 
-            description: resource not found
-            schema:
-              $ref: '#/definitions/errorResp'
-          500:
-            description: server error
-            schema:
-              $ref: '#/definitions/errorResp'
-            
-          
-      
+  /auth/login:
+    post:
+      tags: [auth]
+      summary: logs users into the application
+      description: This end point is used to login a user
+      parameters:
+        - name: loginReq
+          in: body
+          description: |
+            holds the login details of the user
+          required: true
+          schema:
+            $ref: "#/definitions/loginReq"
+      responses:
+        200:
+          description: |
+            user was successfully logged in
+            Note: if the password_changed field in user_data is false, there will be no updated_at field
+            An example: 
+              "user_data": {
+                "user_id": 2,
+                "usernme": "lily",
+                "fullname": "Lily Wise",
+                "role": "sales",
+                "email": "lily@gmail.com",
+                "password_changed": false,
+              }
+              
+            Because the password_changed is false, the user_data would have no updated_at field
+          schema:
+            $ref: "#/definitions/loginResp"
+        400:
+          description: bad request, the request body has invalid fields for creating a user
+          schema:
+            $ref: "#/definitions/errorResponse"
+        401:
+          description: unauthorized, invalid password
+          schema:
+            $ref: "#/definitions/errorResponse"
+        404:
+          description: user with username doesn't exist
+          schema:
+            $ref: "#/definitions/errorResponse"
+        500:
+          description: server error
+          schema:
+            $ref: "#/definitions/errorResponse"
+  /users:
+    post:
+      security:
+        - Bearer: []
+      tags: [users]
+      summary: creates a new user
+      description: This end point creates a new user with a default password, request is restricted to admins.
+      parameters:
+        - name: createUserReq
+          in: body
+          description: |
+            holds the data - username, fullname, email and role, needed to create a user.
+          required: true
+          schema:
+            $ref: "#/definitions/createUserReq"
+      responses:
+        201:
+          description: user was successfully created, response body holds username and in the header the location to get the resource
+          schema:
+            $ref: "#/definitions/createUserResp"
+        400:
+          description: bad request, the request body has invalid fields for creating a user
+          schema:
+            $ref: "#/definitions/errorResponse"
+        401:
+          description: unauthorized, the user with an invalid access token accessed the end point
+          schema:
+            $ref: "#/definitions/errorResponse"
+
+        409:
+          description: a user with already exists with similar req details
+          schema:
+            $ref: "#/definitions/errorResponse"
+        500:
+          description: server error
+          schema:
+            $ref: "#/definitions/errorResponse"
+    get:
+      security:
+        - Bearer: []
+      tags: [users]
+      summary: get all users
+      description: |
+        If no other user exist an empty array of user_data is returned.
+        The least page_id is 1, and page_size should be 10
+        This end point is restricted to admins
+      parameters:
+        - name: page_id
+          in: query
+          description: the pagination offset, identifies sequentially the page to get
+          required: true
+          type: integer
+          default: 1
+          minimum: 1
+        - name: page_size
+          in: query
+          description: the pagination limit, identifies the number of resources in one page
+          required: true
+          type: integer
+          default: 10
+          minimum: 5
+      responses:
+        200:
+          description: successfull request
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: "#/definitions/user_data"
+              pagination:
+                $ref: "#/definitions/pagination"
+        400:
+          description: |
+            invalid request parameters, use integers greater than zero
+            page_id is at least 1, and page_size should be 10
+          schema:
+            $ref: "#/definitions/errorResponse"
+        401:
+          description: unauthorized access, request from a user who's role is not admin
+          schema:
+            $ref: "#/definitions/errorResponse"
+        500:
+          description: server error
+          schema:
+            $ref: "#/definitions/errorResponse"
+  /users/{user_id}:
+    get:
+      security:
+        - Bearer: []
+      tags: [users]
+      summary: get user by user_id
+      description: "user_id is always greater than 0"
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          default: 2
+          type: integer
+          minimum: 1
+      responses:
+        200:
+          description: request succesful
+          schema:
+            $ref: "#/definitions/user_data"
+        400:
+          description: invalid request parameter, user an integer greater than zero
+          schema:
+            $ref: "#/definitions/errorResponse"
+        404:
+          description: resource with user_id not found
+          schema:
+            $ref: "#/definitions/errorResponse"
+        500:
+          description: server error
+          schema:
+            $ref: "#/definitions/errorResponse"
+    put:
+      security:
+        - Bearer: []
+      tags: [users]
+      summary: updates a user
+      description: |
+        For updating users, user_id is always greater than 0
+        this end point is restricted to admins only.
+      parameters:
+        - name: user_id
+          in: path
+          type: integer
+          required: true
+          default: 2
+          minimum: 1
+        - name: updateUserReq
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/updateUserReq"
+      responses:
+        204:
+          description: update was successful
+          schema:
+            $ref: "#/definitions/successMessage"
+        400:
+          description: invalid request parameter, user an integer greater than zero
+          schema:
+            $ref: "#/definitions/errorResponse"
+        401:
+          description: unauthorized access, request from a user who's role is not admin
+          schema:
+            $ref: "#/definitions/errorResponse"
+        404:
+          description: resource not found
+          schema:
+            $ref: "#/definitions/errorResponse"
+        409:
+          description: user already exist with similar details
+          schema:
+            $ref: "#/definitions/errorResponse"
+        500:
+          description: server error
+          schema:
+            $ref: "#/definitions/errorResponse"
+    delete:
+      security:
+        - Bearer: []
+      tags: [users]
+      summary: deletes a user
+      description: |
+        For deleting users, this end point is restricted to admins only
+        user_id is always greater than 0
+      parameters:
+        - name: user_id
+          in: path
+          type: integer
+          required: true
+          default: 2
+          minimum: 1
+      responses:
+        204:
+          description: delete was successful
+          schema:
+            $ref: "#/definitions/successMessage"
+        400:
+          description: invalid request parameter, user an integer greater than zero
+          schema:
+            $ref: "#/definitions/errorResponse"
+        404:
+          description: resource doesn't exist
+          schema:
+            $ref: "#/definitions/errorResponse"
+        500:
+          description: server error
+          schema:
+            $ref: "#/definitions/errorResponse"
+  /users/{user_id}/password/reset:
+    patch:
+      security:
+        - Bearer: []
+      tags: [users]
+      summary: resets a user's password
+      description: |
+        Allows the admin to reset a user's password to default, this end point is restricted to admins only
+        user_id is always greater than 0.
+      parameters:
+        - name: user_id
+          in: path
+          type: integer
+          required: true
+          default: 2
+          minimum: 1
+      responses:
+        204:
+          description: password reset was successful
+          schema:
+            $ref: "#/definitions/successMessage"
+        400:
+          description: invalid request parameter, user an integer greater than zero
+          schema:
+            $ref: "#/definitions/errorResponse"
+        401:
+          description: unauthorized
+          schema:
+            $ref: "#/definitions/errorResponse"
+        404:
+          description: resource doesn't exist
+          schema:
+            $ref: "#/definitions/errorResponse"
+        500:
+          description: server error
+          schema:
+            $ref: "#/definitions/errorResponse"
+  /users/{user_id}/password:
+    patch:
+      security:
+        - Bearer: []
+      tags: [users]
+      summary: change a user's password
+      description: |
+        Allows all users to update their password, user_id is always greater than 0
+      parameters:
+        - name: user_id
+          in: path
+          type: integer
+          required: true
+          default: 2
+          minimum: 1
+        - name: updatePasswordReq
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/updatePasswordReq"
+      responses:
+        204:
+          description: password update was successful
+          schema:
+            $ref: "#/definitions/successMessage"
+        400:
+          description: |
+            Invalid request parameters:
+              - user_id: Must be an integer greater than 0
+              - old_password: A string representing the user's current password
+              - new_password: A string representing the password the user wants to change to
+        404:
+          description: resource not found
+          schema:
+            $ref: "#/definitions/errorResponse"
+        500:
+          description: server error
+          schema:
+            $ref: "#/definitions/errorResponse"
+  /pitch_requests:
+    post:
+      security:
+        - Bearer: []
+      tags: [pitch_requests]
+      summary: creates a pitch request
+      description: |
+        This end point is used to create a pitch request
+        Restricted to sales user only
+      parameters:
+        - name: createPitchReq
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/createPitchReq"
+      responses:
+        201:
+          description: resource created
+          schema:
+            $ref: "#/definitions/createPitchResp"
+        400:
+          description: invalid request paramters
+          schema:
+            $ref: "#/definitions/errorResponse"
+        401:
+          description: unauthorize, auth token invalid or not provided
+          schema:
+            $ref: "#/definitions/errorResponse"
+        500:
+          description: server error
+          schema:
+            $ref: "#/definitions/errorResponse"
+    get:
+      security:
+        - Bearer: []
+      tags: [pitch_requests]
+      summary: gets all pitch request
+      description: |
+        This end point returns all the pitch requests belonging to the user who makes the request.
+        End point is restricted to sales users only
+      parameters:
+        - name: page_id
+          in: query
+          required: true
+          type: integer
+          minimum: 1
+          default: 1
+        - name: page_size
+          in: query
+          required: true
+          type: integer
+          description: should be 10
+          default: 10
+      responses:
+        200:
+          description: successful request
+          schema:
+            type: object
+            properties:
+              pitch_data:
+                type: array
+                items:
+                  $ref: "#/definitions/pitch_data"
+              pagination:
+                $ref: "#/definitions/pagination"
+        400:
+          description: |
+            Invalid parameters
+            - page_id: integer greater than 1
+            - page_size: integer, should be 10
+          schema:
+            $ref: "#/definitions/errorResponse"
+        401:
+          description: unauthorize, auth token invalid or not provided
+          schema:
+            $ref: "#/definitions/errorResponse"
+        500:
+          description: server error
+          schema:
+            $ref: "#/definitions/errorResponse"
+  /pitch_requests/{pitch_id}:
+    put:
+      security:
+        - Bearer: []
+      tags: [pitch_requests]
+      summary: updates a pitch request
+      description: |
+        This endpoint updates a pitch request
+        This end point is open to admins and sales users
+      parameters:
+        - name: pitch_id
+          in: path
+          required: true
+          type: integer
+          minimum: 1
+          default: 1
+        - name: updatePitchReq
+          in: body
+          required: true
+          description: |
+            a null customer request should be used when the admin is updating the pitch request.
+            when a sales user is updating the pitch requests the customer request is an array with at least one array item.
+            Eample: customer_request: ["EDMS"]
+          schema:
+            $ref: "#/definitions/updatePitchReq"
+      responses:
+        204:
+          description: resource successfully updated
+          schema:
+            $ref: "#/definitions/successMessage"
+        400:
+          description: |
+            Invalid parameter
+            - pitch_id: integer greater than 1
+          schema:
+            $ref: "#/definitions/errorResponse"
+        401:
+          description: unauthorize, auth token invalid or not provided
+          schema:
+            $ref: "#/definitions/errorResponse"
+        404:
+          description: resource not found
+          schema:
+            $ref: "#/definitions/errorResponse"
+        500:
+          description: server error
+          schema:
+            $ref: "#/definitions/errorResponse"
+    delete:
+      security:
+        - Bearer: []
+      tags: [pitch_requests]
+      summary: deletes a pitch request
+      description: |
+        A sales user deletes only pitch requests associated with them
+      parameters:
+        - name: pitch_id
+          in: path
+          required: true
+          type: integer
+          minimum: 1
+          default: 1
+      responses:
+        204:
+          description: resource successfully updated
+          schema:
+            $ref: "#/definitions/successMessage"
+        400:
+          description: |
+            Invalid parameter
+            - pitch_id: integer greater than 1
+          schema:
+            $ref: "#/definitions/errorResponse"
+        401:
+          description: unauthorize, auth token invalid or not provided
+          schema:
+            $ref: "#/definitions/errorResponse"
+        404:
+          description: resource not found
+          schema:
+            $ref: "#/definitions/errorResponse"
+        500:
+          description: server error
+          schema:
+            $ref: "#/definitions/errorResponse"
+  /deals:
+    post:
+      security:
+        - Bearer: []
+      tags: [deals]
+      summary: creates a deal
+      description: |
+        An admin creates a deal with this end point
+        This end point is restricted to admins only
+      parameters:
+        - name: createDealReq
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/createDealReq"
+      responses:
+        201:
+          description: resource created
+          schema:
+            $ref: "#/definitions/createDealResp"
+        400:
+          description: invalid request parameters
+          schema:
+            $ref: "#/definitions/errorResponse"
+        401:
+          description: unauthorized, access_token is invalid or not provided
+        404:
+          description: resource not found
+          schema:
+            $ref: "#/definitions/errorResponse"
+        500:
+          description: "#/definitions/errorResponse"
+          schema:
+            $ref: "#/definitions/errorResponse"
+    get:
+      security:
+        - Bearer: []
+      tags: [deals]
+      summary: gets  deals
+      description: |
+        returns a list of deals based on the query filter
+        This end point is open to all users
+      parameters:
+        - name: status
+          in: query
+          type: string
+          required: false
+        - name: awarded
+          in: query
+          type: boolean
+          required: false
+          default:
+        - name: page_id
+          in: query
+          type: integer
+          required: true
+          default: 1
+          minimum: 1
+        - name: page_size
+          in: query
+          type: integer
+          required: true
+          default: 10
+          description: should be 10
+      responses:
+        200:
+          description: request successful
+          schema:
+            type: object
+            properties:
+              deals_data:
+                type: array
+                items:
+                  $ref: "#/definitions/deals_data"
+              pagination:
+                $ref: "#/definitions/pagination"
+        400:
+          description: invalid request parameters
+          schema:
+            $ref: "#/definitions/errorResponse"
+        401:
+          description: unauthorized, auth token invalid or not provided
+          schema:
+            $ref: "#/definitions/errorResponse"
+        500:
+          description: server error
+          schema:
+            $ref: "#/definitions/errorResponse"
+  /deals/{deal_id}:
+    put:
+      security:
+        - Bearer: []
+      tags: [deals]
+      summary: updates a deal
+      description: |
+        An admin updates a deal to keep the current progress, also to close the deal
+      parameters:
+        - name: deal_id
+          in: path
+          required: true
+          default: 1
+          type: integer
+          minimum: 1
+        - name: updateDealReq
+          in: body
+          required: false
+          schema:
+            $ref: "#/definitions/updateDealsReq"
+      responses:
+        204:
+          description: resource successfully updated
+          schema:
+            $ref: "#/definitions/successMessage"
+        400:
+          description: |
+            Invalid parameter
+            - pitch_id: integer greater than 1
+          schema:
+            $ref: "#/definitions/errorResponse"
+        401:
+          description: unauthorized, auth token invalid or not provided
+          schema:
+            $ref: "#/definitions/errorResponse"
+        404:
+          description: resource not found
+          schema:
+            $ref: "#/definitions/errorResponse"
+        500:
+          description: server error
+          schema:
+            $ref: "#/definitions/errorResponse"
+    delete:
+      security:
+        - Bearer: []
+      tags: [deals]
+      summary: deletes a deal
+      description: |
+        Restricted to admins only
+      parameters:
+        - name: deal_id
+          in: path
+          required: true
+          default: 1
+          type: integer
+          minimum: 1
+      responses:
+        204:
+          description: resource was removed successfully
+        400:
+          description: |
+            Invalid parameter
+            - pitch_id: integer greater than 1
+          schema:
+            $ref: "#/definitions/errorResponse"
+        401:
+          description: unauthorized, auth token invalid or not provided
+          schema:
+            $ref: "#/definitions/errorResponse"
+        404:
+          description: resource not found
+          schema:
+            $ref: "#/definitions/errorResponse"
+        500:
+          description: server error
+          schema:
+            $ref: "#/definitions/errorResponse"
+
 definitions:
   successMessage:
     type: object
@@ -700,12 +706,12 @@ definitions:
         default: 2
         minimum: 1
         description: must not be less than 1
-  errorResp:
+  errorResponse:
     type: object
     properties:
       code:
         type: string
-        description: Error code for client login (e.g, NOT_FOUND, VALIDATION, NETWORK_CONECTION)
+        description: Error code for client login (e.g, NOT_FOUND, VALIDATION_ERROR, NETWORK_CONECTION)
         default: SENTINEL_ERROR
       error:
         type: string
@@ -731,7 +737,7 @@ definitions:
         default: lily@gmail.com
       password_changed:
         type: boolean
-        default: false
+        default: true
       updated_at:
         type: string
         default: 2024-09-09 04:05:09
@@ -741,6 +747,8 @@ definitions:
       username:
         type: string
         default: lily
+        minLength: 4
+        maxLength: 6
       password:
         type: string
         default: vasDeal45
@@ -754,7 +762,7 @@ definitions:
         type: string
         default: "alongrandomstringofrandomcharactersusedastheaccesstoken"
       user_data:
-        $ref: '#/definitions/user_data'
+        $ref: "#/definitions/user_data"
   pagination:
     type: object
     properties:
@@ -817,8 +825,7 @@ definitions:
       customer_request:
         type: array
         items:
-          type:
-            string
+          type: string
         minItems: 0
         default:
         x-nullable: true
@@ -1002,5 +1009,3 @@ definitions:
       - net__total
       - profit
       - awarded
-          
-        
