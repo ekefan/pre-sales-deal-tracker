@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS deals;
+DROP TABLE IF EXISTS pitch_requests;
+DROP TABLE IF EXISTS users;
