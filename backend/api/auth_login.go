@@ -33,11 +33,10 @@ func (server *Server) authLogin(ctx *gin.Context) {
 	}
 	// TODO:
 	// Update db to set updated_at for userlogin to nullable
-	// 1. create password encrypter and checker
-	// 2. Verfiy passwor
 	// 3. create json web tokens
 	// 4. add token maker to server struct
 	// 5. create token
+
 	user, err := server.store.GetUserByUsername(ctx, req.Username)
 	if err != nil {
 		if errors.Is(pgx.ErrNoRows, err) {
@@ -45,6 +44,10 @@ func (server *Server) authLogin(ctx *gin.Context) {
 			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err, "SERVER_ERROR"))
+		return
+	}
+	if err := ValidatePassword(user.Password, req.Password); err != nil {
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err, "INVALID_PASSWORD"))
 		return
 	}
 	userData := generateUserData(user)
