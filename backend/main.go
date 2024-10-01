@@ -11,17 +11,20 @@ import (
 )
 
 func main() {
-	dbpool, err := pgxpool.New(context.Background(), "postgresql://root:vasDealTracker@localhost:5432/dealTrackerDB?sslmode=disable")
+	config, err := api.ReadConfigFiles(".")
 	if err != nil {
-		log.Fatal("unable to create db connection pool", err)
+		log.Fatal("unable to read environment variables ", err)
+	}
+	dbpool, err := pgxpool.New(context.Background(), config.DatabaseUrl)
+	if err != nil {
+		log.Fatal("unable to create db connection pool ", err)
 	}
 	defer dbpool.Close()
-
 	store := db.NewStore(dbpool)
-	server, err := api.NewServer(store)
+	server, err := api.NewServer(store, config)
 	if err != nil {
-		log.Fatal("can not start server", err)
+		log.Fatal("can not start server, ", err)
 	}
 	slog.Info("starting http server")
-	server.StartServer(":8080")
+	server.StartServer()
 }
