@@ -38,7 +38,7 @@ func (server *Server) authLogin(ctx *gin.Context) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err, "NOT_FOUND"))
 			return
 		}
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err, "SERVER_ERROR"))
+		ctx.JSON(http.StatusInternalServerError, errorResponse(errors.New("can not connect to database"), "SERVER_ERROR"))
 		return
 	}
 	if err := ValidatePassword(user.Password, req.Password); err != nil {
@@ -59,7 +59,7 @@ func (server *Server) authLogin(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp)
 }
 
-// generateUserData generates a userLoginResp struct 
+// generateUserData generates a userLoginResp struct
 // updatedAt field will be nil if user has never been updated
 func generateUserData(user db.User) UserLoginResp {
 
