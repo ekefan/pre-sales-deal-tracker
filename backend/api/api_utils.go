@@ -12,10 +12,12 @@ type UserLoginResp struct {
 	Role string `json:"role"`
 	Email string `json:"email"`
 	PasswordChanged bool `json:"password_changed"`
-	UpdatedAt string `json:"updated_at"`
+	UpdatedAt *string `json:"updated_at"`
 
 }
 
+// errorResponse sends custom error response to client
+// with code: a sentinel error eg. NOT_FOUND and err the error
 func errorResponse(err error, code string) gin.H {
 	return gin.H{
 		"code": code,

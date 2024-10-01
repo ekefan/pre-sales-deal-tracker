@@ -1,11 +1,15 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 	"time"
 
+	// "time"
+
 	db "github.com/ekefan/pre-sales-deal-tracker/backend/db/sqlc"
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5"
 )
 
 // LogingReq holds fields required to authenticate and log in users
@@ -16,58 +20,67 @@ type LoginReq struct {
 
 // LoginResp holds the fields in the response body if login is successful
 type LoginResp struct {
-	AccessToken string `json:"access_token"`
-	UserData UserLoginResp `json:"user_data"`
+	AccessToken string        `json:"access_token"`
+	UserData    UserLoginResp `json:"user_data"`
 }
 
 // authLogin handles client log in
 func (server *Server) authLogin(ctx *gin.Context) {
-	var req LoginReq 
+	var req LoginReq
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err, "BAD_REQUEST"))
 		return
 	}
-	// TODO: 
+	// TODO:
+	// Update db to set updated_at for userlogin to nullable
 	// 1. create password encrypter and checker
 	// 2. Verfiy passwor
 	// 3. create json web tokens
 	// 4. add token maker to server struct
 	// 5. create token
-	user, err := server.store.AuthLogin(ctx, req.Username)
+	user, err := server.store.GetUserByUsername(ctx, req.Username)
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, errorResponse(err, "NOT_FOUND"))
+		if errors.Is(pgx.ErrNoRows, err) {
+			ctx.JSON(http.StatusNotFound, errorResponse(err, "NOT_FOUND"))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err, "SERVER_ERROR"))
 		return
 	}
-
-	userData := generateLoginUserData(user)
+	userData := generateUserData(user)
 	resp := LoginResp{
 		AccessToken: "thisisatestaccesstoken",
-		UserData: userData,
+		UserData:    userData,
 	}
 
 	ctx.JSON(http.StatusOK, resp)
 }
 
+// generateUserData generates a userLoginResp struct 
+// updatedAt field will be nil if user has never been updated
+func generateUserData(user db.User) UserLoginResp {
 
-func generateLoginUserData(user db.User) UserLoginResp {
-	if !user.PasswordChanged {
+	if !user.UpdatedAt.Time.IsZero() {
 		return UserLoginResp{
-			UserID: user.ID,
-			Username: user.Username,
-			Fullname: user.FullName,
-			Role: user.Role,
-			Email: user.Email,
+			UserID:          user.ID,
+			Username:        user.Username,
+			Fullname:        user.FullName,
+			Role:            user.Role,
+			Email:           user.Email,
 			PasswordChanged: user.PasswordChanged,
+			UpdatedAt:       nil,
 		}
 	}
-	
+
+	updatedAt := user.UpdatedAt.Time.Format(time.RFC3339)
+
 	return UserLoginResp{
-		UserID: user.ID,
-		Username: user.Username,
-		Fullname: user.FullName,
-		Role: user.Role,
-		Email: user.Email,
+		UserID:          user.ID,
+		Username:        user.Username,
+		Fullname:        user.FullName,
+		Role:            user.Role,
+		Email:           user.Email,
 		PasswordChanged: user.PasswordChanged,
-		UpdatedAt: user.UpdatedAt.Time.Format(time.RFC3339),
+		UpdatedAt:       &updatedAt,
 	}
 }
