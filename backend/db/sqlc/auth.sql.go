@@ -9,19 +9,14 @@ import (
 	"context"
 )
 
-const authLogin = `-- name: AuthLogin :one
+const getUserByUsername = `-- name: GetUserByUsername :one
 SELECT id, username, role, full_name, email, password, password_changed, updated_at, created_at FROM users
 WHERE username = $1
 LIMIT 1
 `
 
-// AuthLogin
-//
-//	SELECT id, username, role, full_name, email, password, password_changed, updated_at, created_at FROM users
-//	WHERE username = $1
-//	LIMIT 1
-func (q *Queries) AuthLogin(ctx context.Context, username string) (User, error) {
-	row := q.db.QueryRow(ctx, authLogin, username)
+func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByUsername, username)
 	var i User
 	err := row.Scan(
 		&i.ID,

@@ -9,12 +9,7 @@ import (
 )
 
 type Querier interface {
-	//AuthLogin
-	//
-	//  SELECT id, username, role, full_name, email, password, password_changed, updated_at, created_at FROM users
-	//  WHERE username = $1
-	//  LIMIT 1
-	AuthLogin(ctx context.Context, username string) (User, error)
+	GetUserByUsername(ctx context.Context, username string) (User, error)
 }
 
 var _ Querier = (*Queries)(nil)
