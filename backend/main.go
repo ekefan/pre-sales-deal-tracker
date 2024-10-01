@@ -13,12 +13,15 @@ import (
 func main() {
 	dbpool, err := pgxpool.New(context.Background(), "postgresql://root:vasDealTracker@localhost:5432/dealTrackerDB?sslmode=disable")
 	if err != nil {
-		log.Fatal("Unable to create connection pool", err)
+		log.Fatal("unable to create db connection pool", err)
 	}
 	defer dbpool.Close()
 
 	store := db.NewStore(dbpool)
-	server := api.NewServer(store)
+	server, err := api.NewServer(store)
+	if err != nil {
+		log.Fatal("can not start server", err)
+	}
 	slog.Info("starting http server")
 	server.StartServer(":8080")
 }

@@ -31,11 +31,6 @@ func (server *Server) authLogin(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err, "BAD_REQUEST"))
 		return
 	}
-	// TODO:
-	// Update db to set updated_at for userlogin to nullable
-	// 3. create json web tokens
-	// 4. add token maker to server struct
-	// 5. create token
 
 	user, err := server.store.GetUserByUsername(ctx, req.Username)
 	if err != nil {
@@ -50,9 +45,14 @@ func (server *Server) authLogin(ctx *gin.Context) {
 		ctx.JSON(http.StatusUnauthorized, errorResponse(err, "INVALID_PASSWORD"))
 		return
 	}
+	accessToken, _, err := server.tokenGenerator.GenerateToken(user.ID, user.Role, time.Hour)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err, "SEVER_ERROR"))
+	}
 	userData := generateUserData(user)
+
 	resp := LoginResp{
-		AccessToken: "thisisatestaccesstoken",
+		AccessToken: accessToken,
 		UserData:    userData,
 	}
 
