@@ -7,6 +7,8 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createUser = `-- name: CreateUser :one
@@ -36,11 +38,17 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (int64, 
 	return id, err
 }
 
+const deleteUser = `-- name: DeleteUser :exec
+DELETE FROM users WHERE id = $1
+`
+
+func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
+	_, err := q.db.Exec(ctx, deleteUser, id)
+	return err
+}
+
 const getNumberOfAdminUsers = `-- name: GetNumberOfAdminUsers :one
-SELECT COUNT(*) WHERE EXISTS (
-    SELECT id, username, role, full_name, email, password, password_changed, updated_at, created_at FROM users
-    WHERE role = $1
-)
+SELECT COUNT(*) FROM users WHERE role = $1
 `
 
 func (q *Queries) GetNumberOfAdminUsers(ctx context.Context, role string) (int64, error) {
@@ -48,4 +56,115 @@ func (q *Queries) GetNumberOfAdminUsers(ctx context.Context, role string) (int64
 	var count int64
 	err := row.Scan(&count)
 	return count, err
+}
+
+const getTotalNumOfUsers = `-- name: GetTotalNumOfUsers :one
+SELECT COUNT(*) FROM users
+`
+
+func (q *Queries) GetTotalNumOfUsers(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, getTotalNumOfUsers)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const getUserByID = `-- name: GetUserByID :one
+SELECT id, username, role, full_name, email, password, password_changed, updated_at, created_at FROM users
+WHERE id = $1
+`
+
+func (q *Queries) GetUserByID(ctx context.Context, id int64) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByID, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Role,
+		&i.FullName,
+		&i.Email,
+		&i.Password,
+		&i.PasswordChanged,
+		&i.UpdatedAt,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const listAllUsers = `-- name: ListAllUsers :many
+SELECT id, username, role, full_name, email, password, password_changed, updated_at, created_at from users
+`
+
+func (q *Queries) ListAllUsers(ctx context.Context) ([]User, error) {
+	rows, err := q.db.Query(ctx, listAllUsers)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []User{}
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Username,
+			&i.Role,
+			&i.FullName,
+			&i.Email,
+			&i.Password,
+			&i.PasswordChanged,
+			&i.UpdatedAt,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateUser = `-- name: UpdateUser :exec
+UPDATE users 
+SET username = $2, full_name = $3, role = $4, email = $5, updated_at = $6
+WHERE id = $1
+`
+
+type UpdateUserParams struct {
+	ID        int64            `json:"id"`
+	Username  string           `json:"username"`
+	FullName  string           `json:"full_name"`
+	Role      string           `json:"role"`
+	Email     string           `json:"email"`
+	UpdatedAt pgtype.Timestamp `json:"updated_at"`
+}
+
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
+	_, err := q.db.Exec(ctx, updateUser,
+		arg.ID,
+		arg.Username,
+		arg.FullName,
+		arg.Role,
+		arg.Email,
+		arg.UpdatedAt,
+	)
+	return err
+}
+
+const updateUserPassword = `-- name: UpdateUserPassword :exec
+UPDATE users
+ SET password = $2, password_changed = $3
+WHERE id = $1
+`
+
+type UpdateUserPasswordParams struct {
+	ID              int64  `json:"id"`
+	Password        string `json:"password"`
+	PasswordChanged bool   `json:"password_changed"`
+}
+
+func (q *Queries) UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) error {
+	_, err := q.db.Exec(ctx, updateUserPassword, arg.ID, arg.Password, arg.PasswordChanged)
+	return err
 }
