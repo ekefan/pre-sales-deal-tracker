@@ -34,7 +34,7 @@ func (server *Server) authLogin(ctx *gin.Context) {
 
 	user, err := server.store.GetUserByUsername(ctx, req.Username)
 	if err != nil {
-		if errors.Is(pgx.ErrNoRows, err) {
+		if errors.Is(err, pgx.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err, "NOT_FOUND"))
 			return
 		}

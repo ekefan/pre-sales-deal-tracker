@@ -8,6 +8,8 @@ import (
 	"github.com/ekefan/pre-sales-deal-tracker/backend/api"
 	db "github.com/ekefan/pre-sales-deal-tracker/backend/db/sqlc"
 	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -37,7 +39,7 @@ func main() {
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
 		log.Fatal("error applying migrations: ", err)
 	} else if err == migrate.ErrNoChange {
-		log.Println("No new migrations to apply.")
+		slog.Info("No new migrations to apply.")
 	}
 
 	// Start server
@@ -46,6 +48,6 @@ func main() {
 		log.Fatal("cannot start server: ", err)
 	}
 
-	slog.Info("starting HTTP server")
+	slog.Info("Starting HTTP server")
 	server.StartServer()
 }
