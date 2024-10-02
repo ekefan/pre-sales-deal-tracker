@@ -4,14 +4,11 @@ import (
 	"context"
 	"log"
 	"log/slog"
-	"os"
 
 	"github.com/ekefan/pre-sales-deal-tracker/backend/api"
 	db "github.com/ekefan/pre-sales-deal-tracker/backend/db/sqlc"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database/postgres"
-	"github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func main() {
@@ -20,7 +17,7 @@ func main() {
 		log.Fatal("unable to read environment variables ", err)
 	}
 
-	dbpool, err := pgxpool.New(context.Background(), config.DatabaseUrl)
+	dbpool, err := pgxpool.New(context.Background(), config.DatabaseSource)
 	if err != nil {
 		log.Fatal("unable to create db connection pool ", err)
 	}
@@ -28,16 +25,9 @@ func main() {
 
 	store := db.NewStore(dbpool)
 
-	// Initialize migrate
-	driver, err := postgres.WithInstance(dbpool, &postgres.Config{})
-	if err != nil {
-		log.Fatal("unable to create migrate driver: ", err)
-	}
-
-	m, err := migrate.NewWithDatabaseInstance(
-		"file://db/migrations", // Path to your migrations
-		"postgres",             // Database name
-		driver,
+	m, err := migrate.New(
+		config.MigrationSource, // Path to your migrations
+		config.DatabaseSource,
 	)
 	if err != nil {
 		log.Fatal("unable to create migrate instance: ", err)

@@ -89,7 +89,8 @@ func ValidatePassword(hash, password string) error {
 type Config struct {
 	SymmetricKey string `mapstructure:"SYMMETRIC_KEY"`
 	ServerAddres string `mapstructure:"SERVER_ADDRESS"`
-	DatabaseUrl  string `mapstructure:"DATABASE_URL"`
+	DatabaseSource  string `mapstructure:"DATABASE_SOURCE"`
+	MigrationSource string `mapstructure:"MIGRATION_SOURCE"`
 	TokenDuration time.Duration `mapstructure:"TOKEN_DURATION"`
 }
 

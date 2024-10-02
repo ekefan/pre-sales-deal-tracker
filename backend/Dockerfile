@@ -10,5 +10,5 @@ COPY --from=builder /app/main .
 COPY app.env .
 COPY db/migrations ./db/migrations
 
-EXPOSE 8080 9090
+EXPOSE 8080 8080
 CMD [ "/app/main" ]
