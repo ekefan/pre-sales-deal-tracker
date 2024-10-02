@@ -1,6 +1,9 @@
 package api
 
 import (
+	"errors"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"
@@ -26,12 +29,45 @@ func errorResponse(err error, code string) gin.H {
 	}
 }
 
+// successMessage sends a custom success response to client
 func successMessage(msg string) gin.H {
 	return gin.H{
 		"message": msg,
 	}
 }
 
+const (
+	jsonSource = iota
+	uriSource
+	querySource
+)
+
+// bindClientRequest takes a pointer to the request and a flag	representing
+// the binding source
+func bindClientRequest(ctx *gin.Context, req any, bindingSource int) error {
+	switch bindingSource {
+	case uriSource:
+		if err := ctx.ShouldBindUri(req); err != nil {
+			ctx.JSON(http.StatusBadRequest, errorResponse(err, "BAD_REQUEST"))
+			return err
+		}
+	case querySource:
+		if err := ctx.ShouldBindQuery(req); err != nil {
+			ctx.JSON(http.StatusBadRequest, errorResponse(err, "BAD_REQUEST"))
+			return err
+		}
+	case bindingSource:
+		if err := ctx.ShouldBindJSON(req); err != nil {
+			ctx.JSON(http.StatusBadRequest, errorResponse(err, "BAD_REQUEST"))
+			return err
+		}
+	default:
+		return errors.New("bindingSource not supported")
+	}
+	return nil
+}
+
+// HashPassword uses bcrypt to generate a hash from password
 func HashPassword(password string) (string, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
@@ -40,6 +76,8 @@ func HashPassword(password string) (string, error) {
 	return string(hash), nil
 }
 
+// ValidatePassword compares a hash with a password to see if hash was created
+// from the password
 func ValidatePassword(hash, password string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 }
@@ -51,6 +89,7 @@ type Config struct {
 	DatabaseUrl  string `mapstructure:"DATABASE_URL"`
 }
 
+// ReadConfigFiles uses viper to read environment config or variables into Config
 func ReadConfigFiles(configPath string) (*Config, error) {
 	viper.SetConfigName("app")
 	viper.AddConfigPath(configPath)
