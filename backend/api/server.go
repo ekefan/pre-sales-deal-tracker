@@ -37,6 +37,8 @@ func NewServer(store db.Store, config *Config) (*Server, error) {
 	return server, nil
 }
 
+// setupRouter uses a default gin engine
+// defines api endpoints, middlewares and handler functions
 func (server *Server) setupRouter() {
 	router := gin.Default()
 	router.POST("/auth/login", server.authLogin)

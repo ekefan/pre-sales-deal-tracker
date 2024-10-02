@@ -14,7 +14,7 @@ import (
 
 // LogingReq holds fields required to authenticate and log in users
 type LoginReq struct {
-	Username string `json:"username" bindiing:"required,alphanum,gte=4,lte=6"`
+	Username string `json:"username" binding:"required,alphanum,gte=4,lte=6"`
 	Password string `json:"password" binding:"required,alphanum"`
 }
 
@@ -45,7 +45,7 @@ func (server *Server) authLogin(ctx *gin.Context) {
 		ctx.JSON(http.StatusUnauthorized, errorResponse(err, "INVALID_PASSWORD"))
 		return
 	}
-	accessToken, _, err := server.tokenGenerator.GenerateToken(user.ID, user.Role, time.Hour)
+	accessToken, _, err := server.tokenGenerator.GenerateToken(user.ID, user.Role, server.config.TokenDuration)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err, "SEVER_ERROR"))
 	}
