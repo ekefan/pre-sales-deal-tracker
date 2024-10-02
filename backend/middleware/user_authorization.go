@@ -11,7 +11,7 @@ import (
 const (
 	authoHeaderKey       = "authorization"
 	authHeaderTypeBearer = "bearer"
-	authPayloadKey       = "auth_payload"
+	AuthPayloadKey       = "auth_payload"
 )
 
 // UserAuthorization checks client requests to verify appropriate
@@ -44,7 +44,7 @@ func UserAuthorization(tokenGenerator token.TokenGenerator) gin.HandlerFunc {
 			return
 		}
 
-		ctx.Set(authPayloadKey, payload)
+		ctx.Set(AuthPayloadKey, payload)
 		ctx.Next()
 	}
 }

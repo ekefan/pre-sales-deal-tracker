@@ -40,7 +40,10 @@ func NewServer(store db.Store, config *Config) (*Server, error) {
 func (server *Server) setupRouter() {
 	router := gin.Default()
 	router.POST("/auth/login", server.authLogin)
-	router.Use(middleware.UserAuthorization(server.tokenGenerator))
+	
+	authGrp := router.Group("/")
+	authGrp.Use(middleware.UserAuthorization(server.tokenGenerator))
+	authGrp.POST("/users", server.createUser)
 	server.router = router
 	slog.Info("Router is setup and ready to run")
 
