@@ -3,7 +3,10 @@ package api
 import (
 	"errors"
 	"net/http"
+	"time"
 
+	"github.com/ekefan/pre-sales-deal-tracker/backend/middleware"
+	"github.com/ekefan/pre-sales-deal-tracker/backend/token"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"
@@ -87,6 +90,7 @@ type Config struct {
 	SymmetricKey string `mapstructure:"SYMMETRIC_KEY"`
 	ServerAddres string `mapstructure:"SERVER_ADDRESS"`
 	DatabaseUrl  string `mapstructure:"DATABASE_URL"`
+	TokenDuration time.Duration `mapstructure:"TOKEN_DURATION"`
 }
 
 // ReadConfigFiles uses viper to read environment config or variables into Config
@@ -106,4 +110,23 @@ func ReadConfigFiles(configPath string) (*Config, error) {
 		return nil, err
 	}
 	return &config, nil
+}
+
+const (
+	adminRole   = "admin"
+	salesRole   = "sales"
+	managerRole = "manager"
+)
+
+// authAccess ensures the request is from a user with role in roles
+func authAccess(ctx *gin.Context, roles []string) bool {
+	payload := ctx.MustGet(middleware.AuthPayloadKey).(*token.Payload)
+	for _, role := range roles {
+		if role == payload.Role {
+			return true
+		}
+	}
+	ctx.JSON(http.StatusUnauthorized,
+		errorResponse(errors.New("user not authorized to access resource"), "UNAUTHORIZED"))
+	return false
 }
