@@ -100,7 +100,7 @@ func (server *Server) retrieveUsers(ctx *gin.Context) {
 
 // UsersIDFromUri holds the uri field user_id
 type UsersIDFromUri struct {
-	UserID int64 `uri:"user_id"`
+	UserID int64 `uri:"user_id" binding:"required"`
 }
 
 // getUsersByID route handler for get /users/:user_id, retrieves users by user_id
@@ -204,3 +204,95 @@ func (server *Server) deleteUsers(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusNoContent, successMessage())
 }
+
+type UpdatePassowrdReq struct {
+	OldPassword string `json:"old_password" binding:"required"`
+	NewPassword string `json:"new_password" binding:"required"`
+}
+
+// updateUserPassword route handler for patch /users/:user_id/password
+// updates a user password
+func (server *Server) updateUserPassword(ctx *gin.Context) {
+	var (
+		reqUri  UsersIDFromUri
+		reqBody UpdatePassowrdReq
+	)
+
+	uriErr := bindClientRequest(ctx, &reqUri, uriSource)
+	reqBodyErr := bindClientRequest(ctx, &reqBody, jsonSource)
+	if uriErr != nil || reqBodyErr != nil {
+		slog.Error("failed to bind client request", "uri error", uriErr.Error(), "req body err", reqBodyErr.Error())
+		return
+	}
+
+	if !authAccess(ctx, []string{adminRole, managerRole, salesRole}) {
+		return
+	}
+
+	user, err := server.store.GetUserByID(ctx, reqUri.UserID)
+	if err != nil {
+		errMsg = "user not found"
+		details = fmt.Sprintf("user with user_id: %v, not found", reqUri.UserID)
+		if pgxError(ctx, err, errMsg, details) {
+			return
+		}
+		handleServerError(ctx, err)
+		return
+	}
+	if err := ValidatePassword(user.Password, reqBody.OldPassword); err != nil {
+		statusCode = http.StatusUnauthorized
+		errCode = "UNAUTHORIZED"
+		errMsg = "invalid password"
+		details = fmt.Sprintf("the old password sent doesn't not match with password of user with id: %v", reqUri.UserID)
+		ctx.JSON(statusCode, errorResponse(statusCode, errCode, errMsg, details))
+		return
+	}
+	if err := server.store.UpdateUserPassword(ctx, db.UpdateUserPasswordParams{
+		ID: reqUri.UserID,
+		Password: reqBody.NewPassword,
+		PasswordChanged: true,
+	}); err != nil {
+		handleServerError(ctx, err)
+		return
+	}
+}
+// 
+// resetUserPassword route handler for patch /users/:user_id/password
+// resets a user password
+// func (server *Server) resetUserPassword(ctx *gin.Context) {
+	// var
+		// reqUri  UsersIDFromUri
+// 
+	// uriErr := bindClientRequest(ctx, &reqUri, uriSource)
+	// if uriErr != nil {
+		// slog.Error("failed to bind client request", "uri error", uriErr.Error())
+		// return
+	// }
+// 
+	// if !authAccess(ctx, []string{adminRole}) {
+		// return
+	// }
+// 
+	// if _, err := server.store.GetUserByID(ctx, reqUri.UserID); err != nil {
+		// errMsg = "user not found"
+		// details = fmt.Sprintf("user with user_id: %v, not found", reqUri.UserID)
+		// if pgxError(ctx, err, errMsg, details) {
+			// return
+		// }
+		// handleServerError(ctx, err)
+		// return
+	// }
+	// if err := server.store.UpdateUserPassword(ctx, db.UpdateUserPasswordParams{
+		// ID: reqUri.UserID,
+		// Password:db.DefaultUserPassword,
+		// PasswordChanged: false,
+	// }); err != nil {
+		// handleServerError(ctx, err)
+		// return
+	// }
+// }
+// 
+// 
+// 
+// 
+// 
