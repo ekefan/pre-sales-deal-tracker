@@ -10,8 +10,9 @@ RETURNING users.id;
 SELECT COUNT(*) FROM users;
 
 -- name: ListAllUsers :many
-SELECT * from users;
-
+SELECT id AS user_id, username, role, email, full_name, password_changed, updated_at, created_at from users
+LIMIT $1
+OFFSET $2;
 
 -- name: GetUserByID :one
 SELECT * FROM users

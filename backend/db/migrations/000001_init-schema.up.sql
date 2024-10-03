@@ -6,7 +6,7 @@ CREATE TABLE "users" (
   "email" varchar UNIQUE NOT NULL,
   "password" varchar NOT NULL,
   "password_changed" bool NOT NULL DEFAULT false,
-  "updated_at" timestamp NOT NULL DEFAULT ('0001-01-01 00:00:00'),
+  "updated_at" timestamp NOT NULL DEFAULT (now()),
   "created_at" timestamp NOT NULL DEFAULT (now())
 );
 
@@ -21,7 +21,7 @@ CREATE TABLE "deals" (
   "net_total_cost" numeric(11,2) NOT NULL,
   "profit" numeric(11,2) NOT NULL,
   "created_at" timestamp NOT NULL DEFAULT (now()),
-  "updated_at" timestamp NOT NULL DEFAULT ('0001-01-01 00:00:00'),
+  "updated_at" timestamp NOT NULL DEFAULT (now()),
   "closed_at" timestamp NOT NULL DEFAULT ('0001-01-01 00:00:00'),
   "awarded" bool NOT NULL DEFAULT false
 );
@@ -35,7 +35,7 @@ CREATE TABLE "pitch_requests" (
   "admin_deadline" timestamp NOT NULL,
   "admin_viewed" bool NOT NULL DEFAULT false,
   "created_at" timestamp NOT NULL DEFAULT (now()),
-  "updated_at" timestamp NOT NULL DEFAULT ('0001-01-01 00:00:00')
+  "updated_at" timestamp NOT NULL DEFAULT (now())
 );
 
 ALTER TABLE "pitch_requests" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE CASCADE;
