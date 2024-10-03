@@ -11,17 +11,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// CreateUserReq holds fields needed to create a user resource
-type CreateUserReq struct {
+// UserReq holds fields needed to create or update a user resource
+type UserReq struct {
 	Username string `json:"username" binding:"required,gte=4,lte=6,alphanum"`
-	Fullname string `json:"fullname" binding:"required,gte=4"`
+	FullName string `json:"full_name" binding:"required,gte=4"`
 	Email    string `json:"email" binding:"required,email"`
 	Role     string `json:"role" binding:"required,oneof=admin sales manager"`
 }
 
 // createUser route handler post /users, creates users resource
 func (server *Server) createUsers(ctx *gin.Context) {
-	var req CreateUserReq
+	var req UserReq
 	if err := bindClientRequest(ctx, &req, jsonSource); err != nil {
 		slog.Error(err.Error())
 		return
@@ -36,7 +36,7 @@ func (server *Server) createUsers(ctx *gin.Context) {
 	}
 	userID, err := server.store.CreateUser(ctx, db.CreateUserParams{
 		Username: req.Username,
-		FullName: req.Fullname,
+		FullName: req.FullName,
 		Email:    req.Email,
 		Role:     req.Role,
 		Password: hash,
@@ -103,7 +103,6 @@ type UsersIDFromUri struct {
 	UserID int64 `uri:"user_id"`
 }
 
-
 // getUsersByID route handler for get /users/:user_id, retrieves users by user_id
 func (server *Server) getUsersByID(ctx *gin.Context) {
 	var req UsersIDFromUri
@@ -111,7 +110,7 @@ func (server *Server) getUsersByID(ctx *gin.Context) {
 		slog.Error(err.Error())
 		return
 	}
-	if !authAccess(ctx, []string{adminRole, salesRole, managerRole}) {	
+	if !authAccess(ctx, []string{adminRole, salesRole, managerRole}) {
 		return
 	}
 	user, err := server.store.GetUserByID(ctx, req.UserID)
@@ -125,15 +124,84 @@ func (server *Server) getUsersByID(ctx *gin.Context) {
 		return
 	}
 	resp := db.ListAllUsersRow{
-		UserID: user.ID,
-		Username: user.Username,
-		FullName: user.FullName,
-		Role: user.Role,
-		Email: user.Email,
+		UserID:          user.ID,
+		Username:        user.Username,
+		FullName:        user.FullName,
+		Role:            user.Role,
+		Email:           user.Email,
 		PasswordChanged: user.PasswordChanged,
-		CreatedAt: user.CreatedAt.Time.Format(time.RFC3339),
-		UpdatedAt: user.UpdatedAt.Time.Format(time.RFC3339),
+		CreatedAt:       user.CreatedAt.Time.Format(time.RFC3339),
+		UpdatedAt:       user.UpdatedAt.Time.Format(time.RFC3339),
 	}
 	ctx.JSON(http.StatusOK, resp)
 
 }
+
+// updateUsers route handler for put /users/:user_id
+func (server *Server) updateUsers(ctx *gin.Context) {
+	var (
+		reqUri  UsersIDFromUri
+		reqBody UserReq
+	)
+
+	uriErr := bindClientRequest(ctx, &reqUri, uriSource)
+	reqBodyErr := bindClientRequest(ctx, &reqBody, jsonSource)
+	if uriErr != nil || reqBodyErr != nil {
+		slog.Error("failed to bind client request", "uri error", uriErr.Error(), "req body err", reqBodyErr.Error())
+		return
+	}
+
+	if !authAccess(ctx, []string{adminRole}) {
+		return
+	}
+
+	_, err := server.store.GetUserByID(ctx, reqUri.UserID)
+	if err != nil {
+		errMsg = "user not found"
+		details = fmt.Sprintf("user with user_id: %v, not found", reqUri.UserID)
+		if pgxError(ctx, err, errMsg, details) {
+			return
+		}
+		handleServerError(ctx, err)
+		return
+	}
+	err = server.store.UpdateUserTx(ctx, db.UpdateUserParams{
+		Username: reqBody.Username,
+		FullName: reqBody.FullName,
+		Role:     reqBody.Role,
+		Email:    reqBody.Email,
+	})
+	if err != nil {
+		errMsg = "can not update user"
+		details = fmt.Sprintf("user with username: %v, or email: %v, exists", reqBody.Username, reqBody.Email)
+		if pgxError(ctx, err, errMsg, details) {
+			return
+		}
+		handleServerError(ctx, err)
+		return
+	}
+	ctx.JSON(http.StatusNoContent, successMessage())
+}
+
+// deleteUsers route handler for delete /users/:user_id, deletes user with user_id
+// func (server *Server) deleteUsers(ctx *gin.Context) {
+	// var req UsersIDFromUri
+	// if err := bindClientRequest(ctx, &req, uriSource); err != nil {
+		// slog.Error(err.Error())
+		// return
+	// }
+	// if !authAccess(ctx, []string{adminRole}) {
+		// return
+	// }
+	// if _, err := server.store.GetUserByID(ctx, req.UserID); err != nil {
+		// errMsg = "user not found"
+		// details = fmt.Sprintf("user with user_id: %v, not found", req.UserID)
+		// if pgxError(ctx, err, errMsg, details) {
+			// return
+		// }
+		// handleServerError(ctx, err)
+		// return
+	// }
+	// ctx.JSON(http.StatusNoContent, successMessage())
+// }
+// 
