@@ -10,6 +10,9 @@ import (
 	"github.com/ekefan/pre-sales-deal-tracker/backend/middleware"
 	"github.com/ekefan/pre-sales-deal-tracker/backend/token"
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -66,20 +69,21 @@ func bindClientRequest(ctx *gin.Context, req any, bindingSource int) error {
 	statusCode := http.StatusBadRequest
 	errCode := "BAD_REQUEST"
 	errMsg := "failed to bind client request"
+	details := "invalid request params have been sent, make sure request params are valid"
 	switch bindingSource {
 	case uriSource:
 		if err := ctx.ShouldBindUri(req); err != nil {
-			ctx.JSON(statusCode, errorResponse(statusCode, errCode, errMsg, err.Error()))
+			ctx.JSON(statusCode, errorResponse(statusCode, errCode, errMsg, details))
 			return err
 		}
 	case querySource:
 		if err := ctx.ShouldBindQuery(req); err != nil {
-			ctx.JSON(statusCode, errorResponse(statusCode, errCode, errMsg, err.Error()))
+			ctx.JSON(statusCode, errorResponse(statusCode, errCode, errMsg, details))
 			return err
 		}
 	case bindingSource:
 		if err := ctx.ShouldBindJSON(req); err != nil {
-			ctx.JSON(statusCode, errorResponse(statusCode, errCode, errMsg, err.Error()))
+			ctx.JSON(statusCode, errorResponse(statusCode, errCode, errMsg, details))
 			return err
 		}
 	default:
@@ -166,8 +170,8 @@ type Pagination struct {
 // generatePagination returns pagination data associated with
 // totalRecords, pageID, and pageSize
 func generatePagination(totalRecords, pageID, pageSize int32) Pagination {
-	var totalPages int32 
-	if totalRecords / pageSize < 1 {
+	var totalPages int32
+	if totalRecords/pageSize < 1 {
 		totalPages = 1
 	} else {
 		totalPages = totalRecords / pageSize
@@ -179,4 +183,27 @@ func generatePagination(totalRecords, pageID, pageSize int32) Pagination {
 		HasNext:      totalPages > pageID,
 		HasPrevious:  pageID > 1,
 	}
+}
+
+// pgxError handles database error, returns true if error is a pgxError
+// else returns false
+func pgxError(ctx *gin.Context, err error, msg, errDetails string) bool {
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) && pgErr.Code == pgerrcode.UniqueViolation {
+		statusCode = http.StatusConflict
+		errCode = "STATUS_CONFLICT"
+		errMsg = msg
+		details = errDetails
+		ctx.JSON(statusCode, errorResponse(statusCode, errCode, errMsg, details))
+		return true
+	}
+	if errors.Is(err, pgx.ErrNoRows) {
+		statusCode = http.StatusNotFound
+		errCode = "NOT_FOUND"
+		errMsg = msg
+		details = errDetails
+		ctx.JSON(statusCode, errorResponse(statusCode, errCode, errMsg, details))
+		return true
+	}
+	return false
 }
