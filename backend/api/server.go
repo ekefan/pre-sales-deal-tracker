@@ -50,7 +50,7 @@ func (server *Server) setupRouter() {
 	authGrp.GET("/users/:user_id", server.getUsersByID)
 	authGrp.PUT("/users/:user_id", server.updateUsers)
 	authGrp.DELETE("/users/:user_id", server.deleteUsers)
-	// authGrp.PATCH("/users/:user_id/password/reset", server.resetUserPassword)
+	authGrp.PATCH("/users/:user_id/password/reset", server.resetUserPassword)
 	authGrp.PATCH("/users/:user_id/password", server.updateUserPassword)
 	server.router = router
 	slog.Info("Router is setup and ready to run")
