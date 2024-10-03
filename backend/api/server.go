@@ -48,6 +48,7 @@ func (server *Server) setupRouter() {
 	authGrp.POST("/users", server.createUsers)
 	authGrp.GET("/users", server.retrieveUsers)
 	authGrp.GET("/users/:user_id", server.getUsersByID)
+	authGrp.PUT("/users/:user_id", server.updateUsers)
 	server.router = router
 	slog.Info("Router is setup and ready to run")
 

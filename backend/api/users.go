@@ -184,24 +184,23 @@ func (server *Server) updateUsers(ctx *gin.Context) {
 }
 
 // deleteUsers route handler for delete /users/:user_id, deletes user with user_id
-// func (server *Server) deleteUsers(ctx *gin.Context) {
-	// var req UsersIDFromUri
-	// if err := bindClientRequest(ctx, &req, uriSource); err != nil {
-		// slog.Error(err.Error())
-		// return
-	// }
-	// if !authAccess(ctx, []string{adminRole}) {
-		// return
-	// }
-	// if _, err := server.store.GetUserByID(ctx, req.UserID); err != nil {
-		// errMsg = "user not found"
-		// details = fmt.Sprintf("user with user_id: %v, not found", req.UserID)
-		// if pgxError(ctx, err, errMsg, details) {
-			// return
-		// }
-		// handleServerError(ctx, err)
-		// return
-	// }
-	// ctx.JSON(http.StatusNoContent, successMessage())
-// }
-// 
+func (server *Server) deleteUsers(ctx *gin.Context) {
+	var req UsersIDFromUri
+	if err := bindClientRequest(ctx, &req, uriSource); err != nil {
+		slog.Error(err.Error())
+		return
+	}
+	if !authAccess(ctx, []string{adminRole}) {
+		return
+	}
+	if _, err := server.store.GetUserByID(ctx, req.UserID); err != nil {
+		errMsg = "user not found"
+		details = fmt.Sprintf("user with user_id: %v, not found", req.UserID)
+		if pgxError(ctx, err, errMsg, details) {
+			return
+		}
+		handleServerError(ctx, err)
+		return
+	}
+	ctx.JSON(http.StatusNoContent, successMessage())
+}
