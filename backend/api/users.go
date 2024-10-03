@@ -256,7 +256,7 @@ func (server *Server) updateUserPassword(ctx *gin.Context) {
 		return
 	}
 }
-// 
+
 // resetUserPassword route handler for patch /users/:user_id/password
 // resets a user password
 // func (server *Server) resetUserPassword(ctx *gin.Context) {
