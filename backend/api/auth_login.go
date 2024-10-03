@@ -1,13 +1,11 @@
 package api
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v5"
 )
 
 // LogingReq holds fields required to authenticate and log in users
@@ -43,13 +41,9 @@ func (server *Server) authLogin(ctx *gin.Context) {
 
 	user, err := server.store.GetUserByUsername(ctx, req.Username)
 	if err != nil {
-
-		if errors.Is(err, pgx.ErrNoRows) {
-			statusCode = http.StatusNotFound
-			errCode = "NOT_FOUND"
-			errMsg = "resouce not found"
-			details = fmt.Sprintf("no user with username %v exists", req.Username)
-			ctx.JSON(statusCode, errorResponse(statusCode, errCode, errMsg, details))
+		errMsg = "user not found"
+		details = fmt.Sprintf("no user with username %v exists", req.Username)
+		if pgxError(ctx, err, errMsg, details) {
 			return
 		}
 		handleServerError(ctx, err)
