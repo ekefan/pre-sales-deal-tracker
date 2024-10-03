@@ -2,7 +2,9 @@ package api
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/ekefan/pre-sales-deal-tracker/backend/middleware"
@@ -12,32 +14,45 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// UserLoginResp sub field in the login response body
-type UserLoginResp struct {
-	UserID          int64   `json:"user_id"`
-	Username        string  `json:"username"`
-	Fullname        string  `json:"fullname"`
-	Role            string  `json:"role"`
-	Email           string  `json:"email"`
-	PasswordChanged bool    `json:"password_changed"`
-	UpdatedAt       *string `json:"updated_at"`
-}
+// variables for designing error responses
+var (
+	statusCode               int
+	errCode, errMsg, details string
+)
 
 // errorResponse sends custom error response to client
 // with code: a sentinel error eg. NOT_FOUND and err the error
-func errorResponse(err error, code string) gin.H {
+func errorResponse(statusCode int, code, message, details string) gin.H {
+	errResp := struct {
+		Code    string `json:"code"`
+		Message string `json:"message"`
+		Details string `json:"details"`
+	}{
+		Code:    code,
+		Message: message,
+		Details: details,
+	}
 	return gin.H{
-		"code":  code,
-		"error": err.Error(),
+		"status_code": statusCode,
+		"error":       errResp,
 	}
 }
 
-// successMessage sends a custom success response to client
-func successMessage(msg string) gin.H {
-	return gin.H{
-		"message": msg,
-	}
+// handleServerError snipet for returning server error to the client
+func handleServerError(ctx *gin.Context, err error) {
+	statusCode = http.StatusInternalServerError
+	errCode = "SERVER_ERROR"
+	errMsg = "a server error"
+	details = err.Error()
+	ctx.JSON(statusCode, errorResponse(statusCode, errCode, errMsg, details))
 }
+
+// // successMessage sends a custom success response to client
+// func successMessage(msg string) gin.H {
+// 	return gin.H{
+// 		"message": msg,
+// 	}
+// }
 
 const (
 	jsonSource = iota
@@ -45,23 +60,26 @@ const (
 	querySource
 )
 
-// bindClientRequest takes a pointer to the request and a flag	representing
-// the binding source
+// bindClientRequest binds client request to req, which must always be a pointer to the request
+// the binding source represents which kind of binding to perform on the request
 func bindClientRequest(ctx *gin.Context, req any, bindingSource int) error {
+	statusCode := http.StatusBadRequest
+	errCode := "BAD_REQUEST"
+	errMsg := "failed to bind client request"
 	switch bindingSource {
 	case uriSource:
 		if err := ctx.ShouldBindUri(req); err != nil {
-			ctx.JSON(http.StatusBadRequest, errorResponse(err, "BAD_REQUEST"))
+			ctx.JSON(statusCode, errorResponse(statusCode, errCode, errMsg, err.Error()))
 			return err
 		}
 	case querySource:
 		if err := ctx.ShouldBindQuery(req); err != nil {
-			ctx.JSON(http.StatusBadRequest, errorResponse(err, "BAD_REQUEST"))
+			ctx.JSON(statusCode, errorResponse(statusCode, errCode, errMsg, err.Error()))
 			return err
 		}
 	case bindingSource:
 		if err := ctx.ShouldBindJSON(req); err != nil {
-			ctx.JSON(http.StatusBadRequest, errorResponse(err, "BAD_REQUEST"))
+			ctx.JSON(statusCode, errorResponse(statusCode, errCode, errMsg, err.Error()))
 			return err
 		}
 	default:
@@ -87,11 +105,11 @@ func ValidatePassword(hash, password string) error {
 
 // Config holds environment variables needed to run server
 type Config struct {
-	SymmetricKey string `mapstructure:"SYMMETRIC_KEY"`
-	ServerAddres string `mapstructure:"SERVER_ADDRESS"`
-	DatabaseSource  string `mapstructure:"DATABASE_SOURCE"`
-	MigrationSource string `mapstructure:"MIGRATION_SOURCE"`
-	TokenDuration time.Duration `mapstructure:"TOKEN_DURATION"`
+	SymmetricKey    string        `mapstructure:"SYMMETRIC_KEY"`
+	ServerAddres    string        `mapstructure:"SERVER_ADDRESS"`
+	DatabaseSource  string        `mapstructure:"DATABASE_SOURCE"`
+	MigrationSource string        `mapstructure:"MIGRATION_SOURCE"`
+	TokenDuration   time.Duration `mapstructure:"TOKEN_DURATION"`
 }
 
 // ReadConfigFiles uses viper to read environment config or variables into Config
@@ -127,7 +145,38 @@ func authAccess(ctx *gin.Context, roles []string) bool {
 			return true
 		}
 	}
-	ctx.JSON(http.StatusUnauthorized,
-		errorResponse(errors.New("user not authorized to access resource"), "UNAUTHORIZED"))
+	errMsg := "user not authorized to access resource"
+	errCode := "FORBIDDEN"
+	errDetail := fmt.Sprintf("resource can only be accessed by user with such role: %v", strings.Join(roles, ", "))
+	statusCode := http.StatusForbidden
+	ctx.JSON(statusCode,
+		errorResponse(statusCode, errCode, errMsg, errDetail))
 	return false
+}
+
+// Pagination holds pagination data for users resource
+type Pagination struct {
+	TotalRecords int32 `json:"total_records"`
+	CurrentPage  int32 `json:"current_page"`
+	TotalPages   int32 `json:"total_pages"`
+	HasNext      bool  `json:"has_next"`
+	HasPrevious  bool  `json:"has_previous"`
+}
+
+// generatePagination returns pagination data associated with
+// totalRecords, pageID, and pageSize
+func generatePagination(totalRecords, pageID, pageSize int32) Pagination {
+	var totalPages int32 
+	if totalRecords / pageSize < 1 {
+		totalPages = 1
+	} else {
+		totalPages = totalRecords / pageSize
+	}
+	return Pagination{
+		TotalRecords: totalRecords,
+		CurrentPage:  pageID,
+		TotalPages:   totalPages,
+		HasNext:      totalPages > pageID,
+		HasPrevious:  pageID > 1,
+	}
 }
