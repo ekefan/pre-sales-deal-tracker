@@ -3,6 +3,7 @@ package api
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strings"
 	"time"
@@ -46,16 +47,17 @@ func handleServerError(ctx *gin.Context, err error) {
 	statusCode = http.StatusInternalServerError
 	errCode = "SERVER_ERROR"
 	errMsg = "a server error"
-	details = err.Error()
+	details = "server failed to while handling request"
+	slog.Error(err.Error())
 	ctx.JSON(statusCode, errorResponse(statusCode, errCode, errMsg, details))
 }
 
-// // successMessage sends a custom success response to client
-// func successMessage(msg string) gin.H {
-// 	return gin.H{
-// 		"message": msg,
-// 	}
-// }
+// successMessage sends a custom success response to client
+func successMessage() gin.H {
+	return gin.H{
+		"message": "successful",
+	}
+}
 
 const (
 	jsonSource = iota
@@ -63,8 +65,8 @@ const (
 	querySource
 )
 
-// bindClientRequest binds client request to req, which must always be a pointer to the request
-// the binding source represents which kind of binding to perform on the request
+// bindClientRequest binds client request to req, which must always be a pointer to the request struct
+// the binding source represents the kind of binding to perform on the request
 func bindClientRequest(ctx *gin.Context, req any, bindingSource int) error {
 	statusCode := http.StatusBadRequest
 	errCode := "BAD_REQUEST"
