@@ -92,25 +92,42 @@ func (q *Queries) GetUserByID(ctx context.Context, id int64) (User, error) {
 }
 
 const listAllUsers = `-- name: ListAllUsers :many
-SELECT id, username, role, full_name, email, password, password_changed, updated_at, created_at from users
+SELECT id AS user_id, username, role, email, full_name, password_changed, updated_at, created_at from users
+LIMIT $1
+OFFSET $2
 `
 
-func (q *Queries) ListAllUsers(ctx context.Context) ([]User, error) {
-	rows, err := q.db.Query(ctx, listAllUsers)
+type ListAllUsersParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+type ListAllUsersRow struct {
+	UserID          int64            `json:"user_id"`
+	Username        string           `json:"username"`
+	Role            string           `json:"role"`
+	Email           string           `json:"email"`
+	FullName        string           `json:"full_name"`
+	PasswordChanged bool             `json:"password_changed"`
+	UpdatedAt       pgtype.Timestamp `json:"updated_at"`
+	CreatedAt       pgtype.Timestamp `json:"created_at"`
+}
+
+func (q *Queries) ListAllUsers(ctx context.Context, arg ListAllUsersParams) ([]ListAllUsersRow, error) {
+	rows, err := q.db.Query(ctx, listAllUsers, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []User{}
+	items := []ListAllUsersRow{}
 	for rows.Next() {
-		var i User
+		var i ListAllUsersRow
 		if err := rows.Scan(
-			&i.ID,
+			&i.UserID,
 			&i.Username,
 			&i.Role,
-			&i.FullName,
 			&i.Email,
-			&i.Password,
+			&i.FullName,
 			&i.PasswordChanged,
 			&i.UpdatedAt,
 			&i.CreatedAt,
