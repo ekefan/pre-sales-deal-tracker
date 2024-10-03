@@ -33,12 +33,7 @@ docker compose up -d --build
 - You can read more about docker compose [here](https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-docker-compose/)
 - If the image build is successful you can send requests the server
 
+- As mentioned above the app starts with a predefined admin user, whose `username is josh` and password is the default password for every user
+
 <!-- # FIXME: -->
-<!-- Done.... -->
-<!-- And for the last statment, I get you man 100% -->
-- The swagger UI should show a padlock close to the restricted routes. I don't remember how to do it but I know you can 😄
-- In the request `models` you can mark the required fields as required. They will have a red star close to them
-- The `pitch_requests` endpoint exposes a `PATCH` but should be a `PUT` since you're accepting the whole resource.
-- The same as before applies for the `deals` endpoint
 - The `error` response should have a `code` string field that is like a sentinel errors. Sentinel errors are the ones we're expecting to happen such as `NOT_FOUND`, `VALIDATION`, `NETWORK_CONNECTION`. Potentially, they could be shared with the client that relies logic against
-- Keep this in mind, the `swagger.yml` is a contract we share with the FE team but it's not something written on the stones. It should seldomnly change.
