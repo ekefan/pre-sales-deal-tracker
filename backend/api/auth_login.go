@@ -11,7 +11,7 @@ import (
 // LogingReq holds fields required to authenticate and log in users
 type LoginReq struct {
 	Username string `json:"username" binding:"required,alphanum,gte=4,lte=6"`
-	Password string `json:"password" binding:"required,alphanum"`
+	Password string `json:"password" binding:"required"`
 }
 
 // UserLoginResp sub field in the login response body

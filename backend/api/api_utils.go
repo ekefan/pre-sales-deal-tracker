@@ -55,7 +55,7 @@ func handleServerError(ctx *gin.Context, err error) {
 // successMessage sends a custom success response to client
 func successMessage() gin.H {
 	return gin.H{
-		"message": "successful",
+		"message": "success",
 	}
 }
 

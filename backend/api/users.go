@@ -147,7 +147,7 @@ func (server *Server) updateUsers(ctx *gin.Context) {
 	uriErr := bindClientRequest(ctx, &reqUri, uriSource)
 	reqBodyErr := bindClientRequest(ctx, &reqBody, jsonSource)
 	if uriErr != nil || reqBodyErr != nil {
-		slog.Error("failed to bind client request", "uri error", uriErr.Error(), "req body err", reqBodyErr.Error())
+		slog.Error("failed to bind client request", "uri error", uriErr, "req body err", reqBodyErr)
 		return
 	}
 
@@ -190,6 +190,7 @@ func (server *Server) deleteUsers(ctx *gin.Context) {
 		slog.Error(err.Error())
 		return
 	}
+
 	if !authAccess(ctx, []string{adminRole}) {
 		return
 	}
@@ -199,6 +200,10 @@ func (server *Server) deleteUsers(ctx *gin.Context) {
 		if pgxError(ctx, err, errMsg, details) {
 			return
 		}
+		handleServerError(ctx, err)
+		return
+	}
+	if err := server.store.DeleteUser(ctx, req.UserID); err != nil {
 		handleServerError(ctx, err)
 		return
 	}
@@ -221,7 +226,7 @@ func (server *Server) updateUserPassword(ctx *gin.Context) {
 	uriErr := bindClientRequest(ctx, &reqUri, uriSource)
 	reqBodyErr := bindClientRequest(ctx, &reqBody, jsonSource)
 	if uriErr != nil || reqBodyErr != nil {
-		slog.Error("failed to bind client request", "uri error", uriErr.Error(), "req body err", reqBodyErr.Error())
+		slog.Error("failed to bind client request", "uri error", uriErr, "req body err", reqBodyErr)
 		return
 	}
 
@@ -247,9 +252,16 @@ func (server *Server) updateUserPassword(ctx *gin.Context) {
 		ctx.JSON(statusCode, errorResponse(statusCode, errCode, errMsg, details))
 		return
 	}
+
+	hash, err := HashPassword(reqBody.NewPassword)
+	if err != nil {
+		handleServerError(ctx, err)
+		return
+	}
+	
 	if err := server.store.UpdateUserPassword(ctx, db.UpdateUserPasswordParams{
-		ID: reqUri.UserID,
-		Password: reqBody.NewPassword,
+		ID:              reqUri.UserID,
+		Password:        hash,
 		PasswordChanged: true,
 	}); err != nil {
 		handleServerError(ctx, err)
@@ -260,8 +272,7 @@ func (server *Server) updateUserPassword(ctx *gin.Context) {
 // resetUserPassword route handler for patch /users/:user_id/password
 // resets a user password
 func (server *Server) resetUserPassword(ctx *gin.Context) {
-	var
-		reqUri  UsersIDFromUri
+	var reqUri UsersIDFromUri
 
 	uriErr := bindClientRequest(ctx, &reqUri, uriSource)
 	if uriErr != nil {
@@ -282,9 +293,14 @@ func (server *Server) resetUserPassword(ctx *gin.Context) {
 		handleServerError(ctx, err)
 		return
 	}
+	hash, err := HashPassword(db.DefaultUserPassword)
+	if err != nil {
+		handleServerError(ctx, err)
+		return
+	}
 	if err := server.store.UpdateUserPassword(ctx, db.UpdateUserPasswordParams{
-		ID: reqUri.UserID,
-		Password:db.DefaultUserPassword,
+		ID:              reqUri.UserID,
+		Password:        hash,
 		PasswordChanged: false,
 	}); err != nil {
 		handleServerError(ctx, err)
