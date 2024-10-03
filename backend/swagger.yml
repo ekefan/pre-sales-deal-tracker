@@ -38,7 +38,7 @@ paths:
         200:
           description: |
             user was successfully logged in
-            Note: if the password_changed field in user_data is false, there will be no updated_at field
+            Note: if the user has never updated been updated, updated_at field will be null
             An example: 
               "user_data": {
                 "user_id": 2,
@@ -47,6 +47,7 @@ paths:
                 "role": "sales",
                 "email": "lily@gmail.com",
                 "password_changed": false,
+                "updated_at": null
               }
               
             Because the password_changed is false, the user_data would have no updated_at field
@@ -93,10 +94,13 @@ paths:
           schema:
             $ref: "#/definitions/errorResponse"
         401:
-          description: unauthorized, the user with an invalid access token accessed the end point
+          description: unauthorized, invalid access token
           schema:
             $ref: "#/definitions/errorResponse"
-
+        403:
+          description: forbidden, user is not authorized to access this resource
+          schema:
+            $ref: '#/definitions/errorResponse'
         409:
           description: a user with already exists with similar req details
           schema:
@@ -129,6 +133,7 @@ paths:
           type: integer
           default: 10
           minimum: 5
+          maximum: 10
       responses:
         200:
           description: successfull request
@@ -151,6 +156,10 @@ paths:
           description: unauthorized access, request from a user who's role is not admin
           schema:
             $ref: "#/definitions/errorResponse"
+        403:
+          description: forbidden, user is not authorized to access this resource
+          schema:
+            $ref: '#/definitions/errorResponse'
         500:
           description: server error
           schema:
@@ -178,6 +187,10 @@ paths:
           description: invalid request parameter, user an integer greater than zero
           schema:
             $ref: "#/definitions/errorResponse"
+        403:
+          description: forbidden, user is not authorized to access this resource
+          schema:
+            $ref: '#/definitions/errorResponse'
         404:
           description: resource with user_id not found
           schema:
@@ -219,6 +232,10 @@ paths:
           description: unauthorized access, request from a user who's role is not admin
           schema:
             $ref: "#/definitions/errorResponse"
+        403:
+          description: forbidden, user is not authorized to access this resource
+          schema:
+            $ref: '#/definitions/errorResponse'
         404:
           description: resource not found
           schema:
@@ -255,6 +272,14 @@ paths:
           description: invalid request parameter, user an integer greater than zero
           schema:
             $ref: "#/definitions/errorResponse"
+        401:
+          description: unauthorized
+          schema:
+            $ref: "#/definitions/errorResponse"
+        403:
+          description: forbidden, user is not authorized to access this resource
+          schema:
+            $ref: '#/definitions/errorResponse'
         404:
           description: resource doesn't exist
           schema:
@@ -292,6 +317,10 @@ paths:
           description: unauthorized
           schema:
             $ref: "#/definitions/errorResponse"
+        403:
+          description: forbidden, user is not authorized to access this resource
+          schema:
+            $ref: '#/definitions/errorResponse'
         404:
           description: resource doesn't exist
           schema:
@@ -331,6 +360,10 @@ paths:
               - user_id: Must be an integer greater than 0
               - old_password: A string representing the user's current password
               - new_password: A string representing the password the user wants to change to
+        403:
+          description: forbidden, user is not authorized to access this resource
+          schema:
+            $ref: "#/definitions/errorResponse"
         404:
           description: resource not found
           schema:
@@ -365,6 +398,10 @@ paths:
             $ref: "#/definitions/errorResponse"
         401:
           description: unauthorize, auth token invalid or not provided
+          schema:
+            $ref: "#/definitions/errorResponse"
+        403:
+          description: forbidden, user is not authorized to access this resource
           schema:
             $ref: "#/definitions/errorResponse"
         500:
@@ -415,6 +452,10 @@ paths:
           description: unauthorize, auth token invalid or not provided
           schema:
             $ref: "#/definitions/errorResponse"
+        403:
+          description: forbidden, user is not authorized to access this resource
+          schema:
+            $ref: "#/definitions/errorResponse"
         500:
           description: server error
           schema:
@@ -459,6 +500,10 @@ paths:
           description: unauthorize, auth token invalid or not provided
           schema:
             $ref: "#/definitions/errorResponse"
+        403:
+          description: forbidden, user is not authorized to access this resource
+          schema:
+            $ref: "#/definitions/errorResponse"
         404:
           description: resource not found
           schema:
@@ -496,6 +541,10 @@ paths:
           description: unauthorize, auth token invalid or not provided
           schema:
             $ref: "#/definitions/errorResponse"
+        403:
+          description: forbidden, user is not authorized to access this resource
+          schema:
+            $ref: "#/definitions/errorResponse"
         404:
           description: resource not found
           schema:
@@ -530,6 +579,10 @@ paths:
             $ref: "#/definitions/errorResponse"
         401:
           description: unauthorized, access_token is invalid or not provided
+        403:
+          description: forbidden, user is not authorized to access this resource
+          schema:
+            $ref: "#/definitions/errorResponse"
         404:
           description: resource not found
           schema:
@@ -588,6 +641,10 @@ paths:
           description: unauthorized, auth token invalid or not provided
           schema:
             $ref: "#/definitions/errorResponse"
+        403:
+          description: forbidden, user is not authorized to access this resource
+          schema:
+            $ref: "#/definitions/errorResponse"
         500:
           description: server error
           schema:
@@ -627,6 +684,10 @@ paths:
           description: unauthorized, auth token invalid or not provided
           schema:
             $ref: "#/definitions/errorResponse"
+        403:
+          description: forbidden, user is not authorized to access this resource
+          schema:
+            $ref: "#/definitions/errorResponse"
         404:
           description: resource not found
           schema:
@@ -662,6 +723,10 @@ paths:
           description: unauthorized, auth token invalid or not provided
           schema:
             $ref: "#/definitions/errorResponse"
+        403:
+          description: forbidden, user is not authorized to access this resource
+          schema:
+            $ref: "#/definitions/errorResponse"
         404:
           description: resource not found
           schema:
@@ -684,6 +749,8 @@ definitions:
       username:
         type: string
         default: lily
+        minLength: 4
+        maxLength: 6
       fullname:
         type: string
         default: Lily Wise
@@ -709,13 +776,23 @@ definitions:
   errorResponse:
     type: object
     properties:
-      code:
-        type: string
-        description: Error code for client login (e.g, NOT_FOUND, VALIDATION_ERROR, NETWORK_CONECTION)
-        default: SENTINEL_ERROR
+      status_code:
+        type: integer
+        description: standard http response status code
       error:
-        type: string
-        default: the defined error, aa human readable error message
+        type: object
+        properties:
+          code:
+            type: string
+            description: sentinel description for standard http response codes
+          message:
+            type: string
+            description: a human read able message describing the error
+            default: a human readable message describing the error
+          details:
+            type: string
+            description: possible reasons why the error occurred
+            default: possible reason the error occurred
   user_data:
     type: object
     properties:
