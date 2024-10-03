@@ -38,19 +38,7 @@ paths:
         200:
           description: |
             user was successfully logged in
-            Note: if the user has never updated been updated, updated_at field will be null
-            An example: 
-              "user_data": {
-                "user_id": 2,
-                "usernme": "lily",
-                "fullname": "Lily Wise",
-                "role": "sales",
-                "email": "lily@gmail.com",
-                "password_changed": false,
-                "updated_at": null
-              }
-              
-            Because the password_changed is false, the user_data would have no updated_at field
+            Note: if resource has not been updated, the updated_at field will be same as the created_at field.
           schema:
             $ref: "#/definitions/loginResp"
         400:
@@ -121,14 +109,14 @@ paths:
       parameters:
         - name: page_id
           in: query
-          description: the pagination offset, identifies sequentially the page to get
+          description: minimum is 1, the pagination offset, sequestially identifies the page to get
           required: true
           type: integer
           default: 1
           minimum: 1
         - name: page_size
           in: query
-          description: the pagination limit, identifies the number of resources in one page
+          description: should be 10, the pagination limit, identifies the number of resources in one page
           required: true
           type: integer
           default: 10
@@ -751,7 +739,7 @@ definitions:
         default: lily
         minLength: 4
         maxLength: 6
-      fullname:
+      full_name:
         type: string
         default: Lily Wise
       email:
@@ -803,7 +791,7 @@ definitions:
       username:
         type: string
         default: lily
-      fullname:
+      full_name:
         type: string
         default: Lily Wise
       role:
@@ -814,10 +802,13 @@ definitions:
         default: lily@gmail.com
       password_changed:
         type: boolean
-        default: true
+        default: false
       updated_at:
         type: string
-        default: 2024-09-09 04:05:09
+        default: 2024-09-09T04:05:09Z
+      created_at:
+        type: string
+        default: 2024-09-09T04:05:09Z
   loginReq:
     type: object
     properties:
@@ -933,7 +924,7 @@ definitions:
         default: costing
       admin_deadline:
         type: string
-        default: 2024-09-29 09:06:09
+        default: 2024-09-29T09:06:09Z
         description: datetime
       admin_viewed:
         type: boolean
@@ -980,17 +971,17 @@ definitions:
         default: costing
       admin_deadline:
         type: string
-        default: 2024-09-29 09:06:09
+        default: 2024-09-29T09:06:09Z
         description: datetime
       admin_viewed:
         type: boolean
         default: false
       updated_at:
         type: string
-        default: 2024-09-29 09:06:09
+        default: 2024-09-29T09:06:09Z
       created_at:
         type: string
-        default: 2024-09-28 09:06:09
+        default: 2024-09-28T09:06:09Z
   createDealReq:
     type: object
     properties:
@@ -1048,10 +1039,10 @@ definitions:
         default: false
       created_at:
         type: string
-        default: 2024-09-05 09:08:05
+        default: 2024-09-05T09:08:05Z
       updated_at:
         type: string
-        default: 2024-09-06 10:08:05
+        default: 2024-09-06T10:08:05Z
   updateDealsReq:
     type: object
     properties:
