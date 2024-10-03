@@ -47,6 +47,7 @@ func (server *Server) setupRouter() {
 	authGrp.Use(middleware.UserAuthorization(server.tokenGenerator))
 	authGrp.POST("/users", server.createUsers)
 	authGrp.GET("/users", server.retrieveUsers)
+	authGrp.GET("/users/:user_id", server.getUsersByID)
 	server.router = router
 	slog.Info("Router is setup and ready to run")
 

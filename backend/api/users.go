@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"time"
 
 	db "github.com/ekefan/pre-sales-deal-tracker/backend/db/sqlc"
 	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgerrcode"
-	"github.com/jackc/pgx/v5/pgconn"
 )
 
 // CreateUserReq holds fields needed to create a user resource
@@ -20,7 +19,7 @@ type CreateUserReq struct {
 	Role     string `json:"role" binding:"required,oneof=admin sales manager"`
 }
 
-// createUser api handler for creating user resource
+// createUser route handler post /users, creates users resource
 func (server *Server) createUsers(ctx *gin.Context) {
 	var req CreateUserReq
 	if err := bindClientRequest(ctx, &req, jsonSource); err != nil {
@@ -43,14 +42,10 @@ func (server *Server) createUsers(ctx *gin.Context) {
 		Password: hash,
 	})
 	if err != nil {
-		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) && pgErr.Code == pgerrcode.UniqueViolation {
+		errMsg = "can not create user"
+		details = fmt.Sprintf("user exists with %v or %v", req.Email, req.Username)
+		if pgxError(ctx, err, errMsg, details) {
 			slog.Warn("user already exist", "username", req.Username, "email", req.Email)
-			statusCode = http.StatusConflict
-			errCode = "STATUS_CONFLICT"
-			errMsg = "can not create user"
-			details = fmt.Sprintf("user exists with %v or %v", req.Email, req.Username)
-			ctx.JSON(statusCode, errorResponse(statusCode, errCode, errMsg, details))
 			return
 		}
 		slog.Error("Failed to create user", "error", err.Error())
@@ -67,10 +62,11 @@ type GetUsersReq struct {
 	PageSize int32 `form:"page_size" binding:"required,gte=5,lte=10"`
 }
 
-// retrieveUsers route handler for get /users endpoint
+// retrieveUsers route handler for get /users, retrieves all users
 func (server *Server) retrieveUsers(ctx *gin.Context) {
 	var req GetUsersReq
 	if err := bindClientRequest(ctx, &req, querySource); err != nil {
+		slog.Error(err.Error())
 		return
 	}
 	if !authAccess(ctx, []string{adminRole}) {
@@ -84,7 +80,7 @@ func (server *Server) retrieveUsers(ctx *gin.Context) {
 	}
 
 	users, err := server.store.ListAllUsers(ctx, db.ListAllUsersParams{
-		Limit: req.PageSize,
+		Limit:  req.PageSize,
 		Offset: req.PageSize * (req.PageID - 1),
 	})
 	if err != nil {
@@ -93,11 +89,51 @@ func (server *Server) retrieveUsers(ctx *gin.Context) {
 	}
 
 	resp := struct {
-		Data []db.ListAllUsersRow `json:"data"`
+		Data       []db.ListAllUsersRow `json:"data"`
 		Pagination `json:"pagination"`
 	}{
-		Data: users,
+		Data:       users,
 		Pagination: generatePagination(int32(totalUsers), req.PageID, req.PageSize),
 	}
 	ctx.JSON(http.StatusOK, resp)
+}
+
+// UsersIDFromUri holds the uri field user_id
+type UsersIDFromUri struct {
+	UserID int64 `uri:"user_id"`
+}
+
+
+// getUsersByID route handler for get /users/:user_id, retrieves users by user_id
+func (server *Server) getUsersByID(ctx *gin.Context) {
+	var req UsersIDFromUri
+	if err := bindClientRequest(ctx, &req, uriSource); err != nil {
+		slog.Error(err.Error())
+		return
+	}
+	if !authAccess(ctx, []string{adminRole, salesRole, managerRole}) {	
+		return
+	}
+	user, err := server.store.GetUserByID(ctx, req.UserID)
+	if err != nil {
+		errMsg = "user not found"
+		details = fmt.Sprintf("user with user_id: %v, not found", req.UserID)
+		if pgxError(ctx, err, errMsg, details) {
+			return
+		}
+		handleServerError(ctx, err)
+		return
+	}
+	resp := db.ListAllUsersRow{
+		UserID: user.ID,
+		Username: user.Username,
+		FullName: user.FullName,
+		Role: user.Role,
+		Email: user.Email,
+		PasswordChanged: user.PasswordChanged,
+		CreatedAt: user.CreatedAt.Time.Format(time.RFC3339),
+		UpdatedAt: user.UpdatedAt.Time.Format(time.RFC3339),
+	}
+	ctx.JSON(http.StatusOK, resp)
+
 }
