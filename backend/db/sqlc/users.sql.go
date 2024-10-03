@@ -92,7 +92,16 @@ func (q *Queries) GetUserByID(ctx context.Context, id int64) (User, error) {
 }
 
 const listAllUsers = `-- name: ListAllUsers :many
-SELECT id AS user_id, username, role, email, full_name, password_changed, updated_at, created_at from users
+SELECT 
+    id AS user_id,
+    username,
+    role,
+    email,
+    full_name,
+    password_changed,
+    to_char(updated_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS updated_at,
+    to_char(created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS created_at
+FROM users
 LIMIT $1
 OFFSET $2
 `
@@ -103,14 +112,14 @@ type ListAllUsersParams struct {
 }
 
 type ListAllUsersRow struct {
-	UserID          int64            `json:"user_id"`
-	Username        string           `json:"username"`
-	Role            string           `json:"role"`
-	Email           string           `json:"email"`
-	FullName        string           `json:"full_name"`
-	PasswordChanged bool             `json:"password_changed"`
-	UpdatedAt       pgtype.Timestamp `json:"updated_at"`
-	CreatedAt       pgtype.Timestamp `json:"created_at"`
+	UserID          int64  `json:"user_id"`
+	Username        string `json:"username"`
+	Role            string `json:"role"`
+	Email           string `json:"email"`
+	FullName        string `json:"full_name"`
+	PasswordChanged bool   `json:"password_changed"`
+	UpdatedAt       string `json:"updated_at"`
+	CreatedAt       string `json:"created_at"`
 }
 
 func (q *Queries) ListAllUsers(ctx context.Context, arg ListAllUsersParams) ([]ListAllUsersRow, error) {

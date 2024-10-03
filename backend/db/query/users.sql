@@ -10,9 +10,20 @@ RETURNING users.id;
 SELECT COUNT(*) FROM users;
 
 -- name: ListAllUsers :many
-SELECT id AS user_id, username, role, email, full_name, password_changed, updated_at, created_at from users
+SELECT 
+    id AS user_id,
+    username,
+    role,
+    email,
+    full_name,
+    password_changed,
+    to_char(updated_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS updated_at,
+    to_char(created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS created_at
+FROM users
 LIMIT $1
 OFFSET $2;
+
+
 
 -- name: GetUserByID :one
 SELECT * FROM users
