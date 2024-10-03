@@ -71,7 +71,7 @@ paths:
             holds the data - username, fullname, email and role, needed to create a user.
           required: true
           schema:
-            $ref: "#/definitions/createUserReq"
+            $ref: "#/definitions/userReq"
       responses:
         201:
           description: user was successfully created, response body holds username and in the header the location to get the resource
@@ -206,7 +206,7 @@ paths:
           in: body
           required: true
           schema:
-            $ref: "#/definitions/updateUserReq"
+            $ref: "#/definitions/userReq"
       responses:
         204:
           description: update was successful
@@ -731,7 +731,7 @@ definitions:
       message:
         type: string
         default: successful
-  createUserReq:
+  userReq:
     type: object
     properties:
       username:
@@ -852,26 +852,6 @@ definitions:
       has_previous:
         type: boolean
         default: false
-  updateUserReq:
-    type: object
-    properties:
-      username:
-        type: string
-        default: lily
-      fullname:
-        type: string
-        default: Lily Foe
-      role:
-        type: string
-        default: sales
-      email:
-        type: string
-        default: lily@gmail.com
-    required:
-      - username
-      - fullname
-      - role
-      - email
   updatePasswordReq:
     type: object
     properties:
