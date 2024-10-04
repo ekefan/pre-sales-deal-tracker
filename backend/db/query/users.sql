@@ -29,10 +29,11 @@ OFFSET $2;
 SELECT * FROM users
 WHERE id = $1;
 
--- name: UpdateUser :exec
+-- name: UpdateUser :one
 UPDATE users 
-SET username = $2, full_name = $3, role = $4, email = $5, updated_at = $6
-WHERE id = $1;
+ SET username = $2, full_name = $3, role = $4, email = $5, updated_at = NOW()
+WHERE id = $1
+RETURNING *;
 
 -- name: DeleteUser :exec
 DELETE FROM users WHERE id = $1;
