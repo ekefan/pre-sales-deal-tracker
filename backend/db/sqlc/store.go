@@ -15,7 +15,7 @@ const (
 // executes queries and transactions
 type Store interface {
 	Querier
-	UpdateUserTx(ctx context.Context, args UpdateUserParams) error
+	UpdateUserTx(ctx context.Context, args UpdateUserTxParams) error
 }
 
 // SqlStore holds fields required to interact with database
@@ -47,6 +47,6 @@ func (store *SqlStore) execTx(ctx context.Context, fn func(*Queries) error) erro
 		}
 		return err
 	}
-
+	
 	return tx.Commit(ctx)
 }
