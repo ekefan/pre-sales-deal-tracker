@@ -28,18 +28,22 @@ type UserLoginResp struct {
 
 // LoginResp holds the fields in the response body if login is successful
 type LoginResp struct {
-	AccessToken string        `json:"access_token"`
-	UserData    UserLoginResp `json:"user_data"`
+	AccessToken string `json:"access_token"`
+	// TODO: are we sure we need to send back also this data when the user sign in?
+	UserData UserLoginResp `json:"user_data"`
 }
 
 // authLogin handles client log in
 func (server *Server) authLogin(ctx *gin.Context) {
 	var req LoginReq
+	// FIXME: it seems overcomplicated this function.
+	// You're using the Gin Web framework, you should use its tools. Try to simplify the code
 	if err := bindClientRequest(ctx, &req, jsonSource); err != nil {
 		return
 	}
 
 	user, err := server.store.GetUserByUsername(ctx, req.Username)
+	// FIXME: you should use errors.Is or errors.As to type check your error.
 	if err != nil {
 		errMsg = "user not found"
 		details = fmt.Sprintf("no user with username %v exists", req.Username)

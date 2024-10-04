@@ -26,6 +26,7 @@ var (
 
 // errorResponse sends custom error response to client
 // with code: a sentinel error eg. NOT_FOUND and err the error
+// FIXME: create a struct exposed to hold the error. Then, create a "constructor" function to instantiate it.
 func errorResponse(statusCode int, code, message, details string) gin.H {
 	errResp := struct {
 		Code    string `json:"code"`
@@ -37,6 +38,7 @@ func errorResponse(statusCode int, code, message, details string) gin.H {
 		Details: details,
 	}
 	return gin.H{
+		// FIXME: it's redundant. We already have this information in the response Status Code Header.
 		"status_code": statusCode,
 		"error":       errResp,
 	}
@@ -67,6 +69,7 @@ const (
 
 // bindClientRequest binds client request to req, which must always be a pointer to the request struct
 // the binding source represents the kind of binding to perform on the request
+// FIXME: here you're doing too many things: bind the client request and setting the response payload.
 func bindClientRequest(ctx *gin.Context, req any, bindingSource int) error {
 	statusCode := http.StatusBadRequest
 	errCode := "BAD_REQUEST"

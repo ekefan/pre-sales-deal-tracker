@@ -3,14 +3,17 @@ package token
 import (
 	"fmt"
 	"time"
+
+	// FIXME: watch out these libraries. They're extremely old and they're not receiving updates for a while.
+	// Stick to popular packages whenever you can
 	"github.com/aead/chacha20poly1305"
 	"github.com/o1egl/paseto"
 )
 
 // PasetoGenerator is a PASETO token maker
 type PasetoGenerator struct {
-	pasetoVersion       *paseto.V2
-	symmetricKey []byte
+	pasetoVersion *paseto.V2
+	symmetricKey  []byte
 }
 
 // NewPasetoMaker creates a new PasetoMaker
@@ -20,8 +23,8 @@ func NewPasetoGenerator(symmetricKey string) (TokenGenerator, error) {
 	}
 
 	tokenGenerator := &PasetoGenerator{
-		pasetoVersion:       paseto.NewV2(),
-		symmetricKey: []byte(symmetricKey),
+		pasetoVersion: paseto.NewV2(),
+		symmetricKey:  []byte(symmetricKey),
 	}
 
 	return tokenGenerator, nil

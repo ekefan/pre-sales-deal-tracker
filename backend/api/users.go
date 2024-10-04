@@ -20,6 +20,8 @@ type UserReq struct {
 }
 
 // createUser route handler post /users, creates users resource
+// FIXME: singular noun.
+// FIXME: present the user with the invalid fields. How can I know what fields should be changed or filled in?
 func (server *Server) createUsers(ctx *gin.Context) {
 	var req UserReq
 	if err := bindClientRequest(ctx, &req, jsonSource); err != nil {
@@ -63,17 +65,21 @@ type GetUsersReq struct {
 }
 
 // retrieveUsers route handler for get /users, retrieves all users
+// FIXME: you should either make params required or provide a default value. They're mutually exclusive.
+// I believe it's better to leave the default value here.
 func (server *Server) retrieveUsers(ctx *gin.Context) {
 	var req GetUsersReq
 	if err := bindClientRequest(ctx, &req, querySource); err != nil {
 		slog.Error(err.Error())
 		return
 	}
+	// FIXME: this logic should be moved in a middleware and abort the request if it doesn't have permissions to perform it. You're bloating the code around.
 	if !authAccess(ctx, []string{adminRole}) {
 		return
 	}
 
-	totalUsers, err := server.store.GetTotalNumOfUsers(ctx) //totalUsers
+	// BUG: you're doing two calls for this operation that can be done at once. You're interacting with the DB one time more than needed.
+	totalUsers, err := server.store.GetTotalNumOfUsers(ctx) // totalUsers
 	if err != nil {
 		handleServerError(ctx, errors.New("can not retrieve resource from database"))
 		return
@@ -89,7 +95,8 @@ func (server *Server) retrieveUsers(ctx *gin.Context) {
 	}
 
 	resp := struct {
-		Data       []db.ListAllUsersRow `json:"data"`
+		Data []db.ListAllUsersRow `json:"data"`
+		// BUG: pagination info should be listed first
 		Pagination `json:"pagination"`
 	}{
 		Data:       users,
@@ -104,6 +111,7 @@ type UsersIDFromUri struct {
 }
 
 // getUsersByID route handler for get /users/:user_id, retrieves users by user_id
+// FIXME: in the swagger you missed the 401 Unauthorized response
 func (server *Server) getUsersByID(ctx *gin.Context) {
 	var req UsersIDFromUri
 	if err := bindClientRequest(ctx, &req, uriSource); err != nil {
@@ -123,6 +131,7 @@ func (server *Server) getUsersByID(ctx *gin.Context) {
 		handleServerError(ctx, err)
 		return
 	}
+	// FIXME: try to play with the json tag annotation to hide the user password which is the field that led you creating another struct
 	resp := db.ListAllUsersRow{
 		UserID:          user.ID,
 		Username:        user.Username,
@@ -134,16 +143,19 @@ func (server *Server) getUsersByID(ctx *gin.Context) {
 		UpdatedAt:       user.UpdatedAt.Time.Format(time.RFC3339),
 	}
 	ctx.JSON(http.StatusOK, resp)
-
 }
 
 // updateUsers route handler for put /users/:user_id
+// FIXME: should be singular noun this function
+// FIXME: the status code should be 202 Accepted, or 200 OK. 204 NoContent is reserved for delete.
 func (server *Server) updateUsers(ctx *gin.Context) {
 	var (
 		reqUri  UsersIDFromUri
 		reqBody UserReq
 	)
 
+	// FIXME: pick the path param & set it to the "id" field in the request payload so the user cannot tamper the data manually.
+	// Again, use the things Gin provides you. Be more specific with the error handling.
 	uriErr := bindClientRequest(ctx, &reqUri, uriSource)
 	reqBodyErr := bindClientRequest(ctx, &reqBody, jsonSource)
 	if uriErr != nil || reqBodyErr != nil {
@@ -166,15 +178,16 @@ func (server *Server) updateUsers(ctx *gin.Context) {
 		return
 	}
 	args := db.UpdateUserParams{
-		ID: reqUri.UserID,
+		ID:       reqUri.UserID,
 		Username: reqBody.Username,
 		FullName: reqBody.FullName,
 		Role:     reqBody.Role,
 		Email:    reqBody.Email,
 	}
+	// [Q]: if we look merely to the user entity, I don't see the reason why we put it in a transaction.
 	err = server.store.UpdateUserTx(ctx, db.UpdateUserTxParams{
 		UpdateUserParams: args,
-		OldFullName: usr.FullName,
+		OldFullName:      usr.FullName,
 	})
 	if err != nil {
 		errMsg = "can not update user"
@@ -199,6 +212,7 @@ func (server *Server) deleteUsers(ctx *gin.Context) {
 	if !authAccess(ctx, []string{adminRole}) {
 		return
 	}
+	// FIXME: you're doing unnecessary operations in the DB. Delete the user right away. You can decide if trigger an error for non existing user or report success. Be gentle with the DB load.
 	if _, err := server.store.GetUserByID(ctx, req.UserID); err != nil {
 		errMsg = "user not found"
 		details = fmt.Sprintf("user with user_id: %v, not found", req.UserID)
@@ -212,6 +226,7 @@ func (server *Server) deleteUsers(ctx *gin.Context) {
 		handleServerError(ctx, err)
 		return
 	}
+	// FIXME: successMessage() could be omitted
 	ctx.JSON(http.StatusNoContent, successMessage())
 }
 
@@ -222,6 +237,7 @@ type UpdatePassowrdReq struct {
 
 // updateUserPassword route handler for patch /users/:user_id/password
 // updates a user password
+// FIXME: this route could be "/password/change" if we have the "/password/reset"
 func (server *Server) updateUserPassword(ctx *gin.Context) {
 	var (
 		reqUri  UsersIDFromUri
@@ -263,7 +279,7 @@ func (server *Server) updateUserPassword(ctx *gin.Context) {
 		handleServerError(ctx, err)
 		return
 	}
-	
+
 	if err := server.store.UpdateUserPassword(ctx, db.UpdateUserPasswordParams{
 		ID:              reqUri.UserID,
 		Password:        hash,
@@ -277,6 +293,8 @@ func (server *Server) updateUserPassword(ctx *gin.Context) {
 
 // resetUserPassword route handler for patch /users/:user_id/password
 // resets a user password
+// FIXME: reset to what? This can be omitted or merged with the "updateUserPassword".
+// Usually, it's a POST that sends a mail asking to reset the password and then you can invoke the above-mentioned PUT.
 func (server *Server) resetUserPassword(ctx *gin.Context) {
 	var reqUri UsersIDFromUri
 
