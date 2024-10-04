@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	// FIXME: you're using two logging packages. Stick to the log/slog if you can.
 	"log"
 	"log/slog"
 
@@ -12,6 +13,8 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
+
+// FIXME: I suggest you to use the "internal" pkg and expose only the needed things. By default, things should not be exposed. Then, you expose things whenever you need them to be public.
 
 func main() {
 	config, err := api.ReadConfigFiles(".")

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/ekefan/pre-sales-deal-tracker/backend/middleware"
 	db "github.com/ekefan/pre-sales-deal-tracker/backend/db/sqlc"
+	"github.com/ekefan/pre-sales-deal-tracker/backend/middleware"
 	"github.com/ekefan/pre-sales-deal-tracker/backend/token"
 	"github.com/gin-gonic/gin"
 )
@@ -26,6 +26,7 @@ func NewServer(store db.Store, config *Config) (*Server, error) {
 	}
 
 	// set token generator
+	// [Q]: let's have a discussion around this Paseto thing since I've never used it.
 	tokenGen, err := token.NewPasetoGenerator(server.config.SymmetricKey)
 	if err != nil {
 		fmt.Println(len(server.config.SymmetricKey))
@@ -42,7 +43,7 @@ func NewServer(store db.Store, config *Config) (*Server, error) {
 func (server *Server) setupRouter() {
 	router := gin.Default()
 	router.POST("/auth/login", server.authLogin)
-	
+
 	authGrp := router.Group("/")
 	authGrp.Use(middleware.UserAuthorization(server.tokenGenerator))
 	authGrp.POST("/users", server.createUsers)
@@ -54,7 +55,6 @@ func (server *Server) setupRouter() {
 	authGrp.PATCH("/users/:user_id/password", server.updateUserPassword)
 	server.router = router
 	slog.Info("Router is setup and ready to run")
-
 }
 
 func (server *Server) StartServer() error {
