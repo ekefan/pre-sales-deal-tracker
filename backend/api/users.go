@@ -155,7 +155,7 @@ func (server *Server) updateUsers(ctx *gin.Context) {
 		return
 	}
 
-	_, err := server.store.GetUserByID(ctx, reqUri.UserID)
+	usr, err := server.store.GetUserByID(ctx, reqUri.UserID)
 	if err != nil {
 		errMsg = "user not found"
 		details = fmt.Sprintf("user with user_id: %v, not found", reqUri.UserID)
@@ -165,11 +165,16 @@ func (server *Server) updateUsers(ctx *gin.Context) {
 		handleServerError(ctx, err)
 		return
 	}
-	err = server.store.UpdateUserTx(ctx, db.UpdateUserParams{
+	args := db.UpdateUserParams{
+		ID: reqUri.UserID,
 		Username: reqBody.Username,
 		FullName: reqBody.FullName,
 		Role:     reqBody.Role,
 		Email:    reqBody.Email,
+	}
+	err = server.store.UpdateUserTx(ctx, db.UpdateUserTxParams{
+		UpdateUserParams: args,
+		OldFullName: usr.FullName,
 	})
 	if err != nil {
 		errMsg = "can not update user"
@@ -267,6 +272,7 @@ func (server *Server) updateUserPassword(ctx *gin.Context) {
 		handleServerError(ctx, err)
 		return
 	}
+	ctx.JSON(http.StatusNoContent, gin.H{})
 }
 
 // resetUserPassword route handler for patch /users/:user_id/password
@@ -306,4 +312,5 @@ func (server *Server) resetUserPassword(ctx *gin.Context) {
 		handleServerError(ctx, err)
 		return
 	}
+	ctx.JSON(http.StatusNoContent, gin.H{})
 }
