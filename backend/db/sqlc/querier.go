@@ -11,13 +11,14 @@ import (
 type Querier interface {
 	CreateUser(ctx context.Context, arg CreateUserParams) (int64, error)
 	DeleteUser(ctx context.Context, id int64) error
+	GetDealToUpdateSalesName(ctx context.Context, salesRepName string) (Deal, error)
 	GetNumberOfAdminUsers(ctx context.Context, role string) (int64, error)
 	GetTotalNumOfUsers(ctx context.Context) (int64, error)
 	GetUserByID(ctx context.Context, id int64) (User, error)
 	GetUserByUsername(ctx context.Context, username string) (User, error)
 	ListAllUsers(ctx context.Context, arg ListAllUsersParams) ([]ListAllUsersRow, error)
-	UpdateDealSalesName(ctx context.Context, salesRepName string) error
-	UpdateUser(ctx context.Context, arg UpdateUserParams) error
+	UpdateDealSalesName(ctx context.Context, arg UpdateDealSalesNameParams) error
+	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
 	UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) error
 }
 

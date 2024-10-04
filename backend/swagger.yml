@@ -210,8 +210,6 @@ paths:
       responses:
         204:
           description: update was successful
-          schema:
-            $ref: "#/definitions/successMessage"
         400:
           description: invalid request parameter, user an integer greater than zero
           schema:
@@ -254,8 +252,6 @@ paths:
       responses:
         204:
           description: delete was successful
-          schema:
-            $ref: "#/definitions/successMessage"
         400:
           description: invalid request parameter, user an integer greater than zero
           schema:
@@ -295,8 +291,6 @@ paths:
       responses:
         204:
           description: password reset was successful
-          schema:
-            $ref: "#/definitions/successMessage"
         400:
           description: invalid request parameter, user an integer greater than zero
           schema:
@@ -340,8 +334,10 @@ paths:
       responses:
         204:
           description: password update was successful
+        401:
+          description: unauthorized, invalid password
           schema:
-            $ref: "#/definitions/successMessage"
+            $ref: "#/definitions/errorResponse"
         400:
           description: |
             Invalid request parameters:
@@ -476,8 +472,6 @@ paths:
       responses:
         204:
           description: resource successfully updated
-          schema:
-            $ref: "#/definitions/successMessage"
         400:
           description: |
             Invalid parameter
@@ -517,8 +511,6 @@ paths:
       responses:
         204:
           description: resource successfully updated
-          schema:
-            $ref: "#/definitions/successMessage"
         400:
           description: |
             Invalid parameter
@@ -660,8 +652,6 @@ paths:
       responses:
         204:
           description: resource successfully updated
-          schema:
-            $ref: "#/definitions/successMessage"
         400:
           description: |
             Invalid parameter
@@ -725,12 +715,6 @@ paths:
             $ref: "#/definitions/errorResponse"
 
 definitions:
-  successMessage:
-    type: object
-    properties:
-      message:
-        type: string
-        default: successful
   userReq:
     type: object
     properties:

@@ -9,11 +9,44 @@ import (
 	"context"
 )
 
-const updateDealSalesName = `-- name: UpdateDealSalesName :exec
-UPDATE deals SET sales_rep_name = $1
+const getDealToUpdateSalesName = `-- name: GetDealToUpdateSalesName :one
+SELECT id, pitch_id, sales_rep_name, customer_name, services_to_render, status, department, net_total_cost, profit, created_at, updated_at, closed_at, awarded FROM deals
+WHERE sales_rep_name = $1
+FOR NO KEY UPDATE
 `
 
-func (q *Queries) UpdateDealSalesName(ctx context.Context, salesRepName string) error {
-	_, err := q.db.Exec(ctx, updateDealSalesName, salesRepName)
+func (q *Queries) GetDealToUpdateSalesName(ctx context.Context, salesRepName string) (Deal, error) {
+	row := q.db.QueryRow(ctx, getDealToUpdateSalesName, salesRepName)
+	var i Deal
+	err := row.Scan(
+		&i.ID,
+		&i.PitchID,
+		&i.SalesRepName,
+		&i.CustomerName,
+		&i.ServicesToRender,
+		&i.Status,
+		&i.Department,
+		&i.NetTotalCost,
+		&i.Profit,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.ClosedAt,
+		&i.Awarded,
+	)
+	return i, err
+}
+
+const updateDealSalesName = `-- name: UpdateDealSalesName :exec
+UPDATE deals SET sales_rep_name = $1
+WHERE sales_rep_name = $2
+`
+
+type UpdateDealSalesNameParams struct {
+	NewSalesName string `json:"new_sales_name"`
+	OldSalesName string `json:"old_sales_name"`
+}
+
+func (q *Queries) UpdateDealSalesName(ctx context.Context, arg UpdateDealSalesNameParams) error {
+	_, err := q.db.Exec(ctx, updateDealSalesName, arg.NewSalesName, arg.OldSalesName)
 	return err
 }

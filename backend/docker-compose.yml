@@ -13,8 +13,6 @@ services:
       timeout: 15s
       retries: 5
       start_period: 45s
-    volumes:
-      - data-volume:/var/lib/postgresql/data
   api:
     build:
       context: .
@@ -28,5 +26,3 @@ services:
         condition: service_healthy
         restart: true
     command: [ "/app/main" ]
-volumes:
-  data-volume:

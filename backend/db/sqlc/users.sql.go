@@ -7,8 +7,6 @@ package db
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createUser = `-- name: CreateUser :one
@@ -151,31 +149,42 @@ func (q *Queries) ListAllUsers(ctx context.Context, arg ListAllUsersParams) ([]L
 	return items, nil
 }
 
-const updateUser = `-- name: UpdateUser :exec
+const updateUser = `-- name: UpdateUser :one
 UPDATE users 
-SET username = $2, full_name = $3, role = $4, email = $5, updated_at = $6
+ SET username = $2, full_name = $3, role = $4, email = $5, updated_at = NOW()
 WHERE id = $1
+RETURNING id, username, role, full_name, email, password, password_changed, updated_at, created_at
 `
 
 type UpdateUserParams struct {
-	ID        int64            `json:"id"`
-	Username  string           `json:"username"`
-	FullName  string           `json:"full_name"`
-	Role      string           `json:"role"`
-	Email     string           `json:"email"`
-	UpdatedAt pgtype.Timestamp `json:"updated_at"`
+	ID       int64  `json:"id"`
+	Username string `json:"username"`
+	FullName string `json:"full_name"`
+	Role     string `json:"role"`
+	Email    string `json:"email"`
 }
 
-func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
-	_, err := q.db.Exec(ctx, updateUser,
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
+	row := q.db.QueryRow(ctx, updateUser,
 		arg.ID,
 		arg.Username,
 		arg.FullName,
 		arg.Role,
 		arg.Email,
-		arg.UpdatedAt,
 	)
-	return err
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Role,
+		&i.FullName,
+		&i.Email,
+		&i.Password,
+		&i.PasswordChanged,
+		&i.UpdatedAt,
+		&i.CreatedAt,
+	)
+	return i, err
 }
 
 const updateUserPassword = `-- name: UpdateUserPassword :exec

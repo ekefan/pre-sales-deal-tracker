@@ -16,4 +16,6 @@ migrateforce:
 sqlc:
 	sqlc generate
 
+docker:
+	docker compose up -d --build
 .PHONY: postgres createdb dropdb
