@@ -116,24 +116,24 @@ paths:
           minimum: 1
         - name: page_size
           in: query
-          description: should be 10, the pagination limit, identifies the number of resources in one page
+          description: MUST be 10, the pagination limit, identifies the number of resources in one page
           required: true
           type: integer
           default: 10
-          minimum: 5
-          maximum: 10
+          enum: [10]
       responses:
         200:
           description: successfull request
           schema:
             type: object
             properties:
+              pagination:
+                $ref: "#/definitions/pagination"
               data:
                 type: array
                 items:
                   $ref: "#/definitions/user_data"
-              pagination:
-                $ref: "#/definitions/pagination"
+              
         400:
           description: |
             invalid request parameters, use integers greater than zero
@@ -141,7 +141,7 @@ paths:
           schema:
             $ref: "#/definitions/errorResponse"
         401:
-          description: unauthorized access, request from a user who's role is not admin
+          description: unauthorized, invalid access token
           schema:
             $ref: "#/definitions/errorResponse"
         403:
@@ -173,6 +173,10 @@ paths:
             $ref: "#/definitions/user_data"
         400:
           description: invalid request parameter, user an integer greater than zero
+          schema:
+            $ref: "#/definitions/errorResponse"
+        401:
+          description: unauthorized, invalid access token
           schema:
             $ref: "#/definitions/errorResponse"
         403:
@@ -208,14 +212,16 @@ paths:
           schema:
             $ref: "#/definitions/userReq"
       responses:
-        204:
+        200:
           description: update was successful
+          schema:
+            $ref: '#/definitions/successMessage'
         400:
           description: invalid request parameter, user an integer greater than zero
           schema:
             $ref: "#/definitions/errorResponse"
         401:
-          description: unauthorized access, request from a user who's role is not admin
+          description: unauthorized access, invalid access token
           schema:
             $ref: "#/definitions/errorResponse"
         403:
@@ -257,46 +263,7 @@ paths:
           schema:
             $ref: "#/definitions/errorResponse"
         401:
-          description: unauthorized
-          schema:
-            $ref: "#/definitions/errorResponse"
-        403:
-          description: forbidden, user is not authorized to access this resource
-          schema:
-            $ref: '#/definitions/errorResponse'
-        404:
-          description: resource doesn't exist
-          schema:
-            $ref: "#/definitions/errorResponse"
-        500:
-          description: server error
-          schema:
-            $ref: "#/definitions/errorResponse"
-  /users/{user_id}/password/reset:
-    patch:
-      security:
-        - Bearer: []
-      tags: [users]
-      summary: resets a user's password
-      description: |
-        Allows the admin to reset a user's password to default, this end point is restricted to admins only
-        user_id is always greater than 0.
-      parameters:
-        - name: user_id
-          in: path
-          type: integer
-          required: true
-          default: 2
-          minimum: 1
-      responses:
-        204:
-          description: password reset was successful
-        400:
-          description: invalid request parameter, user an integer greater than zero
-          schema:
-            $ref: "#/definitions/errorResponse"
-        401:
-          description: unauthorized
+          description: unauthorized, invalid access token
           schema:
             $ref: "#/definitions/errorResponse"
         403:
@@ -332,10 +299,12 @@ paths:
           schema:
             $ref: "#/definitions/updatePasswordReq"
       responses:
-        204:
-          description: password update was successful
+        200:
+          description: update was successful
+          schema:
+            $ref: '#/definitions/successMessage'
         401:
-          description: unauthorized, invalid password
+          description: unauthorized, invalid password or access token
           schema:
             $ref: "#/definitions/errorResponse"
         400:
@@ -745,26 +714,29 @@ definitions:
         default: 2
         minimum: 1
         description: must not be less than 1
+  successMessage:
+    type: object
+    properties:
+      message:
+        type: string
+        default: "successful"
   errorResponse:
     type: object
     properties:
-      status_code:
-        type: integer
-        description: standard http response status code
-      error:
+      code:
+        type: string
+        description: sentinel description for standard http response codes
+      message:
+        type: string
+        description: a human read able message describing the error
+        default: a human readable message describing the error
+      details:
         type: object
+        description: possible reasons why the error occurred
         properties:
-          code:
+          reason:
             type: string
-            description: sentinel description for standard http response codes
-          message:
-            type: string
-            description: a human read able message describing the error
-            default: a human readable message describing the error
-          details:
-            type: string
-            description: possible reasons why the error occurred
-            default: possible reason the error occurred
+            default: an explicit explaination for this reason
   user_data:
     type: object
     properties:

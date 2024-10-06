@@ -2,8 +2,9 @@ package main
 
 import (
 	"context"
+	"os"
 	// FIXME: you're using two logging packages. Stick to the log/slog if you can.
-	"log"
+	// fixed: Using only slog now...... I thought log helped to to exit the program and log the error in one line
 	"log/slog"
 
 	"github.com/ekefan/pre-sales-deal-tracker/backend/api"
@@ -14,43 +15,41 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// FIXME: I suggest you to use the "internal" pkg and expose only the needed things. By default, things should not be exposed. Then, you expose things whenever you need them to be public.
-
+// Fixme: I suggest you to use the "internal" pkg and expose only the needed things. By default, things should not be exposed. Then, you expose things whenever you need them to be public.
+// DONE: todo: 1. 
 func main() {
 	config, err := api.ReadConfigFiles(".")
 	if err != nil {
-		log.Fatal("unable to read environment variables ", err)
+		slog.Error("unable to read environment variables", "error", err)
+		os.Exit(1)
 	}
-
 	dbpool, err := pgxpool.New(context.Background(), config.DatabaseSource)
 	if err != nil {
-		log.Fatal("unable to create db connection pool ", err)
+		slog.Error("unable to create db connection pool ", "error", err)
+		os.Exit(1)
 	}
 	defer dbpool.Close()
-
 	store := db.NewStore(dbpool)
-
 	m, err := migrate.New(
 		config.MigrationSource, // Path to your migrations
 		config.DatabaseSource,
 	)
 	if err != nil {
-		log.Fatal("unable to create migrate instance: ", err)
+		slog.Error("unable to create migrate instance", "error", err)
+		os.Exit(1)
 	}
-
 	// Apply migrations
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
-		log.Fatal("error applying migrations: ", err)
+		slog.Error("error applying migrations: ", "error", err)
+		os.Exit(1)
 	} else if err == migrate.ErrNoChange {
 		slog.Info("No new migrations to apply.")
 	}
-
 	// Start server
 	server, err := api.NewServer(store, config)
 	if err != nil {
-		log.Fatal("cannot start server: ", err)
+		slog.Error("cannot start server: ", "error", err)
 	}
-
 	slog.Info("Starting HTTP server")
 	server.StartServer()
 }
