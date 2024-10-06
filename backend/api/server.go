@@ -27,7 +27,7 @@ func NewServer(store db.Store, config *Config) (*Server, error) {
 
 	// set token generator
 	// [Q]: let's have a discussion around this Paseto thing since I've never used it.
-	tokenGen, err := token.NewPasetoGenerator(server.config.SymmetricKey)
+	tokenGen, err := token.NewJwtGenerator(server.config.SymmetricKey)
 	if err != nil {
 		fmt.Println(len(server.config.SymmetricKey))
 		return nil, fmt.Errorf("cannot generate tokens, %v", err)
@@ -46,13 +46,21 @@ func (server *Server) setupRouter() {
 
 	authGrp := router.Group("/")
 	authGrp.Use(middleware.UserAuthorization(server.tokenGenerator))
-	authGrp.POST("/users", server.createUsers)
-	authGrp.GET("/users", server.retrieveUsers)
+
+	adminGrp := router.Group("/")
+	adminGrp.Use(middleware.UserAuthorization(server.tokenGenerator))
+	adminGrp.Use(middleware.AdminAccessAuthorization())
+
+	// salesGrp := router.Group("/")
+	// salesGrp.Use(middleware.UserAuthorization(server.tokenGenerator))
+	// salesGrp.Use(middleware.SalesAccessAuthorization())
+
+	adminGrp.POST("/users", server.createUser)
+	adminGrp.GET("/users", server.retrieveUsers)
 	authGrp.GET("/users/:user_id", server.getUsersByID)
-	authGrp.PUT("/users/:user_id", server.updateUsers)
-	authGrp.DELETE("/users/:user_id", server.deleteUsers)
-	authGrp.PATCH("/users/:user_id/password/reset", server.resetUserPassword)
-	authGrp.PATCH("/users/:user_id/password", server.updateUserPassword)
+	adminGrp.PUT("/users/:user_id", server.updateUser)
+	adminGrp.DELETE("/users/:user_id", server.deleteUsers)
+	adminGrp.PATCH("/users/:user_id/password", server.updateUserPassword)
 	server.router = router
 	slog.Info("Router is setup and ready to run")
 }

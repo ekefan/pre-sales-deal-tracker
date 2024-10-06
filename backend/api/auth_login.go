@@ -10,7 +10,7 @@ import (
 
 // LogingReq holds fields required to authenticate and log in users
 type LoginReq struct {
-	Username string `json:"username" binding:"required,alphanum,gte=4,lte=6"`
+	Username string `json:"username" binding:"required,alphanum,min=4,max=6"`
 	Password string `json:"password" binding:"required"`
 }
 
@@ -29,39 +29,36 @@ type UserLoginResp struct {
 // LoginResp holds the fields in the response body if login is successful
 type LoginResp struct {
 	AccessToken string `json:"access_token"`
-	// TODO: are we sure we need to send back also this data when the user sign in?
+	// T0DO: are we sure we need to send back also this data when the user sign in? // DONE
+	// Yes, I used the data to populate the user_profile on the dashboard on the UI
 	UserData UserLoginResp `json:"user_data"`
 }
 
 // authLogin handles client log in
 func (server *Server) authLogin(ctx *gin.Context) {
 	var req LoginReq
-	// FIXME: it seems overcomplicated this function.
+	// Fixme: it seems overcomplicated this function. //DONE: simplified the function
 	// You're using the Gin Web framework, you should use its tools. Try to simplify the code
 	if err := bindClientRequest(ctx, &req, jsonSource); err != nil {
+		handleClientReqError(ctx, err)
 		return
 	}
 
 	user, err := server.store.GetUserByUsername(ctx, req.Username)
 	// FIXME: you should use errors.Is or errors.As to type check your error.
 	if err != nil {
-		errMsg = "user not found"
-		details = fmt.Sprintf("no user with username %v exists", req.Username)
-		if pgxError(ctx, err, errMsg, details) {
+		details := fmt.Sprintf("user with username: %v, doesn't exist", req.Username)
+		if handleDbError(ctx, err, details) {
 			return
 		}
 		handleServerError(ctx, err)
 		return
 	}
 	if err := ValidatePassword(user.Password, req.Password); err != nil {
-		statusCode = http.StatusUnauthorized
-		errCode = "UNAUTHORIZED"
-		errMsg = "invalid password"
-		details = "the user password sent by this client is incorrect"
-		ctx.JSON(statusCode, errorResponse(statusCode, errCode, errMsg, details))
+		handlePasswordValidationError(ctx, err)
 		return
 	}
-	accessToken, _, err := server.tokenGenerator.GenerateToken(user.ID, user.Role, server.config.TokenDuration)
+	accessToken, err := server.tokenGenerator.GenerateToken(user.ID, user.Role, server.config.TokenDuration)
 	if err != nil {
 		handleServerError(ctx, err)
 		return
