@@ -5,7 +5,8 @@ import (
 	"time"
 
 	// FIXME: watch out these libraries. They're extremely old and they're not receiving updates for a while.
-	// Stick to popular packages whenever you can
+	// Stick to popular packages whenever you can, couldn't find a maintained version of paseto I liked so I am using go-jwt instead.
+	// fixed
 	"github.com/aead/chacha20poly1305"
 	"github.com/o1egl/paseto"
 )
@@ -31,14 +32,13 @@ func NewPasetoGenerator(symmetricKey string) (TokenGenerator, error) {
 }
 
 // CreateToken creates a new token for a specific username and duration
-func (pg *PasetoGenerator) GenerateToken(user_id int64, role string, duration time.Duration) (string, *Payload, error) {
+func (pg *PasetoGenerator) GenerateToken(user_id int64, role string, duration time.Duration) (string, error) {
 	payload, err := NewPayload(user_id, role, duration)
 	if err != nil {
-		return "", payload, err
+		return "", err
 	}
-
 	token, err := pg.pasetoVersion.Encrypt(pg.symmetricKey, payload, nil)
-	return token, payload, err
+	return token, err
 }
 
 // VerifyToken checks if the token is valid or not

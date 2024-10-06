@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
 
@@ -15,8 +16,8 @@ var (
 
 // Payload contains the payload data of a token
 type Payload struct {
-	ID        uuid.UUID `json:"id"`
-	UserID    int64     `json:"user_id"`
+	ID     uuid.UUID `json:"id"`
+	UserID int64     `json:"user_id"`
 	// Username  string    `json:"username"`
 	Role      string    `json:"role"`
 	IssuedAt  time.Time `json:"issued_at"`
@@ -30,8 +31,8 @@ func NewPayload(userID int64, role string, duration time.Duration) (*Payload, er
 		return nil, err
 	}
 	payload := &Payload{
-		ID:        tokenID,
-		UserID:    userID,
+		ID:     tokenID,
+		UserID: userID,
 		// Username:  username,
 		Role:      role,
 		IssuedAt:  time.Now(),
@@ -46,4 +47,30 @@ func (payload *Payload) Valid() error {
 		return ErrExpiredToken
 	}
 	return nil
+}
+
+// Implementing the jwt CLaims
+func (p *Payload) GetExpirationTime() (*jwt.NumericDate, error) {
+	return &jwt.NumericDate{
+		Time: p.ExpiredAt,
+	}, nil
+}
+func (p *Payload) GetIssuedAt() (*jwt.NumericDate, error) {
+	return &jwt.NumericDate{
+		Time: p.IssuedAt,
+	}, nil
+}
+func (p *Payload) GetNotBefore() (*jwt.NumericDate, error) {
+	return &jwt.NumericDate{
+		Time: p.IssuedAt,
+	}, nil
+}
+func (p *Payload) GetIssuer() (string, error) {
+	return "", nil
+}
+func (p *Payload) GetSubject() (string, error) {
+	return "", nil
+}
+func (p *Payload) GetAudience() (jwt.ClaimStrings, error) {
+	return jwt.ClaimStrings{""}, nil
 }
