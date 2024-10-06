@@ -21,26 +21,26 @@ func UserAuthorization(tokenGenerator token.TokenGenerator) gin.HandlerFunc {
 		header := ctx.GetHeader("Authorization")
 
 		if len(header) == 0 {
-			abortHandlingRequest(ctx, http.StatusUnauthorized, "UNAUTHORIZED", "no authorization header passed")
+			abortHandlingRequest(ctx, http.StatusUnauthorized, "UNAUTHORIZED", "authorization error", "no authorization header passed")
 			return
 		}
 
 		headerFields := strings.Fields(header)
 		if len(headerFields) != 2 {
-			abortHandlingRequest(ctx, http.StatusUnauthorized, "UNAUTHORIZED", "invalid authorization header")
+			abortHandlingRequest(ctx, http.StatusUnauthorized, "UNAUTHORIZED", "authorization error", "invalid authorization header", )
 			return
 		}
 
 		bearerField := strings.ToLower(headerFields[0])
 		if bearerField != authHeaderTypeBearer {
-			abortHandlingRequest(ctx, http.StatusUnauthorized, "UNAUTHORIZED", "unsupported authorization type")
+			abortHandlingRequest(ctx, http.StatusUnauthorized, "UNAUTHORIZED", "authorization error", "unsupported authorization type")
 			return
 		}
 
 		accessToken := headerFields[1]
 		payload, err := tokenGenerator.VerifyToken(accessToken)
 		if err != nil {
-			abortHandlingRequest(ctx, http.StatusUnauthorized, "UNAUTHORIZED", "invalid access token")
+			abortHandlingRequest(ctx, http.StatusUnauthorized, "UNAUTHORIZED", "authorization error", "invalid access token")
 			return
 		}
 
