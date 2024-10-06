@@ -21,8 +21,9 @@ func (s *SqlStore) UpdateUserTx(ctx context.Context, args UpdateUserTxParams) er
 		if err != nil {
 			return fmt.Errorf("failed to update user: %v", err)
 		}
-		fmt.Println(newUsr)
-
+		if newUsr < 1 {
+			return fmt.Errorf("no rows affected after update")
+		}
 		if deal, err := q.GetDealToUpdateSalesName(ctx, args.OldFullName); err == nil {
 			fmt.Println(deal)
 			err = q.UpdateDealSalesName(ctx, UpdateDealSalesNameParams{

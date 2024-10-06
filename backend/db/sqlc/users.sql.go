@@ -36,13 +36,16 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (int64, 
 	return id, err
 }
 
-const deleteUser = `-- name: DeleteUser :exec
+const deleteUser = `-- name: DeleteUser :execrows
 DELETE FROM users WHERE id = $1
 `
 
-func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
-	_, err := q.db.Exec(ctx, deleteUser, id)
-	return err
+func (q *Queries) DeleteUser(ctx context.Context, id int64) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteUser, id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }
 
 const getNumberOfAdminUsers = `-- name: GetNumberOfAdminUsers :one
@@ -56,12 +59,12 @@ func (q *Queries) GetNumberOfAdminUsers(ctx context.Context, role string) (int64
 	return count, err
 }
 
-const getTotalNumOfUsers = `-- name: GetTotalNumOfUsers :one
+const getTotalNumberOfUsers = `-- name: GetTotalNumberOfUsers :one
 SELECT COUNT(*) FROM users
 `
 
-func (q *Queries) GetTotalNumOfUsers(ctx context.Context) (int64, error) {
-	row := q.db.QueryRow(ctx, getTotalNumOfUsers)
+func (q *Queries) GetTotalNumberOfUsers(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, getTotalNumberOfUsers)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
@@ -149,11 +152,61 @@ func (q *Queries) ListAllUsers(ctx context.Context, arg ListAllUsersParams) ([]L
 	return items, nil
 }
 
-const updateUser = `-- name: UpdateUser :one
+const testGetUserPaginated = `-- name: TestGetUserPaginated :many
+WITH user_data AS (
+    SELECT 
+        id as user_id,
+        username,
+        role,
+        email,
+        full_name,
+        password_changed,
+        to_char(updated_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS updated_at,
+        to_char(created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS created_at
+    FROM users
+    ORDER BY id
+    LIMIT $1 OFFSET $2
+)
+SELECT 
+    (SELECT COUNT(*) FROM users) AS total_users,
+    json_agg(user_data) AS users
+FROM user_data
+`
+
+type TestGetUserPaginatedParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+type TestGetUserPaginatedRow struct {
+	TotalUsers int64  `json:"total_users"`
+	Users      []byte `json:"users"`
+}
+
+func (q *Queries) TestGetUserPaginated(ctx context.Context, arg TestGetUserPaginatedParams) ([]TestGetUserPaginatedRow, error) {
+	rows, err := q.db.Query(ctx, testGetUserPaginated, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []TestGetUserPaginatedRow{}
+	for rows.Next() {
+		var i TestGetUserPaginatedRow
+		if err := rows.Scan(&i.TotalUsers, &i.Users); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateUser = `-- name: UpdateUser :execrows
 UPDATE users 
  SET username = $2, full_name = $3, role = $4, email = $5, updated_at = NOW()
 WHERE id = $1
-RETURNING id, username, role, full_name, email, password, password_changed, updated_at, created_at
 `
 
 type UpdateUserParams struct {
@@ -164,27 +217,18 @@ type UpdateUserParams struct {
 	Email    string `json:"email"`
 }
 
-func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
-	row := q.db.QueryRow(ctx, updateUser,
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (int64, error) {
+	result, err := q.db.Exec(ctx, updateUser,
 		arg.ID,
 		arg.Username,
 		arg.FullName,
 		arg.Role,
 		arg.Email,
 	)
-	var i User
-	err := row.Scan(
-		&i.ID,
-		&i.Username,
-		&i.Role,
-		&i.FullName,
-		&i.Email,
-		&i.Password,
-		&i.PasswordChanged,
-		&i.UpdatedAt,
-		&i.CreatedAt,
-	)
-	return i, err
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }
 
 const updateUserPassword = `-- name: UpdateUserPassword :exec
