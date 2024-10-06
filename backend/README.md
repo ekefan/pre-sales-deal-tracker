@@ -34,6 +34,6 @@ docker compose up -d --build
 - If the image build is successful you can send requests the server
 
 - As mentioned above the app starts with a predefined admin user, whose `username is josh` and password is the default password for every user
-
 <!-- # FIXME: -->
+<!-- fixed -->
 - The `error` response should have a `code` string field that is like a sentinel errors. Sentinel errors are the ones we're expecting to happen such as `NOT_FOUND`, `VALIDATION`, `NETWORK_CONNECTION`. Potentially, they could be shared with the client that relies logic against
