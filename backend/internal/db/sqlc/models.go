@@ -28,7 +28,7 @@ type PitchRequest struct {
 	ID              int64            `json:"id"`
 	UserID          int64            `json:"user_id"`
 	CustomerName    string           `json:"customer_name"`
-	CustomerRequest string           `json:"customer_request"`
+	CustomerRequest []string         `json:"customer_request"`
 	AdminTask       string           `json:"admin_task"`
 	AdminDeadline   pgtype.Timestamp `json:"admin_deadline"`
 	AdminViewed     bool             `json:"admin_viewed"`

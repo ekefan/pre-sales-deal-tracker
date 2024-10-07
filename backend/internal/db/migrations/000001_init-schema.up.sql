@@ -31,7 +31,7 @@ CREATE TABLE "pitch_requests" (
   "id" bigserial PRIMARY KEY,
   "user_id" bigint NOT NULL,
   "customer_name" varchar NOT NULL,
-  "customer_request" varchar NOT NULL DEFAULT 'proposal',
+  "customer_request" text[] NOT NULL DEFAULT '{ }',
   "admin_task" varchar NOT NULL,
   "admin_deadline" timestamp NOT NULL,
   "admin_viewed" bool NOT NULL DEFAULT false,

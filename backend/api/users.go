@@ -83,9 +83,9 @@ func (server *Server) retrieveUsers(ctx *gin.Context) {
 		return
 	}
 	UserData := []User{}
-	totalUsers := result[0].TotalUsers
-	if len(result[0].Users) > 0 {
-		usRrr := json.Unmarshal(result[0].Users, &UserData)
+	totalUsers := result.TotalUsers
+	if len(result.Users) > 0 {
+		usRrr := json.Unmarshal(result.Users, &UserData)
 		if usRrr != nil {
 			slog.Error(usRrr.Error())
 			handleServerError(ctx, err)
