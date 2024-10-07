@@ -10,6 +10,7 @@ import (
 const (
 	adminRole = "admin"
 	salesRole = "sales"
+	RoleKey = "role"
 )
 
 func AdminAccessAuthorization() gin.HandlerFunc {
@@ -21,6 +22,8 @@ func AdminAccessAuthorization() gin.HandlerFunc {
 				"this resouces is restricted to admin users")
 			return
 		}
+		ctx.Set(RoleKey, payload.Role)
+		ctx.Next()
 	}
 }
 
@@ -33,5 +36,7 @@ func SalesAccessAuthorization() gin.HandlerFunc {
 				"this resouces is restricted to sales users")
 			return
 		}
+		ctx.Set(RoleKey, payload.Role)
+		ctx.Next()
 	}
 }

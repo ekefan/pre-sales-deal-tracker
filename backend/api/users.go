@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -206,19 +205,6 @@ func (server *Server) deleteUsers(ctx *gin.Context) {
 		handleClientReqError(ctx, err)
 		return
 	}
-
-	numAdmins, err := server.store.GetNumberOfAdminUsers(ctx, adminRole)
-	if err != nil {
-		handleServerError(ctx, err)
-		return
-	}
-	if numAdmins < 2 {
-		er := NewErrResp("FORBIDDEN", "error deleting an admin user")
-		er.Details = map[string]string{
-			"deleting admin": "there must be one admin in the system at all time",
-		}
-		ctx.JSON(http.StatusForbidden, er)
-	}
 	// FIXME: you're doing unnecessary operations in the DB. Delete the user right away. You can decide if trigger an error for non existing user or report success. Be gentle with the DB load.
 	// fixed
 	// LOL, Oh yes I will, in my defence I was just trying to be thorough :)
@@ -229,8 +215,22 @@ func (server *Server) deleteUsers(ctx *gin.Context) {
 		return
 	}
 	if numUsersDeleted < 1 {
+		// check if user to be deleted was a master admin, to correctly handle errors
+		user_id, err := server.store.GetMasterUser(ctx)
+		if err != nil {
+			handleServerError(ctx, err)
+			return
+		}
+		if user_id == req.UserID {
+			err := deleteMasterAdminErr
+			detail := err.Error()
+			handleDbError(ctx, err, detail)
+			return
+		}
 		detail := fmt.Sprintf("user with id: %v, doesn't exist", req.UserID)
-		handleDbError(ctx, errors.New(customNotFound), detail)
+		err = customNotFound
+		handleDbError(ctx, err, detail)
+		return
 	}
 	// FIXME: successMessage() could be omitted
 	// fixed

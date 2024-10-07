@@ -770,7 +770,7 @@ definitions:
     properties:
       username:
         type: string
-        default: lily
+        default: josh
         minLength: 4
         maxLength: 6
       password:

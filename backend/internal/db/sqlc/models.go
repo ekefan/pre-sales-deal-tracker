@@ -43,6 +43,7 @@ type User struct {
 	FullName        string           `json:"full_name"`
 	Email           string           `json:"email"`
 	Password        string           `json:"password"`
+	IsMaster        bool             `json:"is_master"`
 	PasswordChanged bool             `json:"password_changed"`
 	UpdatedAt       pgtype.Timestamp `json:"updated_at"`
 	CreatedAt       pgtype.Timestamp `json:"created_at"`

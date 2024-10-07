@@ -5,6 +5,7 @@ CREATE TABLE "users" (
   "full_name" varchar NOT NULL,
   "email" varchar UNIQUE NOT NULL,
   "password" varchar NOT NULL,
+  "is_master" boolean NOT NULL DEFAULT false,
   "password_changed" bool NOT NULL DEFAULT false,
   "updated_at" timestamp NOT NULL DEFAULT (now()),
   "created_at" timestamp NOT NULL DEFAULT (now())
@@ -41,3 +42,5 @@ CREATE TABLE "pitch_requests" (
 ALTER TABLE "pitch_requests" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE CASCADE;
 
 ALTER TABLE "deals" ADD FOREIGN KEY ("pitch_id") REFERENCES "pitch_requests" ("id") ON DELETE SET NULL;
+
+CREATE UNIQUE INDEX unique_master_user ON "users" (is_master) WHERE is_master = true;

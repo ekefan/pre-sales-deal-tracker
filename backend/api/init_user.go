@@ -29,14 +29,14 @@ func initUser(store db.Store) {
 		if err != nil {
 			log.Fatalf("can not hash default password %v", err)
 		}
-		createUserArg := db.CreateUserParams{
+		createMaster := db.CreateMasterUserParams{
 			Username: initUsername,
 			Role:     initUserRole,
 			FullName: initUserFullname,
 			Email:    initUserEmail,
 			Password: hash,
 		}
-		_, err = store.CreateUser(ctx, createUserArg)
+		_, err = store.CreateMasterUser(ctx, createMaster)
 		if err != nil {
 			log.Fatalf("can not create an initial admin %v", err)
 		}

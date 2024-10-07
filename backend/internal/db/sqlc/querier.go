@@ -9,14 +9,14 @@ import (
 )
 
 type Querier interface {
+	CreateMasterUser(ctx context.Context, arg CreateMasterUserParams) (int64, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (int64, error)
 	DeleteUser(ctx context.Context, id int64) (int64, error)
 	GetDealToUpdateSalesName(ctx context.Context, salesRepName string) (Deal, error)
+	GetMasterUser(ctx context.Context) (int64, error)
 	GetNumberOfAdminUsers(ctx context.Context, role string) (int64, error)
-	GetTotalNumberOfUsers(ctx context.Context) (int64, error)
 	GetUserByID(ctx context.Context, id int64) (User, error)
 	GetUserByUsername(ctx context.Context, username string) (User, error)
-	ListAllUsers(ctx context.Context, arg ListAllUsersParams) ([]ListAllUsersRow, error)
 	TestGetUserPaginated(ctx context.Context, arg TestGetUserPaginatedParams) ([]TestGetUserPaginatedRow, error)
 	UpdateDealSalesName(ctx context.Context, arg UpdateDealSalesNameParams) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (int64, error)

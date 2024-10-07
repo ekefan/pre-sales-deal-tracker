@@ -8,7 +8,7 @@ FROM alpine:3.19
 WORKDIR /app
 COPY --from=builder /app/main .
 COPY app.env .
-COPY db/migrations ./db/migrations
+COPY internal/db/migrations ./internal/db/migrations
 
 EXPOSE 8080 8080
 CMD [ "/app/main" ]

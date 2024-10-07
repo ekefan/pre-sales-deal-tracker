@@ -40,8 +40,10 @@ func handleServerError(ctx *gin.Context, err error) {
 	ctx.JSON(http.StatusInternalServerError, er)
 }
 
-var customNotFound = "not found"
-
+var (
+	customNotFound = errors.New("not found")
+	deleteMasterAdminErr = errors.New("a master user must exist in the system")
+)
 // handleDbError handles expected db errors,
 // takes the context, the error and a possible error detail
 // returns true if an error was handled and false if no predicted db error is handled
@@ -56,11 +58,17 @@ func handleDbError(ctx *gin.Context, err error, detail string) bool {
 		ctx.JSON(http.StatusConflict, er)
 		return true
 	}
-	if errors.Is(err, pgx.ErrNoRows) || err.Error() == customNotFound {
+	if errors.Is(err, pgx.ErrNoRows) || errors.Is(err, customNotFound){
 		er := NewErrResp("NOT_FOUND", "requested resource doesn't exist")
 		er.Details = map[string]string{"not found": detail}
 		ctx.JSON(http.StatusNotFound, er)
 		return true
+	}
+
+	if errors.Is(err, deleteMasterAdminErr) {
+		er := NewErrResp("FORBIDDEN", "can not delete master admin")
+		er.Details = map[string]string{"deleting admin": detail}
+		ctx.JSON(http.StatusForbidden, er)
 	}
 	return false
 }

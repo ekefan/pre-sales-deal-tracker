@@ -9,6 +9,33 @@ import (
 	"context"
 )
 
+const createMasterUser = `-- name: CreateMasterUser :one
+INSERT INTO users (username, role, full_name, email, password, is_master)
+VALUES ($1, $2, $3, $4, $5, true)
+RETURNING users.id
+`
+
+type CreateMasterUserParams struct {
+	Username string `json:"username"`
+	Role     string `json:"role"`
+	FullName string `json:"full_name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+func (q *Queries) CreateMasterUser(ctx context.Context, arg CreateMasterUserParams) (int64, error) {
+	row := q.db.QueryRow(ctx, createMasterUser,
+		arg.Username,
+		arg.Role,
+		arg.FullName,
+		arg.Email,
+		arg.Password,
+	)
+	var id int64
+	err := row.Scan(&id)
+	return id, err
+}
+
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (username, role, full_name, email, password)
 VALUES ( $1, $2, $3, $4, $5)
@@ -37,7 +64,10 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (int64, 
 }
 
 const deleteUser = `-- name: DeleteUser :execrows
-DELETE FROM users WHERE id = $1
+DELETE FROM users
+WHERE users.id = $1 AND (
+    users.is_master != true
+    )
 `
 
 func (q *Queries) DeleteUser(ctx context.Context, id int64) (int64, error) {
@@ -46,6 +76,18 @@ func (q *Queries) DeleteUser(ctx context.Context, id int64) (int64, error) {
 		return 0, err
 	}
 	return result.RowsAffected(), nil
+}
+
+const getMasterUser = `-- name: GetMasterUser :one
+SELECT id as user_id FROM users
+WHERE is_master = true
+`
+
+func (q *Queries) GetMasterUser(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, getMasterUser)
+	var user_id int64
+	err := row.Scan(&user_id)
+	return user_id, err
 }
 
 const getNumberOfAdminUsers = `-- name: GetNumberOfAdminUsers :one
@@ -59,19 +101,8 @@ func (q *Queries) GetNumberOfAdminUsers(ctx context.Context, role string) (int64
 	return count, err
 }
 
-const getTotalNumberOfUsers = `-- name: GetTotalNumberOfUsers :one
-SELECT COUNT(*) FROM users
-`
-
-func (q *Queries) GetTotalNumberOfUsers(ctx context.Context) (int64, error) {
-	row := q.db.QueryRow(ctx, getTotalNumberOfUsers)
-	var count int64
-	err := row.Scan(&count)
-	return count, err
-}
-
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, username, role, full_name, email, password, password_changed, updated_at, created_at FROM users
+SELECT id, username, role, full_name, email, password, is_master, password_changed, updated_at, created_at FROM users
 WHERE id = $1
 `
 
@@ -85,71 +116,12 @@ func (q *Queries) GetUserByID(ctx context.Context, id int64) (User, error) {
 		&i.FullName,
 		&i.Email,
 		&i.Password,
+		&i.IsMaster,
 		&i.PasswordChanged,
 		&i.UpdatedAt,
 		&i.CreatedAt,
 	)
 	return i, err
-}
-
-const listAllUsers = `-- name: ListAllUsers :many
-SELECT 
-    id AS user_id,
-    username,
-    role,
-    email,
-    full_name,
-    password_changed,
-    to_char(updated_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS updated_at,
-    to_char(created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS created_at
-FROM users
-LIMIT $1
-OFFSET $2
-`
-
-type ListAllUsersParams struct {
-	Limit  int32 `json:"limit"`
-	Offset int32 `json:"offset"`
-}
-
-type ListAllUsersRow struct {
-	UserID          int64  `json:"user_id"`
-	Username        string `json:"username"`
-	Role            string `json:"role"`
-	Email           string `json:"email"`
-	FullName        string `json:"full_name"`
-	PasswordChanged bool   `json:"password_changed"`
-	UpdatedAt       string `json:"updated_at"`
-	CreatedAt       string `json:"created_at"`
-}
-
-func (q *Queries) ListAllUsers(ctx context.Context, arg ListAllUsersParams) ([]ListAllUsersRow, error) {
-	rows, err := q.db.Query(ctx, listAllUsers, arg.Limit, arg.Offset)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []ListAllUsersRow{}
-	for rows.Next() {
-		var i ListAllUsersRow
-		if err := rows.Scan(
-			&i.UserID,
-			&i.Username,
-			&i.Role,
-			&i.Email,
-			&i.FullName,
-			&i.PasswordChanged,
-			&i.UpdatedAt,
-			&i.CreatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
 }
 
 const testGetUserPaginated = `-- name: TestGetUserPaginated :many
