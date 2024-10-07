@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 
-	db "github.com/ekefan/pre-sales-deal-tracker/backend/db/sqlc"
+	db "github.com/ekefan/pre-sales-deal-tracker/backend/internal/db/sqlc"
 	"github.com/ekefan/pre-sales-deal-tracker/backend/middleware"
 	"github.com/ekefan/pre-sales-deal-tracker/backend/token"
 	"github.com/gin-gonic/gin"

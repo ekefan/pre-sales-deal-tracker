@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	db "github.com/ekefan/pre-sales-deal-tracker/backend/db/sqlc"
+	db "github.com/ekefan/pre-sales-deal-tracker/backend/internal/db/sqlc"
 	"github.com/gin-gonic/gin"
 )
 
@@ -152,7 +152,7 @@ func (server *Server) updateUser(ctx *gin.Context) {
 		reqBody UserReq
 	)
 
-	// FIXME: pick the path param & set it to the "id" field in the request payload so the user cannot tamper the data manually. 
+	// FIXME: pick the path param & set it to the "id" field in the request payload so the user cannot tamper the data manually.
 	// fixed: the user id is not in the req payload
 	// Again, use the things Gin provides you. Be more specific with the error handling.
 	uriErr := bindClientRequest(ctx, &reqUri, uriSource)
@@ -205,6 +205,19 @@ func (server *Server) deleteUsers(ctx *gin.Context) {
 	if err := bindClientRequest(ctx, &req, uriSource); err != nil {
 		handleClientReqError(ctx, err)
 		return
+	}
+
+	numAdmins, err := server.store.GetNumberOfAdminUsers(ctx, adminRole)
+	if err != nil {
+		handleServerError(ctx, err)
+		return
+	}
+	if numAdmins < 2 {
+		er := NewErrResp("FORBIDDEN", "error deleting an admin user")
+		er.Details = map[string]string{
+			"deleting admin": "there must be one admin in the system at all time",
+		}
+		ctx.JSON(http.StatusForbidden, er)
 	}
 	// FIXME: you're doing unnecessary operations in the DB. Delete the user right away. You can decide if trigger an error for non existing user or report success. Be gentle with the DB load.
 	// fixed

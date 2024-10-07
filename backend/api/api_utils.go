@@ -8,6 +8,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+const adminRole string = "admin"
 // successMessage sends a custom success response to client
 func successMessage() gin.H {
 	return gin.H{

@@ -1,10 +1,11 @@
+// creates an initial admin user in the database at the start of the appilcation
 package api
 
 import (
 	"context"
 	"log"
 
-	db "github.com/ekefan/pre-sales-deal-tracker/backend/db/sqlc"
+	db "github.com/ekefan/pre-sales-deal-tracker/backend/internal/db/sqlc"
 )
 
 const (
