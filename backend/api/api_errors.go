@@ -69,15 +69,18 @@ func handleDbError(ctx *gin.Context, err error, detail string) bool {
 		}
 
 	}
-	if errors.Is(err, pgx.ErrNoRows) || errors.Is(err, errNotFound) {
+	if errors.Is(err, pgx.ErrNoRows) ||
+		errors.Is(err, errNotFound) ||
+		err.Error() == errNotFound.Error() {
 		er := NewErrResp("NOT_FOUND", "requested resource doesn't exist")
 		er.Details = map[string]string{"not found": detail}
 		ctx.JSON(http.StatusNotFound, er)
 		return true
 	}
 
-	if errors.Is(err, errDeleteMaster) {
-		er := NewErrResp("FORBIDDEN", "can not delete master admin")
+	if errors.Is(err, errDeleteMaster) ||
+		err.Error() == errDeleteMaster.Error() {
+		er := NewErrResp("FORBIDDEN", "changes to a master admin not allowed")
 		er.Details = map[string]string{"deleting admin": detail}
 		ctx.JSON(http.StatusForbidden, er)
 	}
