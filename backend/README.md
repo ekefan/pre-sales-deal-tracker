@@ -13,7 +13,7 @@ With the amount of deals comming in every month at Vas Technologies, Vas Deal Tr
 - A sales user can only interact with pitch requests they create.
 - An admin, can initiate the action to create a deal, after they have viewed a pitch request, they can update the deal and delete it
 
-API end points have been designed in the swagger documentation, view it on swagger UI or import on POSTMAN.
+API end points have been documented with Openapi specifications, swagger 2.0 in a `yml` file, view it on swagger UI or import on POSTMAN.
 
 All end points require an Authorization header with BearerAuth tokens except the /auth/login end point from which the auth tokens are generated.
 
