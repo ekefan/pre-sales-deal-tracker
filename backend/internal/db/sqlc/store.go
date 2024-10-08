@@ -16,6 +16,7 @@ const (
 type Store interface {
 	Querier
 	UpdateUserTx(ctx context.Context, args UpdateUserTxParams) error
+	CreateDealFromPitchId(ctx context.Context, pitch_id int64) error
 }
 
 // SqlStore holds fields required to interact with database
@@ -47,6 +48,6 @@ func (store *SqlStore) execTx(ctx context.Context, fn func(*Queries) error) erro
 		}
 		return err
 	}
-	
+
 	return tx.Commit(ctx)
 }
