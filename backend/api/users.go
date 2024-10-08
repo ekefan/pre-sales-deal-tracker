@@ -52,17 +52,11 @@ func (server *Server) createUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, gin.H{"user_id": userID})
 }
 
-// GetUsersReq holds pagination details for retrieving a specified number of users
-type GetUsersReq struct {
-	PageID   int32 `form:"page_id" binding:"required,min=1,numeric"`
-	PageSize int32 `form:"page_size" binding:"required,eq=10,numeric"`
-}
-
 // retrieveUsers route handler for get /users, retrieves all users
 // FIXME: you should either make params required or provide a default value. They're mutually exclusive.
 // I believe it's better to leave the default value here.
 func (server *Server) retrieveUsers(ctx *gin.Context) {
-	var req GetUsersReq
+	var req GetPaginatedReq
 	if err := bindClientRequest(ctx, &req, querySource); err != nil {
 		handleClientReqError(ctx, err)
 		return
@@ -102,11 +96,6 @@ func (server *Server) retrieveUsers(ctx *gin.Context) {
 		Pagination: generatePagination(int32(totalUsers), req.PageID, req.PageSize),
 	}
 	ctx.JSON(http.StatusOK, resp)
-}
-
-// UsersIDFromUri holds the uri field user_id
-type UsersIDFromUri struct {
-	UserID int64 `uri:"user_id" binding:"required"`
 }
 
 // getUsersByID route handler for get /users/:user_id, retrieves users by user_id
@@ -198,8 +187,13 @@ func (server *Server) updateUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, successMessage())
 }
 
+// UsersIDFromUri holds the uri field user_id
+type UsersIDFromUri struct {
+	UserID int64 `uri:"user_id" binding:"required,min=1,numeric"`
+}
+
 // deleteUsers route handler for delete /users/:user_id, deletes user with user_id
-func (server *Server) deleteUsers(ctx *gin.Context) {
+func (server *Server) deleteUser(ctx *gin.Context) {
 	var req UsersIDFromUri
 	if err := bindClientRequest(ctx, &req, uriSource); err != nil {
 		handleClientReqError(ctx, err)
@@ -207,7 +201,6 @@ func (server *Server) deleteUsers(ctx *gin.Context) {
 	}
 	// FIXME: you're doing unnecessary operations in the DB. Delete the user right away. You can decide if trigger an error for non existing user or report success. Be gentle with the DB load.
 	// fixed
-	// LOL, Oh yes I will, in my defence I was just trying to be thorough :)
 	numUsersDeleted, err := server.store.DeleteUser(ctx, req.UserID)
 	if err != nil {
 		slog.Error(err.Error())
@@ -222,13 +215,13 @@ func (server *Server) deleteUsers(ctx *gin.Context) {
 			return
 		}
 		if user_id == req.UserID {
-			err := deleteMasterAdminErr
+			err := errDeleteMaster
 			detail := err.Error()
 			handleDbError(ctx, err, detail)
 			return
 		}
 		detail := fmt.Sprintf("user with id: %v, doesn't exist", req.UserID)
-		err = customNotFound
+		err = errNotFound
 		handleDbError(ctx, err, detail)
 		return
 	}

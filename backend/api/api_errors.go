@@ -41,31 +41,42 @@ func handleServerError(ctx *gin.Context, err error) {
 }
 
 var (
-	customNotFound = errors.New("not found")
-	deleteMasterAdminErr = errors.New("a master user must exist in the system")
+	errNotFound     = errors.New("not found")
+	errDeleteMaster = errors.New("a master user must exist in the system")
 )
+
 // handleDbError handles expected db errors,
-// takes the context, the error and a possible error detail
+// takes the context, the error and a possible error detail.
+//
 // returns true if an error was handled and false if no predicted db error is handled
 //
 // Note: If err can not be associated with pre-defined db errors, err.Error() will contain custom err message
 func handleDbError(ctx *gin.Context, err error, detail string) bool {
 	slog.Error("from the database", "error", err.Error())
 	var pgErr *pgconn.PgError
-	if errors.As(err, &pgErr) && pgErr.Code == pgerrcode.UniqueViolation {
-		er := NewErrResp("STATUS_CONFLICT", "a similar resource already exists")
-		er.Details = map[string]string{"data conflict": detail}
-		ctx.JSON(http.StatusConflict, er)
-		return true
+	if errors.As(err, &pgErr) {
+		if pgErr.Code == pgerrcode.UniqueViolation {
+			er := NewErrResp("STATUS_CONFLICT", "a similar resource already exists")
+			er.Details = map[string]string{"data conflict": detail}
+			ctx.JSON(http.StatusConflict, er)
+			return true
+		}
+		if pgErr.Code == pgerrcode.ForeignKeyViolation {
+			er := NewErrResp("STATUS_CONFLICT", "this request can not be processed")
+			er.Details = map[string]string{"resource is connected": detail}
+			ctx.JSON(http.StatusConflict, er)
+			return true
+		}
+
 	}
-	if errors.Is(err, pgx.ErrNoRows) || errors.Is(err, customNotFound){
+	if errors.Is(err, pgx.ErrNoRows) || errors.Is(err, errNotFound) {
 		er := NewErrResp("NOT_FOUND", "requested resource doesn't exist")
 		er.Details = map[string]string{"not found": detail}
 		ctx.JSON(http.StatusNotFound, er)
 		return true
 	}
 
-	if errors.Is(err, deleteMasterAdminErr) {
+	if errors.Is(err, errDeleteMaster) {
 		er := NewErrResp("FORBIDDEN", "can not delete master admin")
 		er.Details = map[string]string{"deleting admin": detail}
 		ctx.JSON(http.StatusForbidden, er)
@@ -73,8 +84,7 @@ func handleDbError(ctx *gin.Context, err error, detail string) bool {
 	return false
 }
 
-
-// handlePasswordValidationError snipet for returning error details 
+// handlePasswordValidationError snipet for returning error details
 // to client after a failed password validation
 func handlePasswordValidationError(ctx *gin.Context, err error) {
 	slog.Error("error validating user password", "the error", err.Error())
@@ -121,10 +131,12 @@ func translateError(validationErr validator.ValidationErrors) map[string]string 
 func handleClientReqError(ctx *gin.Context, err error) {
 	// possible pre-defined error types
 	var (
-		validationErr validator.ValidationErrors
-		intErr        *strconv.NumError
-		jsonSyntaxErr *json.SyntaxError
+		validationErr    validator.ValidationErrors
+		intErr           *strconv.NumError
+		jsonSyntaxErr    *json.SyntaxError
+		jsonUnMarshalErr *json.UnmarshalTypeError
 	)
+
 	er := NewErrResp("BAD_REQUEST", "invalid request parameters")
 	if errors.As(err, &validationErr) {
 		er.Details = translateError(validationErr)
@@ -144,6 +156,13 @@ func handleClientReqError(ctx *gin.Context, err error) {
 		}
 		ctx.JSON(http.StatusBadRequest, er)
 		return
+	}
+
+	if errors.As(err, &jsonUnMarshalErr) {
+		er.Details = map[string]string{
+			"time fields": fmt.Sprintf("error validating %v field", jsonUnMarshalErr.Field),
+		}
+		ctx.JSON(http.StatusBadRequest, er)
 	}
 	slog.Error("undetermined client error", "the error", fmt.Sprintf("%T", err))
 	er.Error = "ops!!!! couldn't determine the exact error this time, you might relate to the details"
