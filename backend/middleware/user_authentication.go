@@ -14,9 +14,9 @@ const (
 	AuthPayloadKey       = "auth_payload"
 )
 
-// UserAuthorization checks client requests to verify appropriate
+// UserAuthentication checks client requests to verify appropriate
 // authorization header is used and access token is still valid
-func UserAuthorization(tokenGenerator token.TokenGenerator) gin.HandlerFunc {
+func UserAuthentication(tokenGenerator token.TokenGenerator) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		header := ctx.GetHeader("Authorization")
 
@@ -27,7 +27,7 @@ func UserAuthorization(tokenGenerator token.TokenGenerator) gin.HandlerFunc {
 
 		headerFields := strings.Fields(header)
 		if len(headerFields) != 2 {
-			abortHandlingRequest(ctx, http.StatusUnauthorized, "UNAUTHORIZED", "authorization error", "invalid authorization header", )
+			abortHandlingRequest(ctx, http.StatusUnauthorized, "UNAUTHORIZED", "authorization error", "invalid authorization header")
 			return
 		}
 

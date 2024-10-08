@@ -124,7 +124,19 @@ func (q *Queries) GetUserByID(ctx context.Context, id int64) (User, error) {
 	return i, err
 }
 
-const testGetUserPaginated = `-- name: TestGetUserPaginated :many
+const getUserFullName = `-- name: GetUserFullName :one
+SELECT users.full_name FROM users
+WHERE users.id = $1
+`
+
+func (q *Queries) GetUserFullName(ctx context.Context, id int64) (string, error) {
+	row := q.db.QueryRow(ctx, getUserFullName, id)
+	var full_name string
+	err := row.Scan(&full_name)
+	return full_name, err
+}
+
+const testGetUserPaginated = `-- name: TestGetUserPaginated :one
 WITH user_data AS (
     SELECT 
         id as user_id,
@@ -155,24 +167,11 @@ type TestGetUserPaginatedRow struct {
 	Users      []byte `json:"users"`
 }
 
-func (q *Queries) TestGetUserPaginated(ctx context.Context, arg TestGetUserPaginatedParams) ([]TestGetUserPaginatedRow, error) {
-	rows, err := q.db.Query(ctx, testGetUserPaginated, arg.Limit, arg.Offset)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []TestGetUserPaginatedRow{}
-	for rows.Next() {
-		var i TestGetUserPaginatedRow
-		if err := rows.Scan(&i.TotalUsers, &i.Users); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
+func (q *Queries) TestGetUserPaginated(ctx context.Context, arg TestGetUserPaginatedParams) (TestGetUserPaginatedRow, error) {
+	row := q.db.QueryRow(ctx, testGetUserPaginated, arg.Limit, arg.Offset)
+	var i TestGetUserPaginatedRow
+	err := row.Scan(&i.TotalUsers, &i.Users)
+	return i, err
 }
 
 const updateUser = `-- name: UpdateUser :execrows

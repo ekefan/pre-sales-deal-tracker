@@ -16,7 +16,11 @@ RETURNING users.id;
 SELECT id as user_id FROM users
 WHERE is_master = true;
 
--- name: TestGetUserPaginated :many
+-- name: GetUserFullName :one
+SELECT users.full_name FROM users
+WHERE users.id = $1;
+
+-- name: TestGetUserPaginated :one
 WITH user_data AS (
     SELECT 
         id as user_id,

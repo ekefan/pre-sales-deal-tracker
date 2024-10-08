@@ -9,16 +9,26 @@ import (
 )
 
 type Querier interface {
+	CreateDeal(ctx context.Context, arg CreateDealParams) (int64, error)
 	CreateMasterUser(ctx context.Context, arg CreateMasterUserParams) (int64, error)
+	CreatePitchRequest(ctx context.Context, arg CreatePitchRequestParams) (int64, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (int64, error)
+	DeleteDeals(ctx context.Context, id int64) (int64, error)
+	DeletePitchRequest(ctx context.Context, pitchID int64) (int64, error)
 	DeleteUser(ctx context.Context, id int64) (int64, error)
+	GetDealPaginated(ctx context.Context, arg GetDealPaginatedParams) (GetDealPaginatedRow, error)
 	GetDealToUpdateSalesName(ctx context.Context, salesRepName string) (Deal, error)
 	GetMasterUser(ctx context.Context) (int64, error)
 	GetNumberOfAdminUsers(ctx context.Context, role string) (int64, error)
+	GetPitchRequestById(ctx context.Context, id int64) (PitchRequest, error)
+	GetPitchRequestsPaginated(ctx context.Context, arg GetPitchRequestsPaginatedParams) (GetPitchRequestsPaginatedRow, error)
 	GetUserByID(ctx context.Context, id int64) (User, error)
 	GetUserByUsername(ctx context.Context, username string) (User, error)
-	TestGetUserPaginated(ctx context.Context, arg TestGetUserPaginatedParams) ([]TestGetUserPaginatedRow, error)
+	GetUserFullName(ctx context.Context, id int64) (string, error)
+	TestGetUserPaginated(ctx context.Context, arg TestGetUserPaginatedParams) (TestGetUserPaginatedRow, error)
 	UpdateDealSalesName(ctx context.Context, arg UpdateDealSalesNameParams) error
+	UpdateDeals(ctx context.Context, arg UpdateDealsParams) (int64, error)
+	UpdatePitchRequest(ctx context.Context, arg UpdatePitchRequestParams) (int64, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (int64, error)
 	UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) error
 }

@@ -17,6 +17,13 @@ type UpdateUserTxParams struct {
 // UpdateUserTx a database transaction that updates users
 func (s *SqlStore) UpdateUserTx(ctx context.Context, args UpdateUserTxParams) error {
 	return s.execTx(ctx, func(q *Queries) error {
+		master_id, err :=q.GetMasterUser(ctx)
+		if err != nil {
+			return err
+		}
+		if master_id == args.ID && args.Role != "admin" {
+			return errors.New("a master user must exist in the system")
+		}
 		newUsr, err := q.UpdateUser(ctx, args.UpdateUserParams)
 		if err != nil {
 			return fmt.Errorf("failed to update user: %v", err)
@@ -38,6 +45,25 @@ func (s *SqlStore) UpdateUserTx(ctx context.Context, args UpdateUserTxParams) er
 			return nil
 		} else {
 			return fmt.Errorf("failed to get deals to update sales rep name")
+		}
+		return nil
+	})
+}
+func (s *SqlStore) StoreDeleteUser(ctx context.Context, user_id int64) error {
+	return s.execTx(ctx, func(q *Queries) error {
+		master_id, err := q.GetMasterUser(ctx)
+		if err != nil {
+			return err
+		}
+		if master_id == user_id {
+			return errors.New("a master user must exist in the system")
+		}
+		numUserDeleted, err := q.DeleteUser(ctx, user_id)
+		if err != nil {
+			return err
+		}
+		if numUserDeleted < 1 {
+			return errors.New("not found")
 		}
 		return nil
 	})

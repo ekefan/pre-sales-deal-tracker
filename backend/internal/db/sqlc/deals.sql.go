@@ -7,7 +7,94 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+const createDeal = `-- name: CreateDeal :execrows
+INSERT INTO deals (pitch_id, sales_rep_name, customer_name, services_to_render, department, net_total_cost, profit)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
+`
+
+type CreateDealParams struct {
+	PitchID          *int64         `json:"pitch_id"`
+	SalesRepName     string         `json:"sales_rep_name"`
+	CustomerName     string         `json:"customer_name"`
+	ServicesToRender []string       `json:"services_to_render"`
+	Department       string         `json:"department"`
+	NetTotalCost     pgtype.Numeric `json:"net_total_cost"`
+	Profit           pgtype.Numeric `json:"profit"`
+}
+
+func (q *Queries) CreateDeal(ctx context.Context, arg CreateDealParams) (int64, error) {
+	result, err := q.db.Exec(ctx, createDeal,
+		arg.PitchID,
+		arg.SalesRepName,
+		arg.CustomerName,
+		arg.ServicesToRender,
+		arg.Department,
+		arg.NetTotalCost,
+		arg.Profit,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const deleteDeals = `-- name: DeleteDeals :execrows
+DELETE FROM deals WHERE id = $1
+`
+
+func (q *Queries) DeleteDeals(ctx context.Context, id int64) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteDeals, id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const getDealPaginated = `-- name: GetDealPaginated :one
+WITH deal_data AS (
+    SELECT
+        deals.id as deal_id,
+        deals.pitch_id,
+        deals.sales_rep_name,
+        deals.customer_name,
+        deals.services_to_render,
+        deals.status,
+        deals.department,
+        deals.net_total_cost,
+        deals.profit,
+        deals.awarded,
+        to_char(deals.updated_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS updated_at,
+        to_char(deals.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS created_at
+    FROM deals
+    ORDER BY id
+    LIMIT $1 OFFSET $2
+)
+SELECT
+    (SELECT COUNT(*) FROM deals) AS total_deals,
+    json_agg(deal_data) AS deals
+FROM deal_data
+`
+
+type GetDealPaginatedParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+type GetDealPaginatedRow struct {
+	TotalDeals int64  `json:"total_deals"`
+	Deals      []byte `json:"deals"`
+}
+
+func (q *Queries) GetDealPaginated(ctx context.Context, arg GetDealPaginatedParams) (GetDealPaginatedRow, error) {
+	row := q.db.QueryRow(ctx, getDealPaginated, arg.Limit, arg.Offset)
+	var i GetDealPaginatedRow
+	err := row.Scan(&i.TotalDeals, &i.Deals)
+	return i, err
+}
 
 const getDealToUpdateSalesName = `-- name: GetDealToUpdateSalesName :one
 SELECT id, pitch_id, sales_rep_name, customer_name, services_to_render, status, department, net_total_cost, profit, created_at, updated_at, closed_at, awarded FROM deals
@@ -49,4 +136,36 @@ type UpdateDealSalesNameParams struct {
 func (q *Queries) UpdateDealSalesName(ctx context.Context, arg UpdateDealSalesNameParams) error {
 	_, err := q.db.Exec(ctx, updateDealSalesName, arg.NewSalesName, arg.OldSalesName)
 	return err
+}
+
+const updateDeals = `-- name: UpdateDeals :execrows
+UPDATE deals
+    set services_to_render = $2, status = $3, department = $4, net_total_cost = $5, profit = $6, awarded = $7
+WHERE deals.id = $1
+`
+
+type UpdateDealsParams struct {
+	ID               int64          `json:"id"`
+	ServicesToRender []string       `json:"services_to_render"`
+	Status           string         `json:"status"`
+	Department       string         `json:"department"`
+	NetTotalCost     pgtype.Numeric `json:"net_total_cost"`
+	Profit           pgtype.Numeric `json:"profit"`
+	Awarded          bool           `json:"awarded"`
+}
+
+func (q *Queries) UpdateDeals(ctx context.Context, arg UpdateDealsParams) (int64, error) {
+	result, err := q.db.Exec(ctx, updateDeals,
+		arg.ID,
+		arg.ServicesToRender,
+		arg.Status,
+		arg.Department,
+		arg.NetTotalCost,
+		arg.Profit,
+		arg.Awarded,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }

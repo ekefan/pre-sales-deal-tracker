@@ -8,7 +8,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-const adminRole string = "admin"
 // successMessage sends a custom success response to client
 func successMessage() gin.H {
 	return gin.H{
@@ -80,6 +79,12 @@ func ReadConfigFiles(configPath string) (*Config, error) {
 		return nil, err
 	}
 	return &config, nil
+}
+
+// GetPaginationReq holds pagination details for retrieving a specified number of resouce records
+type GetPaginatedReq struct {
+	PageID   int32 `form:"page_id" binding:"required,min=1,numeric"`
+	PageSize int32 `form:"page_size" binding:"required,eq=10,numeric"`
 }
 
 // Pagination holds pagination data for users resource
