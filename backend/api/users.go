@@ -201,28 +201,14 @@ func (server *Server) deleteUser(ctx *gin.Context) {
 	}
 	// FIXME: you're doing unnecessary operations in the DB. Delete the user right away. You can decide if trigger an error for non existing user or report success. Be gentle with the DB load.
 	// fixed
-	numUsersDeleted, err := server.store.DeleteUser(ctx, req.UserID)
+	err := server.store.StoreDeleteUser(ctx, req.UserID)
 	if err != nil {
+		if err.Error() == errNotFound.Error() || err.Error() == errDeleteMaster.Error() {
+			handleDbError(ctx, err, err.Error())
+			return
+		}
 		slog.Error(err.Error())
 		handleServerError(ctx, err)
-		return
-	}
-	if numUsersDeleted < 1 {
-		// check if user to be deleted was a master admin, to correctly handle errors
-		user_id, err := server.store.GetMasterUser(ctx)
-		if err != nil {
-			handleServerError(ctx, err)
-			return
-		}
-		if user_id == req.UserID {
-			err := errDeleteMaster
-			detail := err.Error()
-			handleDbError(ctx, err, detail)
-			return
-		}
-		detail := fmt.Sprintf("user with id: %v, doesn't exist", req.UserID)
-		err = errNotFound
-		handleDbError(ctx, err, detail)
 		return
 	}
 	// FIXME: successMessage() could be omitted
