@@ -50,6 +50,28 @@ func (q *Queries) DeletePitchRequest(ctx context.Context, pitchID int64) (int64,
 	return result.RowsAffected(), nil
 }
 
+const getPitchRequestById = `-- name: GetPitchRequestById :one
+SELECT id, user_id, customer_name, customer_request, admin_task, admin_deadline, admin_viewed, created_at, updated_at FROM pitch_requests
+WHERE pitch_requests.id = $1
+`
+
+func (q *Queries) GetPitchRequestById(ctx context.Context, id int64) (PitchRequest, error) {
+	row := q.db.QueryRow(ctx, getPitchRequestById, id)
+	var i PitchRequest
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.CustomerName,
+		&i.CustomerRequest,
+		&i.AdminTask,
+		&i.AdminDeadline,
+		&i.AdminViewed,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getPitchRequestsPaginated = `-- name: GetPitchRequestsPaginated :one
 WITH pitch_data AS (
     SELECT

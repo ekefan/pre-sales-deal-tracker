@@ -124,6 +124,18 @@ func (q *Queries) GetUserByID(ctx context.Context, id int64) (User, error) {
 	return i, err
 }
 
+const getUserFullName = `-- name: GetUserFullName :one
+SELECT users.full_name FROM users
+WHERE users.id = $1
+`
+
+func (q *Queries) GetUserFullName(ctx context.Context, id int64) (string, error) {
+	row := q.db.QueryRow(ctx, getUserFullName, id)
+	var full_name string
+	err := row.Scan(&full_name)
+	return full_name, err
+}
+
 const testGetUserPaginated = `-- name: TestGetUserPaginated :one
 WITH user_data AS (
     SELECT 
