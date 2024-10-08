@@ -25,8 +25,12 @@ FROM pitch_data;
 
 -- name: UpdatePitchRequest :execrows
 UPDATE pitch_requests
-    set admin_viewed = sqlc.arg('admin_viewed'), customer_request = sqlc.narg('customer_request')
+    set admin_viewed = sqlc.arg('admin_viewed'), customer_request = sqlc.arg('customer_request')
 WHERE pitch_requests.id = sqlc.arg('pitch_id');
+
+-- name: GetPitchRequestById :one
+SELECT * FROM pitch_requests
+WHERE pitch_requests.id = $1;
 
 -- name: DeletePitchRequest :execrows
 DELETE FROM pitch_requests WHERE pitch_requests.id = @pitch_id;
