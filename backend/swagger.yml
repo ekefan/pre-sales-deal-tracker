@@ -432,10 +432,7 @@ paths:
         - name: updatePitchReq
           in: body
           required: true
-          description: |
-            a null customer request should be used when the admin is updating the pitch request.
-            when a sales user is updating the pitch requests the customer request is an array with at least one array item.
-            Eample: customer_request: ["EDMS"]
+          description: customer request is an array with at least one array item.
           schema:
             $ref: "#/definitions/updatePitchReq"
       responses:
@@ -549,15 +546,6 @@ paths:
         returns a list of deals based on the query filter
         This end point is open to all users
       parameters:
-        - name: status
-          in: query
-          type: string
-          required: false
-        - name: awarded
-          in: query
-          type: boolean
-          required: false
-          default:
         - name: page_id
           in: query
           type: integer
@@ -831,8 +819,8 @@ definitions:
         items:
           type: string
         minItems: 0
-        default:
-        x-nullable: true
+        default: ["IP Video Conferencing", "LAN extension"]
+        # x-nullable: true
     required:
       - admin_viewed
       - customer_request
@@ -862,9 +850,6 @@ definitions:
         type: string
         default: 2024-09-29T09:06:09Z
         description: datetime
-      admin_viewed:
-        type: boolean
-        default: false
     required:
       - user_id
       - customer_name
@@ -965,11 +950,11 @@ definitions:
         default: pre-sales
         description: there are thre major departments, sales, pre-sales and project-manager
       net_total_cost:
-        type: integer
-        default: 10000.00
+        type: number
+        default: 10000.03
       profit:
-        type: integer
-        default: 1000.00
+        type: number
+        default: 1000.02
       awarded:
         type: boolean
         default: false
@@ -982,9 +967,6 @@ definitions:
   updateDealsReq:
     type: object
     properties:
-      sales_rep_name:
-        type: string
-        default: Lily Foe
       services_to_render:
         type: array
         items:
@@ -997,11 +979,11 @@ definitions:
         type: string
         default: sales
       net_total_cost:
-        type: integer
-        default: 80000.00
+        type: number
+        default: 80000.03
       profit:
-        type: integer
-        default: 2000.00
+        type: number
+        default: 2000.02
       awarded:
         type: boolean
         default: true
