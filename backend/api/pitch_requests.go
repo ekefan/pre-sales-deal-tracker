@@ -16,7 +16,6 @@ import (
 
 // CreatePitchReq holds the fields needed to create a pitch request
 type CreatePitchReq struct {
-	UserId           int64     `json:"user_id"`
 	CustomerName     string    `json:"customer_name"`
 	CustomerRequests []string  `json:"customer_request"`
 	AdminTask        string    `json:"admin_task"`
@@ -30,15 +29,17 @@ func (server *Server) createPitchRequest(ctx *gin.Context) {
 		handleClientReqError(ctx, err)
 		return
 	}
+
+	payload := ctx.MustGet(middleware.AuthPayloadKey).(*token.Payload)
 	pitchReqCreated, err := server.store.CreatePitchRequest(ctx, db.CreatePitchRequestParams{
-		UserID:          req.UserId,
+		UserID:          payload.UserID,
 		CustomerName:    req.CustomerName,
 		CustomerRequest: req.CustomerRequests,
 		AdminTask:       req.AdminTask,
 		AdminDeadline:   pgtype.Timestamp{Time: req.AdminDeadline, Valid: true},
 	})
 	if err != nil {
-		details := fmt.Sprintf("could not create pitch request because no user with id: %v, exists", req.UserId)
+		details := fmt.Sprintf("could not create pitch request because no user with id: %v, exists", payload.UserID)
 		if handleDbError(ctx, err, details) {
 			return
 		}

@@ -88,7 +88,7 @@ paths:
         403:
           description: forbidden, user is not authorized to access this resource
           schema:
-            $ref: '#/definitions/errorResponse'
+            $ref: "#/definitions/errorResponse"
         409:
           description: a user with already exists with similar req details
           schema:
@@ -133,7 +133,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/definitions/user_data"
-              
+
         400:
           description: |
             invalid request parameters, use integers greater than zero
@@ -147,7 +147,7 @@ paths:
         403:
           description: forbidden, user is not authorized to access this resource
           schema:
-            $ref: '#/definitions/errorResponse'
+            $ref: "#/definitions/errorResponse"
         500:
           description: server error
           schema:
@@ -182,7 +182,7 @@ paths:
         403:
           description: forbidden, user is not authorized to access this resource
           schema:
-            $ref: '#/definitions/errorResponse'
+            $ref: "#/definitions/errorResponse"
         404:
           description: resource with user_id not found
           schema:
@@ -215,7 +215,7 @@ paths:
         200:
           description: update was successful
           schema:
-            $ref: '#/definitions/successMessage'
+            $ref: "#/definitions/successMessage"
         400:
           description: invalid request parameter, user an integer greater than zero
           schema:
@@ -227,7 +227,7 @@ paths:
         403:
           description: forbidden, user is not authorized to access this resource
           schema:
-            $ref: '#/definitions/errorResponse'
+            $ref: "#/definitions/errorResponse"
         404:
           description: resource not found
           schema:
@@ -269,7 +269,7 @@ paths:
         403:
           description: forbidden, user is not authorized to access this resource
           schema:
-            $ref: '#/definitions/errorResponse'
+            $ref: "#/definitions/errorResponse"
         404:
           description: resource doesn't exist
           schema:
@@ -302,7 +302,7 @@ paths:
         200:
           description: update was successful
           schema:
-            $ref: '#/definitions/successMessage'
+            $ref: "#/definitions/successMessage"
         401:
           description: unauthorized, invalid password or access token
           schema:
@@ -827,10 +827,6 @@ definitions:
   createPitchReq:
     type: object
     properties:
-      user_id:
-        type: integer
-        minimum: 1
-        default: 2
       customer_name:
         type: string
         default: Ministry of Women Affairs
