@@ -29,9 +29,10 @@ func NewServer(store db.Store, config *Config) (*Server, error) {
 
 	// set token generator
 	// [Q]: let's have a discussion around this Paseto thing since I've never used it.
+	// Alright
+	// Now using jwt because the paseto package I was using is no longer maintained, I search for another package, found one but it had'nt seen so much adoption
 	tokenGen, err := token.NewJwtGenerator(server.config.SymmetricKey)
 	if err != nil {
-		fmt.Println(len(server.config.SymmetricKey))
 		return nil, fmt.Errorf("cannot generate tokens, %v", err)
 	}
 
@@ -45,18 +46,19 @@ func NewServer(store db.Store, config *Config) (*Server, error) {
 func (server *Server) setupRouter() {
 	router := gin.Default()
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"*"},                             // Allow all origins or specify origins
-		AllowMethods:     []string{"GET", "POST", "OPTIONS"},        // Specify allowed methods
-		AllowHeaders:     []string{"Content-Type", "Authorization"}, // Specify allowed headers
-		ExposeHeaders:    []string{"Content-Length"},                // Optional: specify headers that can be exposed
-		AllowCredentials: true,                                      // Optional: allow credentials
-		MaxAge:           12 * time.Hour,                            // Optional: set max age for preflight requests
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
+		AllowHeaders:     []string{"Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
 	}))
 	router.POST("/auth/login", server.authLogin)
 	// for authentication middlewares
 	authGrp := router.Group("/")
 
 	// for authorization middlwares
+
 	adminGrp := router.Group("/")
 	salesGrp := router.Group("/")
 

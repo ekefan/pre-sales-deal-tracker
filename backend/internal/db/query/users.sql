@@ -20,7 +20,7 @@ WHERE is_master = true;
 SELECT users.full_name FROM users
 WHERE users.id = $1;
 
--- name: TestGetUserPaginated :one
+-- name: GetUserPaginated :one
 WITH user_data AS (
     SELECT 
         id as user_id,

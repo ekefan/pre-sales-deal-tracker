@@ -67,7 +67,7 @@ func (server *Server) retrieveUsers(ctx *gin.Context) {
 	// BUG: you're doing two calls for this operation that can be done at once. You're interacting with the DB one time more than needed.
 	// I couldn't find a different way to handle this, but I in the query I am using, I use a cte, to return the total users, and all the users in a byte array
 	// I called it TestGetUserPaginated because I wasn't sure it was going to work
-	result, err := server.store.TestGetUserPaginated(ctx, db.TestGetUserPaginatedParams{
+	result, err := server.store.GetUserPaginated(ctx, db.GetUserPaginatedParams{
 		Limit:  req.PageSize,
 		Offset: req.PageSize * (req.PageID - 1),
 	})
@@ -90,20 +90,20 @@ func (server *Server) retrieveUsers(ctx *gin.Context) {
 		Pagination `json:"pagination"`
 		Data       []User `json:"data"`
 		// BUG: pagination info should be listed first
-		// debugged
+		// debugged :)
 	}{
-		Data:       UserData,
 		Pagination: generatePagination(int32(totalUsers), req.PageID, req.PageSize),
+		Data:       UserData,
 	}
 	ctx.JSON(http.StatusOK, resp)
 }
 
 // getUsersByID route handler for get /users/:user_id, retrieves users by user_id
 // FIXME: in the swagger you missed the 401 Unauthorized response
+// fixed
 func (server *Server) getUsersByID(ctx *gin.Context) {
 	var req UsersIDFromUri
 	if err := bindClientRequest(ctx, &req, uriSource); err != nil {
-		slog.Error(err.Error())
 		handleClientReqError(ctx, err)
 		return
 	}
@@ -117,7 +117,7 @@ func (server *Server) getUsersByID(ctx *gin.Context) {
 		return
 	}
 	// FIXME: try to play with the json tag annotation to hide the user password which is the field that led you creating another struct
-	// fixed: todo actually, move the db to the internal package
+	// using sqlc, I couldn't find a way to make exclude a field using json tags. I created api models for that instead...
 	resp := User{
 		UserID:          user.ID,
 		Username:        user.Username,
@@ -141,8 +141,8 @@ func (server *Server) updateUser(ctx *gin.Context) {
 	)
 
 	// FIXME: pick the path param & set it to the "id" field in the request payload so the user cannot tamper the data manually.
-	// fixed: the user id is not in the req payload
 	// Again, use the things Gin provides you. Be more specific with the error handling.
+	// I will try my best for that :), I didn't include the user_id in the request payload though
 	uriErr := bindClientRequest(ctx, &reqUri, uriSource)
 	if uriErr != nil {
 		handleClientReqError(ctx, uriErr)
@@ -203,7 +203,8 @@ func (server *Server) deleteUser(ctx *gin.Context) {
 	// fixed
 	err := server.store.StoreDeleteUser(ctx, req.UserID)
 	if err != nil {
-		if err.Error() == errNotFound.Error() || err.Error() == errDeleteMaster.Error() {
+		if err.Error() == errNotFound.Error() ||
+			err.Error() == errDeleteMaster.Error() {
 			handleDbError(ctx, err, err.Error())
 			return
 		}

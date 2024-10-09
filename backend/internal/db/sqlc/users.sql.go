@@ -136,7 +136,7 @@ func (q *Queries) GetUserFullName(ctx context.Context, id int64) (string, error)
 	return full_name, err
 }
 
-const testGetUserPaginated = `-- name: TestGetUserPaginated :one
+const getUserPaginated = `-- name: GetUserPaginated :one
 WITH user_data AS (
     SELECT 
         id as user_id,
@@ -157,19 +157,19 @@ SELECT
 FROM user_data
 `
 
-type TestGetUserPaginatedParams struct {
+type GetUserPaginatedParams struct {
 	Limit  int32 `json:"limit"`
 	Offset int32 `json:"offset"`
 }
 
-type TestGetUserPaginatedRow struct {
+type GetUserPaginatedRow struct {
 	TotalUsers int64  `json:"total_users"`
 	Users      []byte `json:"users"`
 }
 
-func (q *Queries) TestGetUserPaginated(ctx context.Context, arg TestGetUserPaginatedParams) (TestGetUserPaginatedRow, error) {
-	row := q.db.QueryRow(ctx, testGetUserPaginated, arg.Limit, arg.Offset)
-	var i TestGetUserPaginatedRow
+func (q *Queries) GetUserPaginated(ctx context.Context, arg GetUserPaginatedParams) (GetUserPaginatedRow, error) {
+	row := q.db.QueryRow(ctx, getUserPaginated, arg.Limit, arg.Offset)
+	var i GetUserPaginatedRow
 	err := row.Scan(&i.TotalUsers, &i.Users)
 	return i, err
 }

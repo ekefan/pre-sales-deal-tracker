@@ -25,7 +25,7 @@ type Querier interface {
 	GetUserByID(ctx context.Context, id int64) (User, error)
 	GetUserByUsername(ctx context.Context, username string) (User, error)
 	GetUserFullName(ctx context.Context, id int64) (string, error)
-	TestGetUserPaginated(ctx context.Context, arg TestGetUserPaginatedParams) (TestGetUserPaginatedRow, error)
+	GetUserPaginated(ctx context.Context, arg GetUserPaginatedParams) (GetUserPaginatedRow, error)
 	UpdateDealSalesName(ctx context.Context, arg UpdateDealSalesNameParams) error
 	UpdateDeals(ctx context.Context, arg UpdateDealsParams) (int64, error)
 	UpdatePitchRequest(ctx context.Context, arg UpdatePitchRequestParams) (int64, error)
