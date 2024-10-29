@@ -14,8 +14,8 @@ View a more detailed documentation, [here](/backend/README.md).
 
 ## Frontend
 
+_Still under construction_ <br>
 A beautiful UI designed to allow the users to interact with the application seamlessly.
-_Still under construction_
 
 ### Technologies Used
 
