@@ -3,8 +3,6 @@ package main
 import (
 	"context"
 	"os"
-	// FIXME: you're using two logging packages. Stick to the log/slog if you can.
-	// fixed: Using only slog now...... I thought log helped to to exit the program and log the error in one line
 	"log/slog"
 
 	"github.com/ekefan/pre-sales-deal-tracker/backend/api"
@@ -15,7 +13,6 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// FIXME: I suggest you to use the "internal" pkg and expose only the needed things. By default, things should not be exposed. Then, you expose things whenever you need them to be public.
 func main() {
 	config, err := api.ReadConfigFiles(".")
 	if err != nil {

@@ -20,9 +20,6 @@ type UserReq struct {
 }
 
 // createUser route handler post /users, creates a user
-// FIXME: singular noun. //FIXED
-// FIXME: present the user with the invalid fields. How can I know what fields should be changed or filled in?
-// I knew this was going to come in the review, when I was randomly manually testing the application the last minute before I pushed it :)
 func (server *Server) createUser(ctx *gin.Context) {
 	var req UserReq
 	if err := bindClientRequest(ctx, &req, jsonSource); err != nil {
@@ -53,20 +50,12 @@ func (server *Server) createUser(ctx *gin.Context) {
 }
 
 // retrieveUsers route handler for get /users, retrieves all users
-// FIXME: you should either make params required or provide a default value. They're mutually exclusive.
-// I believe it's better to leave the default value here.
 func (server *Server) retrieveUsers(ctx *gin.Context) {
 	var req GetPaginatedReq
 	if err := bindClientRequest(ctx, &req, querySource); err != nil {
 		handleClientReqError(ctx, err)
 		return
 	}
-	// FIXME: this logic should be moved in a middleware and abort the request if it doesn't have permissions to perform it. You're bloating the code around.
-	// FIXED
-
-	// BUG: you're doing two calls for this operation that can be done at once. You're interacting with the DB one time more than needed.
-	// I couldn't find a different way to handle this, but I in the query I am using, I use a cte, to return the total users, and all the users in a byte array
-	// I called it TestGetUserPaginated because I wasn't sure it was going to work
 	result, err := server.store.GetUserPaginated(ctx, db.GetUserPaginatedParams{
 		Limit:  req.PageSize,
 		Offset: req.PageSize * (req.PageID - 1),
@@ -89,8 +78,7 @@ func (server *Server) retrieveUsers(ctx *gin.Context) {
 	resp := struct {
 		Pagination `json:"pagination"`
 		Data       []User `json:"data"`
-		// BUG: pagination info should be listed first
-		// debugged :)
+
 	}{
 		Pagination: generatePagination(int32(totalUsers), req.PageID, req.PageSize),
 		Data:       UserData,
@@ -99,8 +87,6 @@ func (server *Server) retrieveUsers(ctx *gin.Context) {
 }
 
 // getUsersByID route handler for get /users/:user_id, retrieves users by user_id
-// FIXME: in the swagger you missed the 401 Unauthorized response
-// fixed
 func (server *Server) getUsersByID(ctx *gin.Context) {
 	var req UsersIDFromUri
 	if err := bindClientRequest(ctx, &req, uriSource); err != nil {
@@ -116,7 +102,6 @@ func (server *Server) getUsersByID(ctx *gin.Context) {
 		handleServerError(ctx, err)
 		return
 	}
-	// FIXME: try to play with the json tag annotation to hide the user password which is the field that led you creating another struct
 	// using sqlc, I couldn't find a way to make exclude a field using json tags. I created api models for that instead...
 	resp := User{
 		UserID:          user.ID,
@@ -132,17 +117,11 @@ func (server *Server) getUsersByID(ctx *gin.Context) {
 }
 
 // updateUsers route handler for put /users/:user_id
-// FIXME: should be singular noun this function
-// FIXME: the status code should be 202 Accepted, or 200 OK. 204 NoContent is reserved for delete.
 func (server *Server) updateUser(ctx *gin.Context) {
 	var (
 		reqUri  UsersIDFromUri
 		reqBody UserReq
 	)
-
-	// FIXME: pick the path param & set it to the "id" field in the request payload so the user cannot tamper the data manually.
-	// Again, use the things Gin provides you. Be more specific with the error handling.
-	// I will try my best for that :), I didn't include the user_id in the request payload though
 	uriErr := bindClientRequest(ctx, &reqUri, uriSource)
 	if uriErr != nil {
 		handleClientReqError(ctx, uriErr)
@@ -199,8 +178,6 @@ func (server *Server) deleteUser(ctx *gin.Context) {
 		handleClientReqError(ctx, err)
 		return
 	}
-	// FIXME: you're doing unnecessary operations in the DB. Delete the user right away. You can decide if trigger an error for non existing user or report success. Be gentle with the DB load.
-	// fixed
 	err := server.store.StoreDeleteUser(ctx, req.UserID)
 	if err != nil {
 		if err.Error() == errNotFound.Error() ||
@@ -212,8 +189,6 @@ func (server *Server) deleteUser(ctx *gin.Context) {
 		handleServerError(ctx, err)
 		return
 	}
-	// FIXME: successMessage() could be omitted
-	// fixed
 	ctx.Status(http.StatusNoContent)
 }
 
@@ -224,8 +199,6 @@ type UpdatePassowrdReq struct {
 
 // updateUserPassword route handler for patch /users/:user_id/password/change
 // updates a user password
-// FIXME: this route could be "/password/change" if we have the "/password/reset"
-// I've chosen to just use /password, and remove the reset route, I said something about it in the next fixme tag
 func (server *Server) updateUserPassword(ctx *gin.Context) {
 	var (
 		reqUri  UsersIDFromUri
@@ -272,9 +245,3 @@ func (server *Server) updateUserPassword(ctx *gin.Context) {
 	}
 	ctx.Status(http.StatusNoContent)
 }
-
-// FIXME: reset to what? This can be omitted or merged with the "updateUserPassword".
-// fixed: using one handler for password update
-// Usually, it's a POST that sends a mail asking to reset the password and then you can invoke the above-mentioned PUT.
-// I tried sending emails using googles smtp servers, but that service needed some authorization and the company wasn't going to help me get that.
-// so the reset password was for the admin to help users restore their passwords to default passwords when they forgot it.

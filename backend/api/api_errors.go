@@ -15,8 +15,6 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
-// FixME: create a struct exposed to hold the error. Then, create a "constructor" function to instantiate it.
-// FixME: it's redundant. We already have this information in the response Status Code Header. //DONE
 type ErrResp struct {
 	Code    string            `json:"code"`
 	Error   string            `json:"error"`

@@ -4,9 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	// FIXME: watch out these libraries. They're extremely old and they're not receiving updates for a while.
-	// Stick to popular packages whenever you can, couldn't find a maintained version of paseto I liked so I am using go-jwt instead.
-	// fixed
 	"github.com/aead/chacha20poly1305"
 	"github.com/o1egl/paseto"
 )
