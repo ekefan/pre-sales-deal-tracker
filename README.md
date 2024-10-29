@@ -1,6 +1,6 @@
 # Pre-sales Deal Tracker
 
-**Pre-sales Deal Tracker** is deal tracker and management system. Designed to optimise sales-client processes while integration  pre-sales-management processes.
+**Pre-sales Deal Tracker** is deal tracker and management system. Designed to optimise sales-client processes while integrating  pre-sales-management processes.
 
 ## Backend
 
